@@ -25,7 +25,7 @@ public class FXMLController implements Initializable {
     
     private void doPostRequestWithMap(String targetUrl,String responseType,Map params)throws Exception{
         if (StringUtils.isBlank(targetUrl)) {
-            throw new IllegalArgumentException("targetUrl≤ªƒ‹Œ™ø’!");
+            throw new IllegalArgumentException("targetUrl‰∏çËÉΩ‰∏∫Á©∫!");
         }
         CloseableHttpClient httpClient = HttpClients.createDefault();;
 
