@@ -1,2 +1,3 @@
 com\chinaunicom\elemeetingpc\FXMLController.class
+com\chinaunicom\elemeetingpc\database\dutils\DbManager.class
 com\chinaunicom\elemeetingpc\MainApp.class
