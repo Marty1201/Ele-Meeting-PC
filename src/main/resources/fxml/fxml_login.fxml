@@ -10,18 +10,18 @@
    <children>
       <ImageView fitHeight="1111.0" fitWidth="1920.0" layoutX="-5.0" pickOnBounds="true" preserveRatio="true">
          <image>
-            <Image url="@dzhy/bg.png" />
+            <Image url="@images/bg.png" />
          </image>
       </ImageView>
       <ImageView fitHeight="225.0" fitWidth="231.0" layoutX="840.0" layoutY="202.0" pickOnBounds="true" preserveRatio="true">
          <image>
-            <Image url="@dzhy/logo-2x(1).png" />
+            <Image url="@images/logo-2x(1).png" />
          </image>
       </ImageView>
       <PasswordField layoutX="828.0" layoutY="517.0" prefHeight="46.0" prefWidth="300.0" promptText="输入密码" />
       <ImageView fitHeight="46.0" fitWidth="57.0" layoutX="777.0" layoutY="517.0" pickOnBounds="true" preserveRatio="true">
          <image>
-            <Image url="@dzhy/loginPwd@2x.png" />
+            <Image url="@images/loginPwd@2x.png" />
          </image>
       </ImageView>
       <Button layoutX="801.0" layoutY="628.0" mnemonicParsing="false" prefHeight="41.0" prefWidth="340.0" style="-fx-background-radius: 300px;" styleClass="button1" text="登录" textFill="WHITE" />
@@ -30,7 +30,7 @@
       <ImageView fitHeight="150.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true" />
       <ImageView fitHeight="46.0" fitWidth="57.0" layoutX="778.0" layoutY="448.0" pickOnBounds="true" preserveRatio="true">
          <image>
-            <Image url="@dzhy/loginName@2x.png" />
+            <Image url="@images/loginName@2x.png" />
          </image>
       </ImageView>
    </children>
