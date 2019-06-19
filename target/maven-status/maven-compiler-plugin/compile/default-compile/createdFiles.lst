@@ -1,3 +1,6 @@
-com\chinaunicom\elemeetingpc\FXMLController.class
+com\chinaunicom\elemeetingpc\database\models\BaseModel.class
 com\chinaunicom\elemeetingpc\database\dutils\DbManager.class
+com\chinaunicom\elemeetingpc\utils\exceptions\ApplicationException.class
+com\chinaunicom\elemeetingpc\FXMLController.class
+com\chinaunicom\elemeetingpc\database\dao\CommonDao.class
 com\chinaunicom\elemeetingpc\MainApp.class
