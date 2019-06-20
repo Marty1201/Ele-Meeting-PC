@@ -2,6 +2,7 @@ package com.chinaunicom.elemeetingpc.database.dao;
 
 import com.chinaunicom.elemeetingpc.database.dutils.DbManager;
 import com.chinaunicom.elemeetingpc.database.models.BaseModel;
+import com.chinaunicom.elemeetingpc.utils.FxmlUtils;
 import com.chinaunicom.elemeetingpc.utils.exceptions.ApplicationException;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.DaoManager;
@@ -41,9 +42,7 @@ public abstract class CommonDao {
             return DaoManager.createDao(connectionSource, cls);
         } catch (SQLException e) {
             logger.warn(e.getCause().getMessage());
-            // to do internationalize
-            //throw new ApplicationException(FxmlUtils.getResourceBundle().getString("error.get.dao"));
-            throw new ApplicationException("Error with database");
+            throw new ApplicationException(FxmlUtils.getResourceBundle().getString("error.get.dao"));
         } finally {
             this.closeDbConnection();
         }
@@ -61,9 +60,7 @@ public abstract class CommonDao {
             dao.createOrUpdate((T) baseModel);
         } catch (SQLException e) {
             logger.warn(e.getCause().getMessage());
-            // to do internationalize
-            //throw new ApplicationException(FxmlUtils.getResourceBundle().getString("error.get.dao"));
-            throw new ApplicationException("Error with database");
+            throw new ApplicationException(FxmlUtils.getResourceBundle().getString("error.create.update"));
         } finally {
             this.closeDbConnection();
         }
@@ -81,9 +78,7 @@ public abstract class CommonDao {
             dao.refresh((T) baseModel);
         } catch (SQLException e) {
             logger.warn(e.getCause().getMessage());
-            // to do internationalize
-            //throw new ApplicationException(FxmlUtils.getResourceBundle().getString("error.get.dao"));
-            throw new ApplicationException("Error with database");
+            throw new ApplicationException(FxmlUtils.getResourceBundle().getString("error.refresh"));
         } finally {
             this.closeDbConnection();
         }
@@ -101,9 +96,7 @@ public abstract class CommonDao {
             dao.delete((T) baseModel);
         } catch (SQLException e) {
             logger.warn(e.getCause().getMessage());
-            // to do internationalize
-            //throw new ApplicationException(FxmlUtils.getResourceBundle().getString("error.get.dao"));
-            throw new ApplicationException("Error with database");
+            throw new ApplicationException(FxmlUtils.getResourceBundle().getString("error.delete"));
         } finally {
             this.closeDbConnection();
         }
@@ -122,9 +115,7 @@ public abstract class CommonDao {
             dao.deleteById((I) id);
         } catch (SQLException e) {
             logger.warn(e.getCause().getMessage());
-            // to do internationalize
-            //throw new ApplicationException(FxmlUtils.getResourceBundle().getString("error.get.dao"));
-            throw new ApplicationException("Error with database");
+            throw new ApplicationException(FxmlUtils.getResourceBundle().getString("error.delete"));
         } finally {
             this.closeDbConnection();
         }
@@ -143,9 +134,7 @@ public abstract class CommonDao {
             return dao.queryForId((I) id);
         } catch (SQLException e) {
             logger.warn(e.getCause().getMessage());
-            // to do internationalize
-            //throw new ApplicationException(FxmlUtils.getResourceBundle().getString("error.get.dao"));
-            throw new ApplicationException("Error with database");
+            throw new ApplicationException(FxmlUtils.getResourceBundle().getString("error.not.found"));
         } finally {
             this.closeDbConnection();
         }
@@ -163,9 +152,7 @@ public abstract class CommonDao {
             return dao.queryForAll();
         } catch(SQLException e){
             logger.warn(e.getCause().getMessage());
-            // to do internationalize
-            //throw new ApplicationException(FxmlUtils.getResourceBundle().getString("error.get.dao"));
-            throw new ApplicationException("Error with database");
+            throw new ApplicationException(FxmlUtils.getResourceBundle().getString("error.not.found.all"));
         } finally {
             this.closeDbConnection();
         }
@@ -181,9 +168,7 @@ public abstract class CommonDao {
             this.connectionSource.close();
         } catch (IOException e) {
             logger.warn(e.getCause().getMessage());
-            // to do internationalize
-            //throw new ApplicationException(FxmlUtils.getResourceBundle().getString("error.get.dao"));
-            throw new ApplicationException("Error with database");
+            throw new ApplicationException(FxmlUtils.getResourceBundle().getString("error.get.dao"));
         }
     }
 }
