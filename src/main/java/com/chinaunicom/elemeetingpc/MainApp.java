@@ -1,23 +1,30 @@
 package com.chinaunicom.elemeetingpc;
 
+import com.chinaunicom.elemeetingpc.utils.FxmlUtils;
+import java.util.Locale;
 import javafx.application.Application;
 import static javafx.application.Application.launch;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 
 
 public class MainApp extends Application {
+    
+    public static final String FXML_LOGIN_FXML = "/fxml/fxml_login.fxml";
 
     @Override
     public void start(Stage stage) throws Exception {
-        Parent root = FXMLLoader.load(getClass().getResource("/fxml/fxml_login.fxml"));
+        
+        //Locale.setDefault(new Locale("en"));
+        Locale.setDefault(new Locale("zh"));
+        
+        Pane root = FxmlUtils.fxmlLoader(FXML_LOGIN_FXML);
         
         Scene scene = new Scene(root);
         scene.getStylesheets().add("/styles/Styles.css");
         
-        stage.setTitle("JavaFX and Maven");
+        stage.setTitle(FxmlUtils.getResourceBundle().getString("title.application"));
         stage.setScene(scene);
         stage.show();
     }
