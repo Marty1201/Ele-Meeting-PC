@@ -6,15 +6,14 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.layout.Pane;
 
 /**
- * Initialize and load the project's first fxml template, set localization
- * for the project.
+ * Provides common methods for loading and localizing project's fxml templates.
  * @author chenxi
  * 创建时间：2019-6-20 9:44:25
  */
 public class FxmlUtils {
     
     /**
-     * Load the project's first fxml template, set localization
+     * Load and open the project's fxml templates, set localization.
      * 
      * @param fxmlPath the path of the fxml template
      * @return Pane
