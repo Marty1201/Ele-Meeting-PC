@@ -18,6 +18,10 @@ public class OrganInfo implements BaseModel {
     @DatabaseField(generatedId = true)
     private int id;
     
+    //If UserInfo has a foreign collection of OrganInfos, then OrganInfo must have an UserInfo foreign field. It is required so ORMLite can find the orders that match a particular account.
+    @DatabaseField(columnName = "USERINFO_ID", foreign = true, foreignAutoCreate = true, foreignAutoRefresh = true)
+    private UserInfo userInfo;
+    
     //组织名称
     @DatabaseField(columnName = "organizationName")
     private String organizationName;
@@ -31,7 +35,7 @@ public class OrganInfo implements BaseModel {
     private String organizationEnglishName;
     
     //状态
-    @DatabaseField(columnName = "state", columnDefinition = "varchar(1) default 0")
+    @DatabaseField(columnName = "state", defaultValue = "0")
     private String state;
     
     //组织创建人ID

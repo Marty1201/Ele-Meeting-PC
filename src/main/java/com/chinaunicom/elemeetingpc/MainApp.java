@@ -1,5 +1,6 @@
 package com.chinaunicom.elemeetingpc;
 
+import com.chinaunicom.elemeetingpc.database.dutils.DbManager;
 import com.chinaunicom.elemeetingpc.utils.FxmlUtils;
 import java.util.Locale;
 import javafx.application.Application;
@@ -30,6 +31,9 @@ public class MainApp extends Application {
         stage.setTitle(FxmlUtils.getResourceBundle().getString("title.application"));
         stage.setScene(scene);
         stage.show();
+        
+        //database initialization
+        DbManager.initDatabase();
     }
 
     /**

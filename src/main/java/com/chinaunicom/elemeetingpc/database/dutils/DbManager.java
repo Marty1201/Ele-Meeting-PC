@@ -1,10 +1,14 @@
 
 package com.chinaunicom.elemeetingpc.database.dutils;
 
+import com.chinaunicom.elemeetingpc.database.models.IdentityInfo;
+import com.chinaunicom.elemeetingpc.database.models.OrganInfo;
+import com.chinaunicom.elemeetingpc.database.models.UserInfo;
 import com.j256.ormlite.jdbc.JdbcConnectionSource;
 import com.j256.ormlite.logger.Logger;
 import com.j256.ormlite.logger.LoggerFactory;
 import com.j256.ormlite.support.ConnectionSource;
+import com.j256.ormlite.table.TableUtils;
 import java.io.IOException;
 import java.sql.SQLException;
 
@@ -30,8 +34,7 @@ public class DbManager {
      */
     public static void initDatabase() {
         createConnectionSource();
-        //to do....
-        dropTable();
+        //dropTable();
         createTable();
         closeConnectionSource();
     }
@@ -79,9 +82,16 @@ public class DbManager {
     }
     
     /**
-     * to do.
+     * Create tables if not exist.
      */
     private static void createTable(){
-        
+        try{
+            TableUtils.createTableIfNotExists(connectionSource, UserInfo.class);
+            TableUtils.createTableIfNotExists(connectionSource, OrganInfo.class);
+            TableUtils.createTableIfNotExists(connectionSource, IdentityInfo.class);
+        } catch(SQLException e){
+            logger.warn(e.getMessage());
+            //e.printStackTrace();
+        }
     }
 }

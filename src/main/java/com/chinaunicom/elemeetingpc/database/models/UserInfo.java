@@ -26,7 +26,7 @@ public class UserInfo implements BaseModel {
     private String userName;
     
     //密码（加密后）
-    @DatabaseField(columnName = "password", canBeNull = false, unique = true)
+    @DatabaseField(columnName = "password", canBeNull = false)
     private String password;
     
     //用户英文名称
@@ -38,15 +38,15 @@ public class UserInfo implements BaseModel {
     private String phone;
     
     //状态
-    @DatabaseField(columnName = "state", columnDefinition = "varchar(1) default 0")
+    @DatabaseField(columnName = "state", defaultValue = "0")
     private String state;
     
     //性别（'男','女'）
-    @DatabaseField(columnName = "sexName", canBeNull = false)
+    @DatabaseField(columnName = "sexName")
     private String sexName;
     
     //性别英文（'man','feman'）
-    @DatabaseField(columnName = "sexName")
+    @DatabaseField(columnName = "sexEnglishName")
     private String sexEnglishName;
     
     //排序号

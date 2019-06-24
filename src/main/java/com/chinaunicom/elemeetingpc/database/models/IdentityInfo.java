@@ -15,6 +15,10 @@ public class IdentityInfo implements BaseModel {
     @DatabaseField(generatedId = true)
     private int id;
     
+    //See comments in the OrganInfo class
+    @DatabaseField(columnName = "ORGANINFOR_ID", foreign = true, foreignAutoCreate = true, foreignAutoRefresh = true)
+    private OrganInfo organInfo;
+    
     //身份中文名称
     @DatabaseField(columnName = "identityName")
     private String identityName;
