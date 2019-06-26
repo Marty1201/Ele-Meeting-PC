@@ -1,3 +1,33 @@
-.button {
-    -fx-font-weight: bold;
+/* 
+    Created on : 2019-6-10, 18:04:19
+    Author     : chenxi
+*/
+
+.button1{
+    -fx-font: 18 arial; 
+    -fx-base: #11b7d5;    
 }
+
+.index-text{-fx-background:#ffffff;-fx-border:none;}
+
+.title-title{
+    -fx-font: 24 arial; 
+    -fx-text-fill:#ffffff; 
+}
+.title-left{
+    -fx-font: 28 arial; 
+    -fx-text-fill:#ffffff; 
+    -fx-font-weight:bold;
+    
+}
+.index-meet{-fx-background-color:transparent}
+
+.title-name{
+    -fx-font: 18 arial; 
+    -fx-text-fill:#ffffff; 
+    
+}
+#main2{
+	-fx-background-image: url("images/bg.png");
+}
+
