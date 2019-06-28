@@ -47,14 +47,34 @@ public abstract class CommonDao {
             this.closeDbConnection();
         }
     }
-
+    
     /**
      * Creating an item in the table.
      *
-     * @param baseModel the object class.
+     * @param baseModel the object class to be saved in the table.
      * @throws ApplicationException.
      */
-    public <T extends BaseModel, I> void createOrUpdate(BaseModel baseModel) throws ApplicationException {
+    public <T extends BaseModel, I> void save(BaseModel baseModel) throws ApplicationException {
+        try {
+            Dao<T, I> dao = getDao((Class<T>) baseModel.getClass());
+            dao.create((T) baseModel);
+        } catch (SQLException e) {
+            logger.warn(e.getCause().getMessage());
+            throw new ApplicationException(FxmlUtils.getResourceBundle().getString("error.create.update"));
+        } finally {
+            this.closeDbConnection();
+        }
+    }
+
+    /**
+     * Creating or update an item in the table depends on the existence
+     * of the item in the table, the id is extracted from the parameter
+     * and is used to query the table.
+     * 
+     * @param baseModel the object class to be saved in the table.
+     * @throws ApplicationException.
+     */
+    public <T extends BaseModel, I> void saveOrUpdate(BaseModel baseModel) throws ApplicationException {
         try {
             Dao<T, I> dao = getDao((Class<T>) baseModel.getClass());
             dao.createOrUpdate((T) baseModel);
@@ -69,7 +89,7 @@ public abstract class CommonDao {
     /**
      * Refresh the class field values and bring them up-to-date.
      *
-     * @param baseModel the object class.
+     * @param baseModel the object class to be refreshed.
      * @throws ApplicationException.
      */
     public <T extends BaseModel, I> void refresh(BaseModel baseModel) throws ApplicationException {
@@ -87,7 +107,7 @@ public abstract class CommonDao {
     /**
      * Delete an item from the table which corresponding to the parameter's id.
      *
-     * @param baseModel the object class.
+     * @param baseModel the object class to be deleted.
      * @throws ApplicationException.
      */
     public <T extends BaseModel, I> void delete(BaseModel baseModel) throws ApplicationException {
@@ -105,7 +125,7 @@ public abstract class CommonDao {
     /**
      * Delete an item from the table by id.
      *
-     * @param cls the object class.
+     * @param cls the object class to be deleted.
      * @param id the id of the item.
      * @throws ApplicationException.
      */
@@ -124,7 +144,7 @@ public abstract class CommonDao {
     /**
      * Find an item from the table by id.
      *
-     * @param cls the object class.
+     * @param cls the object class to be queried.
      * @param id the id of the item.
      * @return A single T object.
      * @throws ApplicationException.
@@ -144,7 +164,7 @@ public abstract class CommonDao {
     /**
      * Find all items in the object table from the database.
      *
-     * @param cls the object class.
+     * @param cls the object class to be queried.
      * @return A list of T objects.
      * @throws ApplicationException.
      */
@@ -163,7 +183,7 @@ public abstract class CommonDao {
      /**
      * Find all items from the table by given the columName & its value.
      *
-     * @param cls the object class.
+     * @param cls the object class to be queried.
      * @param fieldName the column name fo the table.
      * @param value the value of the column name holds.
      * @return A list of T objects.
