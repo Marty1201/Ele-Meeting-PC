@@ -31,7 +31,8 @@ public class IdentityInfo implements BaseModel {
         
     }
     
-    public IdentityInfo(String identityName, String identityEnglishName){
+    public IdentityInfo(OrganInfo organInfo, String identityName, String identityEnglishName){
+        this.organInfo = organInfo;
         this.identityName = identityName;
         this.identityEnglishName = identityEnglishName;
     }
@@ -42,6 +43,14 @@ public class IdentityInfo implements BaseModel {
 
     public void setId(int id) {
         this.id = id;
+    }
+    
+    public OrganInfo getOrganInfo() {
+        return organInfo;
+    }
+
+    public void setOrganInfo(OrganInfo organInfo) {
+        this.organInfo = organInfo;
     }
     
     public String getIdentityName() {

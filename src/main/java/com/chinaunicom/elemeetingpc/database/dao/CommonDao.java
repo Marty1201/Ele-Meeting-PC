@@ -31,11 +31,11 @@ public abstract class CommonDao {
     }
 
     /**
-     * Create DAO a class which extend and implement BaseModel + Dao
+     * Create a DAO class which extend and implement BaseModel + Dao.
      *
-     * @param cls the class which is needed to be persisting with the DAO
-     * @return a Dao class
-     * @throws ApplicationException
+     * @param cls the class which is needed to be persisting with the DAO.
+     * @return a Dao class.
+     * @throws ApplicationException.
      */
     public <T extends BaseModel, I> Dao<T, I> getDao(Class<T> cls) throws ApplicationException {
         try {
@@ -49,10 +49,10 @@ public abstract class CommonDao {
     }
 
     /**
-     * Creating an item in the database.
+     * Creating an item in the table.
      *
-     * @param baseModel the object class
-     * @throws ApplicationException
+     * @param baseModel the object class.
+     * @throws ApplicationException.
      */
     public <T extends BaseModel, I> void createOrUpdate(BaseModel baseModel) throws ApplicationException {
         try {
@@ -69,8 +69,8 @@ public abstract class CommonDao {
     /**
      * Refresh the class field values and bring them up-to-date.
      *
-     * @param baseModel the object class
-     * @throws ApplicationException
+     * @param baseModel the object class.
+     * @throws ApplicationException.
      */
     public <T extends BaseModel, I> void refresh(BaseModel baseModel) throws ApplicationException {
         try {
@@ -85,10 +85,10 @@ public abstract class CommonDao {
     }
 
     /**
-     * Delete an entry item from the database.
+     * Delete an item from the table which corresponding to the parameter's id.
      *
-     * @param baseModel the object class
-     * @throws ApplicationException
+     * @param baseModel the object class.
+     * @throws ApplicationException.
      */
     public <T extends BaseModel, I> void delete(BaseModel baseModel) throws ApplicationException {
         try {
@@ -103,11 +103,11 @@ public abstract class CommonDao {
     }
 
     /**
-     * Delete an entry item from the database by id.
+     * Delete an item from the table by id.
      *
-     * @param cls the object class
-     * @param id the id of the item
-     * @throws ApplicationException
+     * @param cls the object class.
+     * @param id the id of the item.
+     * @throws ApplicationException.
      */
     public <T extends BaseModel, I> void deleteById(Class<T> cls, Integer id) throws ApplicationException {
         try {
@@ -122,11 +122,12 @@ public abstract class CommonDao {
     }
 
     /**
-     * Find an entry item from the database by id.
+     * Find an item from the table by id.
      *
-     * @param cls the object class
-     * @param id the id of the item
-     * @throws ApplicationException
+     * @param cls the object class.
+     * @param id the id of the item.
+     * @return A single T object.
+     * @throws ApplicationException.
      */
     public <T extends BaseModel, I> T findById(Class<T> cls, Integer id) throws ApplicationException {
         try {
@@ -141,10 +142,11 @@ public abstract class CommonDao {
     }
     
     /**
-     * Find all entry items in the object table from the database.
+     * Find all items in the object table from the database.
      *
-     * @param cls the object class
-     * @throws ApplicationException
+     * @param cls the object class.
+     * @return A list of T objects.
+     * @throws ApplicationException.
      */
     public <T extends BaseModel, I> List<T> findAll(Class<T> cls) throws ApplicationException {
         try{
@@ -157,11 +159,31 @@ public abstract class CommonDao {
             this.closeDbConnection();
         }
     }
+    
+     /**
+     * Find all items from the table by given the columName & its value.
+     *
+     * @param cls the object class.
+     * @param fieldName the column name fo the table.
+     * @param value the value of the column name holds.
+     * @return A list of T objects.
+     * @throws ApplicationException.
+     */
+    public <T extends BaseModel, I> List<T> findByFieldNameAndValue(Class<T> cls, String fieldName, Object value) throws ApplicationException {
+        Dao<T, I> dao = getDao(cls);
+        try {
+            return dao.queryForEq(fieldName, value);
+        } catch (SQLException e) {
+            logger.warn(e.getCause().getMessage());
+            throw new ApplicationException(FxmlUtils.getResourceBundle().getString("error.not.found.all"));
+        } finally {
+            this.closeDbConnection();
+        }
+    }
 
     /**
-     * Close the connection source
-     *
-     * @throws ApplicationException
+     * Close the connection source.
+     * @throws ApplicationException.
      */
     public void closeDbConnection() throws ApplicationException {
         try {

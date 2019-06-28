@@ -12,51 +12,39 @@ import com.j256.ormlite.table.DatabaseTable;
  */
 @DatabaseTable(tableName = "UserInfo")
 public class UserInfo implements BaseModel {
-    
     //id
     @DatabaseField(generatedId = true)
     private int id;
-    
     //登录账号
     @DatabaseField(columnName = "loginName", canBeNull = false)
     private String loginName;
-    
     //用户名称
     @DatabaseField(columnName = "userName", canBeNull = false)
     private String userName;
-    
     //密码（加密后）
     @DatabaseField(columnName = "password", canBeNull = false)
     private String password;
-    
     //用户英文名称
     @DatabaseField(columnName = "englishName")
     private String englishName;
-    
     //手机号
     @DatabaseField(columnName = "phone")
     private String phone;
-    
     //状态
     @DatabaseField(columnName = "state", defaultValue = "0")
     private String state;
-    
     //性别（'男','女'）
     @DatabaseField(columnName = "sexName")
     private String sexName;
-    
     //性别英文（'man','feman'）
     @DatabaseField(columnName = "sexEnglishName")
     private String sexEnglishName;
-    
     //排序号
     @DatabaseField(columnName = "sort")
     private String sort;
-    
     //更新时间
     @DatabaseField(columnName = "updateDate")
     private String updateDate;
-    
     //组织机构列表
     @ForeignCollectionField
     private ForeignCollection<OrganInfo> orglist;
