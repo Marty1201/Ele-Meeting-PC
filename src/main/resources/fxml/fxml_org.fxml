@@ -9,18 +9,17 @@
 <?import java.lang.*?>
 <?import javafx.scene.control.*?>
 
-
-<VBox alignment="CENTER" fillWidth="false" minHeight="-Infinity" minWidth="-Infinity" prefHeight="433.0" prefWidth="500.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+<VBox alignment="CENTER" fillWidth="false" minHeight="-Infinity" minWidth="-Infinity" prefHeight="433.0" prefWidth="500.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.chinaunicom.elemeetingpc.controllers.OrganInfoController">
    <children>
       <ImageView fitHeight="222.0" fitWidth="260.0" pickOnBounds="true" preserveRatio="true">
          <image>
-            <Image url="@images/logo-2x(1).png" />
+            <Image url="images/logo-2x(1).png" />
          </image>
          <VBox.margin>
             <Insets />
          </VBox.margin>
       </ImageView>
-      <ListView prefHeight="42.0" prefWidth="303.0" style="-fx-background-color: #4581bf; -fx-background-radius: 60px;" styleClass="llist-cell" stylesheets="@Styles.css.css">
+      <ListView fx:id="organListView" fixedCellSize="40.0" prefHeight="42.0" prefWidth="303.0">
          <VBox.margin>
             <Insets top="10.0" />
          </VBox.margin>
