@@ -37,4 +37,16 @@ public class DialogsUtils {
         errorAlert.getDialogPane().setContent(textArea);
         errorAlert.showAndWait();
     } 
+    
+        /**
+     * Show error alert dialog windows.
+     */
+    public static void infoAlert(String infoString){
+        Alert infoAlert = new Alert(Alert.AlertType.INFORMATION);
+        infoAlert.setTitle(bundle.getString("info.title"));
+        
+        TextArea textArea = new TextArea(infoString);
+        infoAlert.getDialogPane().setContent(textArea);
+        infoAlert.showAndWait();
+    } 
 }

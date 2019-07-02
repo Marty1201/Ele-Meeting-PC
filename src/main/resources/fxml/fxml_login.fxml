@@ -8,23 +8,23 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-<BorderPane fx:id="borderPaneMain" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="800.0" minWidth="1000.0" prefHeight="1080.0" prefWidth="1920.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="cn.test.fx.controllers.LoginController">
+<BorderPane fx:id="borderPaneMain" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="800.0" minWidth="1000.0" prefHeight="1080.0" prefWidth="1920.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.chinaunicom.elemeetingpc.controllers.LoginController">
    <center>
       <VBox id="main2" alignment="CENTER" fillWidth="false" minWidth="0.0" prefHeight="180.0" prefWidth="500.0" BorderPane.alignment="CENTER">
          <children>
             <ImageView fitHeight="213.0" fitWidth="158.0" pickOnBounds="true" preserveRatio="true">
                <image>
-                  <Image url="@images/logo-2x(1).png" />
+                  <Image url="images/logo-2x(1).png" />
                </image>
             </ImageView>
             <HBox prefHeight="37.0" prefWidth="319.0">
                <children>
                   <ImageView fitHeight="36.0" fitWidth="46.0" pickOnBounds="true" preserveRatio="true">
                      <image>
-                        <Image url="@images/loginName@2x.png" />
+                        <Image url="images/loginName@2x.png" />
                      </image>
                   </ImageView>
-                  <TextField maxWidth="Infinity" prefHeight="36.0" prefWidth="280.0" promptText="输入账号" />
+                  <TextField fx:id="loginNameField" maxWidth="Infinity" prefHeight="36.0" prefWidth="280.0" promptText="输入账号" />
                </children>
                <VBox.margin>
                   <Insets bottom="20.0" top="20.0" />
@@ -34,21 +34,21 @@
                <children>
                   <ImageView fitHeight="36.0" fitWidth="46.0" pickOnBounds="true" preserveRatio="true">
                      <image>
-                        <Image url="@images/loginPwd@2x.png" />
+                        <Image url="images/loginPwd@2x.png" />
                      </image>
                   </ImageView>
-                  <TextField maxWidth="Infinity" prefHeight="36.0" prefWidth="280.0" promptText="输入密码" />
+                  <TextField fx:id="tpasswordfField" maxWidth="Infinity" prefHeight="36.0" prefWidth="280.0" promptText="输入密码" />
                </children>
                <VBox.margin>
                   <Insets bottom="20.0" />
                </VBox.margin>
             </HBox>
-            <Button fx:id="LoginButton" alignment="CENTER" maxWidth="Infinity" mnemonicParsing="false" prefHeight="26.0" prefWidth="115.0" text="获取验证码" textFill="#0d7ec9">
+            <Button fx:id="LoginButton" alignment="CENTER" maxWidth="Infinity" mnemonicParsing="false" onAction="#validaNum" prefHeight="26.0" prefWidth="115.0" text="获取验证码" textFill="#0d7ec9">
                <VBox.margin>
                   <Insets left="200.0" top="-10.0" />
                </VBox.margin>
             </Button>
-            <Button fx:id="LoginButton1" alignment="CENTER" maxWidth="Infinity" mnemonicParsing="false" prefHeight="36.0" prefWidth="320.0" style="-fx-background-image: #4581bf;" styleClass="button1" text="登录" textFill="WHITE">
+            <Button fx:id="LoginButton1" alignment="CENTER" maxWidth="Infinity" mnemonicParsing="false" onAction="#login" prefHeight="36.0" prefWidth="320.0" style="-fx-background-image: #4581bf;" styleClass="button1" text="登录" textFill="WHITE">
                <VBox.margin>
                   <Insets top="16.0" />
                </VBox.margin>
@@ -57,10 +57,6 @@
          <BorderPane.margin>
             <Insets />
          </BorderPane.margin>
-         <stylesheets>
-            <URL value="@Styles.css.css" />
-            <URL value="@Styles.css" />
-         </stylesheets>
       </VBox>
    </center>
    
