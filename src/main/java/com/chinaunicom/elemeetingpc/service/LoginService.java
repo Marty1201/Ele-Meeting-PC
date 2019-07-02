@@ -45,8 +45,9 @@ public class LoginService {
             String resultDesc = String.valueOf(temp_map.get("resultDesc"));
             resultMap.put("code", result_code);
             resultMap.put("desc", resultDesc);
+            String resultData = String.valueOf(temp_map.get("resultData"));
             
-            Map dataMap = (Map) temp_map.get("resultData");
+            Map dataMap = GsonUtil.getMap(resultData);;
             parseFzDataMap(dataMap);
           
         } catch (Exception ex) {
@@ -68,8 +69,9 @@ public class LoginService {
      */
     private String fzParam(String loginName,String password,String validaNum,String updateDate){
         String md5password = HashUtil.toMD5(password);
-        md5password="757f7fc9ad2ec1a2951fbf3a7bbc2144";
-        String resultString="{loginName:'"+loginName+"',password:'"+md5password+"',deviceToken:'60393D7BF54A',updateDate:''}";
+        System.out.println("MD5-password："+md5password);
+        //md5password="757f7fc9ad2ec1a2951fbf3a7bbc2144";
+        String resultString="{loginName:'"+loginName+"',password:'"+md5password+"',deviceToken:'862411F32EC6',updateDate:''}";
         
         return resultString;
     }

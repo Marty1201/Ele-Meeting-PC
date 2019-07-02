@@ -24,7 +24,7 @@
                         <Image url="images/loginName@2x.png" />
                      </image>
                   </ImageView>
-                  <TextField fx:id="loginNameField" maxWidth="Infinity" prefHeight="36.0" prefWidth="280.0" promptText="输入账号" />
+                  <TextField fx:id="loginNameField" maxWidth="Infinity" prefHeight="36.0" prefWidth="280.0" promptText="%login.userNamePrompt" />
                </children>
                <VBox.margin>
                   <Insets bottom="20.0" top="20.0" />
@@ -37,18 +37,18 @@
                         <Image url="images/loginPwd@2x.png" />
                      </image>
                   </ImageView>
-                  <PasswordField fx:id="tpasswordfField" maxWidth="Infinity" prefHeight="36.0" prefWidth="280.0" promptText="输入密码" />
+                  <PasswordField fx:id="tpasswordfField" maxWidth="Infinity" prefHeight="36.0" prefWidth="280.0" promptText="%login.passwordPrompt" />
                </children>
                <VBox.margin>
                   <Insets bottom="20.0" />
                </VBox.margin>
             </HBox>
-            <Button fx:id="LoginButton" alignment="CENTER" maxWidth="Infinity" mnemonicParsing="false" onAction="#validaNum" prefHeight="26.0" prefWidth="115.0" text="获取验证码" textFill="#0d7ec9">
+            <Button fx:id="LoginButton" alignment="CENTER" maxWidth="Infinity" mnemonicParsing="false" onAction="#validaNum" prefHeight="26.0" prefWidth="115.0" text="%login.verificationCode" textFill="#0d7ec9">
                <VBox.margin>
                   <Insets left="200.0" top="-10.0" />
                </VBox.margin>
             </Button>
-            <Button fx:id="LoginButton1" alignment="CENTER" maxWidth="Infinity" mnemonicParsing="false" onAction="#login" prefHeight="36.0" prefWidth="320.0" style="-fx-background-image: #4581bf;" styleClass="button1" text="登录" textFill="WHITE">
+            <Button fx:id="LoginButton1" alignment="CENTER" maxWidth="Infinity" mnemonicParsing="false" onAction="#login" prefHeight="36.0" prefWidth="320.0"  styleClass="button1" text="%login.loginButton" textFill="WHITE">
                <VBox.margin>
                   <Insets top="16.0" />
                </VBox.margin>

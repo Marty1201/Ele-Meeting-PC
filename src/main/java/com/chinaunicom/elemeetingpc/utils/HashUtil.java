@@ -43,23 +43,5 @@ public final class HashUtil {
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }
-    }
-    public static void main(String[] args) {
-		String p="123335";
-		 MessageDigest md;
-		 System.out.println("=====================buf=======");
-		try {
-			md = MessageDigest.getInstance("MD5");
-			byte[] buf = md.digest(p.getBytes());
-			for(int t=0;t<buf.length;t++){
-				System.out.println("=====================buf======="+buf[t]);
-			}
-			
-		} catch (NoSuchAlgorithmException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-      
-	}
-
+    }   
 }

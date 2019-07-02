@@ -45,7 +45,7 @@ public class DialogsUtils {
         Alert infoAlert = new Alert(Alert.AlertType.INFORMATION);
         infoAlert.setTitle(bundle.getString("info.title"));
         
-        TextArea textArea = new TextArea(infoString);
+        TextArea textArea = new TextArea(bundle.getString(infoString));
         infoAlert.getDialogPane().setContent(textArea);
         infoAlert.showAndWait();
     } 
