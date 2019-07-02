@@ -37,7 +37,7 @@
                         <Image url="images/loginPwd@2x.png" />
                      </image>
                   </ImageView>
-                  <TextField fx:id="tpasswordfField" maxWidth="Infinity" prefHeight="36.0" prefWidth="280.0" promptText="输入密码" />
+                  <PasswordField fx:id="tpasswordfField" maxWidth="Infinity" prefHeight="36.0" prefWidth="280.0" promptText="输入密码" />
                </children>
                <VBox.margin>
                   <Insets bottom="20.0" />
