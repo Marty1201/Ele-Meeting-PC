@@ -16,4 +16,6 @@ public class GlobalStaticConstant {
     public static String SESSION_USERINFO_LOGINNAME="1";
     //当前登录用户名称
     public static String SESSION_USERINFO_USERNAME="1";
+    //全局更新日期
+    public static String GLOBAL_UPDATEDATE="1";
 }

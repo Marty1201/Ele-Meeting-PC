@@ -134,9 +134,104 @@ public class LoginService {
                 user.setSort(sort);
                 is_update_user_state=true;
             }
+            if(!user.getUpdateDate().equals(updateDate)){
+                user.setUpdateDate(updateDate);
+                is_update_user_state=true;
+            }
             
             if(is_update_user_state){
                 userDao.saveOrUpdate(user);
+                
+            }
+            //设置全局静态变量
+            GlobalStaticConstant.SESSION_USERINFO_ID=user.getId()+"";
+            GlobalStaticConstant.SESSION_USERINFO_LOGINNAME=user.getLoginName();
+            GlobalStaticConstant.SESSION_USERINFO_USERNAME=user.getUserName();
+            GlobalStaticConstant.GLOBAL_UPDATEDATE=user.getUpdateDate();
+            
+            //2、修改机构信息
+            //组织机构list
+            List<Map> tempList = (List<Map>) userMap.get("organs");
+            if(tempList!=null){
+                OrganInfoDao organDao = new OrganInfoDao();
+                List<OrganInfo> exist_organList = organDao.findByFieldNameAndValue(OrganInfo.class, "USERINFO_ID", user.getId());
+                for(Object obj : tempList){
+                    Map orgMap = (Map) obj;
+                    String organizationName = String.valueOf(orgMap.get("organizationName"));
+                    String userId = String.valueOf(orgMap.get("userId"));
+                    String state2 = String.valueOf(orgMap.get("state"));
+                    String organizationId = String.valueOf(orgMap.get("organizationId"));
+                    String organizationEnglishName = String.valueOf(orgMap.get("organizationEnglishName"));
+                    
+                    OrganInfo organInfo = null;
+                    for(OrganInfo o : exist_organList){
+                        if(o.getOrganizationId().equals(organizationId)){
+                            organInfo=o;
+                        }
+                    }
+                    if(organInfo == null){
+                        //新增
+                        //封装机构信息，保存至数据库
+                        organInfo = new OrganInfo(user, organizationName, organizationId, organizationEnglishName, state2, userId);
+                        organDao.save(organInfo);
+                    }else{
+                        //修改
+                        boolean is_update_organ_state=false;
+                        if(!organInfo.getOrganizationName().equals(organizationName)){
+                            organInfo.setOrganizationName(organizationName);
+                            is_update_organ_state=true;
+                        }
+                        if(!organInfo.getOrganizationEnglishName().equals(organizationEnglishName)){
+                            organInfo.setOrganizationEnglishName(organizationEnglishName);
+                            is_update_organ_state=true;
+                        }
+                        if(!organInfo.getState().equals(state2)){
+                            organInfo.setState(state2);
+                            is_update_organ_state=true;
+                        }
+                        if(!organInfo.getUserId().equals(userId)){
+                            organInfo.setUserId(userId);
+                            is_update_organ_state=true;
+                        }
+                        if(is_update_organ_state){
+                            organDao.saveOrUpdate(organInfo);
+                        }                        
+                    }
+
+                     //身份list
+                     List<Map> dataList = (List<Map>) orgMap.get("identityList");
+                     if(dataList!=null){
+                         IdentityInfoDao infoDao = new IdentityInfoDao();
+                         List<IdentityInfo> exist_idenList = infoDao.findByFieldNameAndValue(IdentityInfo.class, "ORGANINFOR_ID", organInfo.getId());
+                         for(Object t : dataList){
+                            Map ideMap = (Map) t;
+                            String identityName = String.valueOf(ideMap.get("identityName"));
+                            String identityEnglishName = String.valueOf(ideMap.get("identityEnglishName"));
+
+                            IdentityInfo info=null;
+                            for(IdentityInfo d : exist_idenList){
+                                if(d.getIdentityName().equals(identityName)){
+                                    info=d;
+                                }
+                            }
+                            if(info==null){
+                                //新增
+                                info = new IdentityInfo(organInfo, identityName, identityEnglishName);                             
+                                infoDao.save(info);
+                            }else{
+                                //修改
+                                boolean is_update_info_state=false;
+                                if(!info.getIdentityEnglishName().equals(identityEnglishName)){
+                                    info.setIdentityEnglishName(identityEnglishName);
+                                    is_update_info_state=true;
+                                }
+                                if(is_update_info_state){
+                                    infoDao.saveOrUpdate(info);
+                                }
+                            }                            
+                         }
+                     }
+                }
             }
         }else{
             //新增信息
@@ -147,6 +242,7 @@ public class LoginService {
             GlobalStaticConstant.SESSION_USERINFO_ID=user.getId()+"";
             GlobalStaticConstant.SESSION_USERINFO_LOGINNAME=user.getLoginName();
             GlobalStaticConstant.SESSION_USERINFO_USERNAME=user.getUserName();
+            GlobalStaticConstant.GLOBAL_UPDATEDATE=user.getUpdateDate();
             
 
             //组织机构list

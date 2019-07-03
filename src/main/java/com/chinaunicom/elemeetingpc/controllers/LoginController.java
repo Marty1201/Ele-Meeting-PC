@@ -80,7 +80,7 @@ public class LoginController {
         if(StatusConstant.RESULT_CODE_SUCCESS.endsWith(map.get("code"))){
             //登录成功
             okLogin=true;
-            DialogsUtils.infoAlert("loginController.success");
+            //DialogsUtils.infoAlert("loginController.success");
             showFxmlOrg();
         }else{
             okLogin=false;
