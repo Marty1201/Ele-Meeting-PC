@@ -1,5 +1,6 @@
 package com.chinaunicom.elemeetingpc.modelFx;
 
+import com.chinaunicom.elemeetingpc.constant.GlobalStaticConstant;
 import com.chinaunicom.elemeetingpc.database.dao.OrganInfoDao;
 import com.chinaunicom.elemeetingpc.database.dao.UserInfoDao;
 import com.chinaunicom.elemeetingpc.database.models.OrganInfo;
@@ -18,7 +19,7 @@ import javafx.collections.ObservableList;
  */
 public class OrganInfoModel {
     
-    String userId = "1";//to do, 应动态获取当前登录用户的id
+    String userId = GlobalStaticConstant.SESSION_USERINFO_ID;//to do, 应动态获取当前登录用户的id
     private ObservableList<String> organInfoNameObservableList = FXCollections.observableArrayList();
     private List<String> organInfoNameList = new ArrayList<>();
 

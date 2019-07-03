@@ -1,5 +1,6 @@
 package com.chinaunicom.elemeetingpc.service;
 
+import com.chinaunicom.elemeetingpc.constant.GlobalStaticConstant;
 import com.chinaunicom.elemeetingpc.constant.ServeIpConstant;
 import com.chinaunicom.elemeetingpc.constant.StatusConstant;
 import com.chinaunicom.elemeetingpc.database.dao.IdentityInfoDao;
@@ -45,10 +46,11 @@ public class LoginService {
             String resultDesc = String.valueOf(temp_map.get("resultDesc"));
             resultMap.put("code", result_code);
             resultMap.put("desc", resultDesc);
-            String resultData = String.valueOf(temp_map.get("resultData"));
-            
-            Map dataMap = GsonUtil.getMap(resultData);;
-            parseFzDataMap(dataMap);
+            if(StatusConstant.RESULT_CODE_SUCCESS.equals(result_code)){
+                String resultData = String.valueOf(temp_map.get("resultData"));
+                Map dataMap = GsonUtil.getMap(resultData);;
+                parseFzDataMap(dataMap);
+            }
           
         } catch (Exception ex) {
             Logger.getLogger(LoginService.class.getName()).log(Level.SEVERE, null, ex);
@@ -92,42 +94,92 @@ public class LoginService {
         String sexName = String.valueOf(userMap.get("sexName"));
         String sexEnglishName = String.valueOf(userMap.get("sexEnglishName"));
         String sort = String.valueOf(userMap.get("sort"));
-        //封装用户信息，保存至数据库
-        UserInfo user = new UserInfo(loginName, userName, password, englishName,  phone,  state,  sexName,  sexEnglishName,  sort,  updateDate);
+        //封装用户信息，保存或修改至数据库
         UserInfoDao userDao = new UserInfoDao();
-        //userDao.saveOrUpdate(user);
-        userDao.save(user);
-        
-        //组织机构list
-        List<Map> tempList = (List<Map>) userMap.get("organs");
-        if(tempList!=null){
-            for(Object obj : tempList){
-                Map orgMap = (Map) obj;
-                String organizationName = String.valueOf(orgMap.get("organizationName"));
-                String userId = String.valueOf(orgMap.get("userId"));
-                String state2 = String.valueOf(orgMap.get("state"));
-                String organizationId = String.valueOf(orgMap.get("organizationId"));
-                String organizationEnglishName = String.valueOf(orgMap.get("organizationEnglishName"));
-                //封装机构信息，保存至数据库
-                OrganInfo organInfo = new OrganInfo(user, organizationName, organizationId, organizationEnglishName, state2, userId);
-                OrganInfoDao organDao = new OrganInfoDao();
-                organDao.save(organInfo);
-                
-                 //身份list
-                 List<Map> dataList = (List<Map>) orgMap.get("identityList");
-                 if(dataList!=null){
-                     for(Object t : dataList){
-                        Map ideMap = (Map) t;
-                        String identityName = String.valueOf(ideMap.get("identityName"));
-                        String identityEnglishName = String.valueOf(ideMap.get("identityEnglishName"));
-                        
-                         IdentityInfo info = new IdentityInfo(organInfo, identityName, identityEnglishName);
-                         IdentityInfoDao infoDao = new IdentityInfoDao();
-                         infoDao.save(info);
-                     }
-                 }
+        List<UserInfo> userList = userDao.findByFieldNameAndValue(UserInfo.class, "loginName", loginName);
+        if(userList!=null && userList.size()>0){
+            //修改信息
+            UserInfo user = userList.get(0);
+            //1、修改用户基本信息
+            boolean is_update_user_state=false;
+            if(!user.getPassword().equals(password)){
+                user.setPassword(password);
+                is_update_user_state=true;
             }
-        }
+            if(!user.getUserName().equals(userName)){
+                user.setUserName(userName);
+                is_update_user_state=true;
+            }
+            if(!user.getPhone().equals(phone)){
+                user.setPhone(phone);
+                is_update_user_state=true;
+            }
+            if(!user.getEnglishName().equals(englishName)){
+                user.setEnglishName(englishName);
+                is_update_user_state=true;
+            }
+            if(!user.getState().equals(state)){
+                user.setState(state);
+                is_update_user_state=true;
+            }
+            if(!user.getSexName().equals(sexName)){
+                user.setSexName(sexName);
+                is_update_user_state=true;
+            }
+            if(!user.getSexEnglishName().equals(sexEnglishName)){
+                user.setSexEnglishName(sexEnglishName);
+                is_update_user_state=true;
+            }
+            if(!user.getSort().equals(sort)){
+                user.setSort(sort);
+                is_update_user_state=true;
+            }
+            
+            if(is_update_user_state){
+                userDao.saveOrUpdate(user);
+            }
+        }else{
+            //新增信息
+            UserInfo user = new UserInfo(loginName, userName, password, englishName,  phone,  state,  sexName,  sexEnglishName,  sort,  updateDate);
+            //userDao.saveOrUpdate(user);
+            userDao.save(user);
+            //设置全局静态变量
+            GlobalStaticConstant.SESSION_USERINFO_ID=user.getId()+"";
+            GlobalStaticConstant.SESSION_USERINFO_LOGINNAME=user.getLoginName();
+            GlobalStaticConstant.SESSION_USERINFO_USERNAME=user.getUserName();
+            
+
+            //组织机构list
+            List<Map> tempList = (List<Map>) userMap.get("organs");
+            if(tempList!=null){
+                for(Object obj : tempList){
+                    Map orgMap = (Map) obj;
+                    String organizationName = String.valueOf(orgMap.get("organizationName"));
+                    String userId = String.valueOf(orgMap.get("userId"));
+                    String state2 = String.valueOf(orgMap.get("state"));
+                    String organizationId = String.valueOf(orgMap.get("organizationId"));
+                    String organizationEnglishName = String.valueOf(orgMap.get("organizationEnglishName"));
+                    //封装机构信息，保存至数据库
+                    OrganInfo organInfo = new OrganInfo(user, organizationName, organizationId, organizationEnglishName, state2, userId);
+                    OrganInfoDao organDao = new OrganInfoDao();
+                    organDao.save(organInfo);
+
+                     //身份list
+                     List<Map> dataList = (List<Map>) orgMap.get("identityList");
+                     if(dataList!=null){
+                         for(Object t : dataList){
+                            Map ideMap = (Map) t;
+                            String identityName = String.valueOf(ideMap.get("identityName"));
+                            String identityEnglishName = String.valueOf(ideMap.get("identityEnglishName"));
+
+                             IdentityInfo info = new IdentityInfo(organInfo, identityName, identityEnglishName);
+                             IdentityInfoDao infoDao = new IdentityInfoDao();
+                             infoDao.save(info);
+                         }
+                     }
+                }
+            }
+        }        
     }
     
 }
