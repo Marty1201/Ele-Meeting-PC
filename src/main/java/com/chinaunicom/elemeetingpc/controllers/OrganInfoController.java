@@ -1,6 +1,7 @@
 
 package com.chinaunicom.elemeetingpc.controllers;
 
+import com.chinaunicom.elemeetingpc.modelFx.OrganInfoFx;
 import com.chinaunicom.elemeetingpc.modelFx.OrganInfoModel;
 import com.chinaunicom.elemeetingpc.utils.DialogsUtils;
 import com.chinaunicom.elemeetingpc.utils.exceptions.ApplicationException;
@@ -18,8 +19,11 @@ import javafx.scene.control.ListView;
  */
 public class OrganInfoController {
     
+//    @FXML
+//    private ListView<String> organListView;
+    
     @FXML
-    private ListView<String> organListView;
+    private ListView<OrganInfoFx> organListView;
     
     private OrganInfoModel organInfoModel;
     
@@ -33,13 +37,25 @@ public class OrganInfoController {
         }
         int listSize = this.organInfoModel.getOrganInfoNameObservableList().size();
         organListView.setItems(this.organInfoModel.getOrganInfoNameObservableList());
+        
         //ListView的高=list的size X 每条list-cell的size + 5(间距)
         organListView.setPrefHeight(listSize * 40 + 5);
         //添加事件监听器
         organListView.getSelectionModel().selectedItemProperty().addListener(
-                            (ObservableValue<? extends String> ov, String old_val, String new_val) ->{
-                    System.out.println(new_val + " Clicked!");
-                    //to do
-                });
+                (ObservableValue<? extends OrganInfoFx> observable, OrganInfoFx oldValue, OrganInfoFx newValue) -> {
+            System.out.println("newValue: " + newValue);
+            System.out.println("oldValue: " + oldValue);
+            System.out.println("observable-OrganId: " + observable.getValue().getOrganizationId());
+    });
+        
+        
+        
+//        organListView.getSelectionModel().selectedItemProperty().addListener(
+//                            (ObservableValue<? extends OrganInfoFx> observable, String oldValue, String newValue) ->{
+//                    System.out.println("newValue: " + newValue);
+//                    System.out.println("oldValue: " + oldValue);
+//                    System.out.println("observable: " + observable);
+//                    //to do
+//                });
     }
 }
