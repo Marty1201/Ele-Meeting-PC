@@ -3,6 +3,7 @@ package com.chinaunicom.elemeetingpc.modelFx;
 import com.chinaunicom.elemeetingpc.constant.GlobalStaticConstant;
 import com.chinaunicom.elemeetingpc.database.dao.OrganInfoDao;
 import com.chinaunicom.elemeetingpc.database.models.OrganInfo;
+import com.chinaunicom.elemeetingpc.utils.converters.OrganInfoConverter;
 import com.chinaunicom.elemeetingpc.utils.exceptions.ApplicationException;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,12 +18,12 @@ import javafx.collections.ObservableList;
  */
 public class OrganInfoModel {
     
-    String userId = GlobalStaticConstant.SESSION_USERINFO_ID;//to do, 应动态获取当前登录用户的id
-    private ObservableList<String> organInfoNameObservableList = FXCollections.observableArrayList();
-    private List<String> organInfoNameList = new ArrayList<>();
+    String userId = GlobalStaticConstant.SESSION_USERINFO_ID;
+    private ObservableList<OrganInfoFx> organInfoNameObservableList = FXCollections.observableArrayList();
+    private List<OrganInfoFx> organInfoNameList = new ArrayList<>();
 
     /**
-     * Initialize the OrganInfoFxsObservableList and populate with String
+     * Initialize the OrganInfoFxsObservableList and populate with OrganInfoFx
      * objects.
      *
      * @throws ApplicationException.
@@ -33,17 +34,17 @@ public class OrganInfoModel {
         List<OrganInfo> OrganInfoList = organInfoDao.findByFieldNameAndValue(OrganInfo.class, "USERINFO_ID", userId);
         organInfoNameList.clear();
         OrganInfoList.forEach(organInfo -> {
-            this.organInfoNameList.add(organInfo.getOrganizationName());
+            this.organInfoNameList.add(OrganInfoConverter.convertToOrganInfoFx(organInfo));
         });
         organInfoNameObservableList.setAll(organInfoNameList);
     }
 
     /**
-     * Return a OrganInfoFxsObservableList which contains String objects.
+     * Return a OrganInfoFxsObservableList which contains OrganInfoFx objects.
      *
      * @return organInfoFxsObservableLis.
      */
-    public ObservableList<String> getOrganInfoNameObservableList() {
+    public ObservableList<OrganInfoFx> getOrganInfoNameObservableList() {
         return organInfoNameObservableList;
     }
 }

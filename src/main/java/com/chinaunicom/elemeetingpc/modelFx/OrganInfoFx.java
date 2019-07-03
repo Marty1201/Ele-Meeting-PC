@@ -119,16 +119,15 @@ public class OrganInfoFx {
         this.userId.set(userId);
     }
     
+    /**
+     * 解决当插入ListView中的集合是自定义类时，ListView不能正常显示的问题，
+     * 通过重写自定义类toString方法将内容输出成一个字符串，可使ListView显示
+     * toString方法的返回值。
+     *
+     * @return 要在ListView显示的String
+     */
     @Override
-    public String toString(){
-        return "OrganInfoFx{" + 
-                "id=" + id +
-                ", userInfoFx" + userInfoFx +
-                ", organizationName=" + organizationName +
-                ", organizationId" + organizationId +
-                ", organizationEnglishName=" + organizationEnglishName +
-                ", state=" + state +
-                ", userId=" + userId +
-                '}';
+    public String toString() {
+        return getOrganizationName();
     }
 }
