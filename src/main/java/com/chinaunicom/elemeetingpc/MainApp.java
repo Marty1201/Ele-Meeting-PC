@@ -30,6 +30,8 @@ public class MainApp extends Application {
         
         stage.setTitle(FxmlUtils.getResourceBundle().getString("title.application"));
         stage.setScene(scene);
+        //stage.setFullScreen(true); //窗口最大化，但是会弹出ESC提示
+        stage.setMaximized(true); //窗口最大化
         stage.show();
         
         //database initialization
