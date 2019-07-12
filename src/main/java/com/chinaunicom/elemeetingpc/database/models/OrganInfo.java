@@ -114,5 +114,21 @@ public class OrganInfo implements BaseModel {
     public void setIdentityList(ForeignCollection identityList) {
         this.identityList = identityList;
     }
-            
+    
+    /**
+     * 解决在List集合中使用removeAll对象去重的问题，重写OrganInfo类的equals方法，
+     * 根据id，organizationId，organizationName三个字段判断对象是否相同。
+     *
+     * @return true if methods conditions are fullfilled
+     */
+    @Override
+    public boolean equals(Object obj)  
+   {  
+       //if(this == obj) return true;
+       //if(obj == null || getClass() != obj.getClass()) return false;
+       OrganInfo organInfo = (OrganInfo)obj;
+       if(id == organInfo.id) return true;
+       if(organizationId == organInfo.organizationId) return true;
+       return organizationName.equals(organInfo.organizationName);
+   }
 }

@@ -33,7 +33,6 @@ public class UserInfoConverter {
         userInfoFx.setSexName(userInfo.getSexName());
         userInfoFx.setSexEnglishName(userInfo.getSexEnglishName());
         userInfoFx.setSort(userInfo.getSort());
-        userInfoFx.setUpdateDate(userInfo.getUpdateDate());
         return userInfoFx;
     }
     
@@ -54,7 +53,6 @@ public class UserInfoConverter {
         userInfo.setSexName(userInfoFx.getSexName());
         userInfo.setSexEnglishName(userInfoFx.getSexEnglishName());
         userInfo.setSort(userInfoFx.getSort());
-        userInfo.setUpdateDate(userInfoFx.getUpdateDate());
         return userInfo;
     }
 }

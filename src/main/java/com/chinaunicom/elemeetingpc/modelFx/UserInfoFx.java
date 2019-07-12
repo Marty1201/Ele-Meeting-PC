@@ -37,8 +37,6 @@ public class UserInfoFx {
     private final StringProperty sexEnglishName = new SimpleStringProperty();
     //排序号
     private final StringProperty sort = new SimpleStringProperty();
-    //更新时间
-    private final StringProperty updateDate = new SimpleStringProperty();
     
     public UserInfoFx(){
         
@@ -163,19 +161,7 @@ public class UserInfoFx {
     public void setSort(String sort) {
         this.sort.set(sort);
     }
-    
-    public String getUpdateDate() {
-        return updateDate.get();
-    }
-    
-    public StringProperty updateDateProperty(){
-        return updateDate;
-    }
 
-    public void setUpdateDate(String updateDate) {
-        this.updateDate.set(updateDate);
-    }
-    
     @Override
     public String toString() {
         return "UserInfoFx{"
@@ -189,7 +175,6 @@ public class UserInfoFx {
                 + ", sexName=" + sexName
                 + ", sexEnglishName=" + sexEnglishName
                 + ", sort=" + sort
-                + ", updateDate=" + updateDate
                 + '}';
     }
 }

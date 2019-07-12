@@ -42,9 +42,6 @@ public class UserInfo implements BaseModel {
     //排序号
     @DatabaseField(columnName = "sort")
     private String sort;
-    //更新时间
-    @DatabaseField(columnName = "updateDate")
-    private String updateDate;
     //组织机构列表
     @ForeignCollectionField
     private ForeignCollection<OrganInfo> orglist;
@@ -54,7 +51,7 @@ public class UserInfo implements BaseModel {
     }
 
     //构造方法
-    public UserInfo(String loginName, String userName, String password, String englishName, String phone, String state, String sexName, String sexEnglishName, String sort, String updateDate) {
+    public UserInfo(String loginName, String userName, String password, String englishName, String phone, String state, String sexName, String sexEnglishName, String sort) {
         this.loginName = loginName;
         this.userName = userName;
         this.password = password;
@@ -64,7 +61,6 @@ public class UserInfo implements BaseModel {
         this.sexName = sexName;
         this.sexEnglishName = sexEnglishName;
         this.sort = sort;
-        this.updateDate = updateDate;
     }
 
     public int getId() {
@@ -153,13 +149,5 @@ public class UserInfo implements BaseModel {
 
     public void setOrglist(ForeignCollection<OrganInfo> orglist) {
         this.orglist = orglist;
-    }
-    
-    public String getUpdateDate() {
-        return updateDate;
-    }
-
-    public void setUpdateDate(String updateDate) {
-        this.updateDate = updateDate;
     }
 }

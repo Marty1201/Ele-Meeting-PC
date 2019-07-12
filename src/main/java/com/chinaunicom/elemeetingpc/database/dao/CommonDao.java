@@ -11,7 +11,9 @@ import com.j256.ormlite.logger.LoggerFactory;
 import com.j256.ormlite.support.ConnectionSource;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Provide common methods for database manipulation, all Dao methods are
@@ -68,8 +70,8 @@ public abstract class CommonDao {
 
     /**
      * Creating or update an item in the table depends on the existence
-     * of the item in the table, the id is extracted from the parameter
-     * and is used to query the table.
+     * of the item in the table, the ID is extracted from the parameter
+     * (Object's field) and is used to query the table.
      * 
      * @param baseModel the object class to be saved in the table.
      * @throws ApplicationException.
@@ -140,6 +142,25 @@ public abstract class CommonDao {
             this.closeDbConnection();
         }
     }
+    
+    /**
+     * Delete a collection of objects from the database.
+     *
+     * @param cls the object class to be deleted.
+     * @param datas the collection of items.
+     * @throws ApplicationException.
+     */
+    public <T extends BaseModel, I> void deleteByCollection(Class<T> cls, Collection<T> datas) throws ApplicationException {
+        try {
+            Dao<T, I> dao = getDao(cls);
+            dao.delete(datas);
+        } catch (SQLException e) {
+            logger.warn(e.getCause().getMessage());
+            throw new ApplicationException(FxmlUtils.getResourceBundle().getString("error.delete"));
+        } finally {
+            this.closeDbConnection();
+        }
+    }
 
     /**
      * Find an item from the table by id.
@@ -193,6 +214,26 @@ public abstract class CommonDao {
         Dao<T, I> dao = getDao(cls);
         try {
             return dao.queryForEq(fieldName, value);
+        } catch (SQLException e) {
+            logger.warn(e.getCause().getMessage());
+            throw new ApplicationException(FxmlUtils.getResourceBundle().getString("error.not.found.all"));
+        } finally {
+            this.closeDbConnection();
+        }
+    }
+    
+    /**
+     * Find all items from the table by given a map of columNames & values.
+     *
+     * @param cls the object class to be queried.
+     * @param fieldValues a map contains all the query values.
+     * @return A list of T objects.
+     * @throws ApplicationException.
+     */
+    public <T extends BaseModel, I> List<T> findByFieldNamesAndValues(Class<T> cls, Map<String, Object> fieldValues) throws ApplicationException {
+        Dao<T, I> dao = getDao(cls);
+        try {
+            return dao.queryForFieldValues(fieldValues);
         } catch (SQLException e) {
             logger.warn(e.getCause().getMessage());
             throw new ApplicationException(FxmlUtils.getResourceBundle().getString("error.not.found.all"));
