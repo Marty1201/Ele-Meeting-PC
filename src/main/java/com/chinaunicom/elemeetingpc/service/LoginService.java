@@ -1,5 +1,6 @@
 package com.chinaunicom.elemeetingpc.service;
 
+import com.chinaunicom.elemeetingpc.constant.GlobalStaticConstant;
 import com.chinaunicom.elemeetingpc.constant.ServeIpConstant;
 import com.chinaunicom.elemeetingpc.constant.StatusConstant;
 import com.chinaunicom.elemeetingpc.database.models.IdentityInfo;
@@ -29,7 +30,7 @@ public class LoginService {
     private UserInfoModel userInfoModel;
 
     private OrganInfoModel organInfoModel;
-    
+
     private IdentityInfoModel identityInfoModel;
 
     /**
@@ -107,8 +108,12 @@ public class LoginService {
             if (!userList.isEmpty()) {
                 userInfo = userList.get(0);
                 userInfoModel.saveOrUpdateUserInfo(setUserInfoProperties(userInfo, userInfoMap));//解析并封装用户信息,更新对象信息
+                //在全局常量里记录当前登录人的id
+                GlobalStaticConstant.GLOBAL_USERINFO_ID = userInfo.getId();
             } else {
                 userInfoModel.saveOrUpdateUserInfo(setUserInfoProperties(userInfo, userInfoMap));//解析并封装用户信息,新建对象信息
+                //在全局常量里记录当前登录人的id
+                GlobalStaticConstant.GLOBAL_USERINFO_ID = userInfo.getId();
             }
         }
         //2、处理机构信息
@@ -122,10 +127,10 @@ public class LoginService {
                 fieldValues.put("organizationId", String.valueOf(organInfoMap.get("organizationId")));
                 fieldValues.put("userId", String.valueOf(organInfoMap.get("userId")));
                 List<OrganInfo> organList = organInfoModel.queryOrganInfosByMap(fieldValues);//根据机构id和用户id查询数据库里是否已存在同样的数据
-                if(!organList.isEmpty()){
-                        organInfo = organList.get(0);
-                        organInfoModel.saveOrUpdateOrganInfo(setOrganInfoProperties(organInfo, organInfoMap, userInfo));//解析并封装机构信息,更新对象信息
-                        remoteOrganList.add(setOrganInfoProperties(organInfo, organInfoMap, userInfo));
+                if (!organList.isEmpty()) {
+                    organInfo = organList.get(0);
+                    organInfoModel.saveOrUpdateOrganInfo(setOrganInfoProperties(organInfo, organInfoMap, userInfo));//解析并封装机构信息,更新对象信息
+                    remoteOrganList.add(setOrganInfoProperties(organInfo, organInfoMap, userInfo));
                 } else {
                     organInfoModel.saveOrUpdateOrganInfo(setOrganInfoProperties(organInfo, organInfoMap, userInfo));//解析并封装机构信息,新建对象信息
                     remoteOrganList.add(setOrganInfoProperties(organInfo, organInfoMap, userInfo));
@@ -148,11 +153,11 @@ public class LoginService {
         }
         //4、最后需要处理删除本地机构表和身份表与接口不同步的数据
         List<OrganInfo> localOrganList = organInfoModel.queryOrganInfosByUserId("USERINFO_ID", userInfo.getId());//查出用户所属的所有机构
-        if(remoteOrganList.size() < localOrganList.size()){ //如果接口返回的机构数小于本地存储的机构数，则服务端用户所属机构减少了，本地也要删除对应的机构和身份
+        if (remoteOrganList.size() < localOrganList.size()) { //如果接口返回的机构数小于本地存储的机构数，则服务端用户所属机构减少了，本地也要删除对应的机构和身份
             localOrganList.removeAll(remoteOrganList);//机构去重
-            for(OrganInfo localOrganInfo:localOrganList){
+            for (OrganInfo localOrganInfo : localOrganList) {
                 List<IdentityInfo> localIdentityList = identityInfoModel.queryIdentityInfos("ORGANINFOR_ID", localOrganInfo.getId());//首先判断当前机构下是否存在身份信息
-                if(!localIdentityList.isEmpty()){
+                if (!localIdentityList.isEmpty()) {
                     identityInfoModel.deleteAllIdentityInfos(localIdentityList);//需要先删除机构下的身份
                 }
             }
@@ -211,7 +216,7 @@ public class LoginService {
         organInfo.setUserInfo(userInfo);
         return organInfo;
     }
-    
+
     /**
      * 解析数据并封装identityInfo对象.
      *

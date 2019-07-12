@@ -1,6 +1,7 @@
 
 package com.chinaunicom.elemeetingpc.controllers;
 
+import com.chinaunicom.elemeetingpc.constant.GlobalStaticConstant;
 import com.chinaunicom.elemeetingpc.modelFx.OrganInfoFx;
 import com.chinaunicom.elemeetingpc.modelFx.OrganInfoModel;
 import com.chinaunicom.elemeetingpc.utils.DialogsUtils;
@@ -43,19 +44,11 @@ public class OrganInfoController {
         //添加事件监听器
         organListView.getSelectionModel().selectedItemProperty().addListener(
                 (ObservableValue<? extends OrganInfoFx> observable, OrganInfoFx oldValue, OrganInfoFx newValue) -> {
-            System.out.println("newValue: " + newValue);
-            System.out.println("oldValue: " + oldValue);
-            System.out.println("observable-OrganId: " + observable.getValue().getOrganizationId());
+                    //在全局常量里记录当前选择的机构id
+                    GlobalStaticConstant.GLOBAL_ORGANINFO_ORGANIZATIONID = observable.getValue().getOrganizationId();
+                    System.out.println("newValue: " + newValue);
+                    System.out.println("oldValue: " + oldValue);
+                    System.out.println("observable-OrganId: " + observable.getValue().getOrganizationId());
     });
-        
-        
-        
-//        organListView.getSelectionModel().selectedItemProperty().addListener(
-//                            (ObservableValue<? extends OrganInfoFx> observable, String oldValue, String newValue) ->{
-//                    System.out.println("newValue: " + newValue);
-//                    System.out.println("oldValue: " + oldValue);
-//                    System.out.println("observable: " + observable);
-//                    //to do
-//                });
     }
 }

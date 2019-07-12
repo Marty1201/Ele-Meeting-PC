@@ -19,7 +19,6 @@ import javafx.collections.ObservableList;
  */
 public class OrganInfoModel {
     
-    String userId = GlobalStaticConstant.SESSION_USERINFO_ID;
     private ObservableList<OrganInfoFx> organInfoNameObservableList = FXCollections.observableArrayList();
     private List<OrganInfoFx> organInfoNameList = new ArrayList<>();
 
@@ -32,7 +31,7 @@ public class OrganInfoModel {
     public void init() throws ApplicationException {
         OrganInfoDao organInfoDao = new OrganInfoDao();
         //根据用户id从数据库里查到对应的组织机构信息
-        List<OrganInfo> OrganInfoList = organInfoDao.findByFieldNameAndValue(OrganInfo.class, "USERINFO_ID", userId);
+        List<OrganInfo> OrganInfoList = organInfoDao.findByFieldNameAndValue(OrganInfo.class, "USERINFO_ID", GlobalStaticConstant.GLOBAL_USERINFO_ID);
         organInfoNameList.clear();
         OrganInfoList.forEach(organInfo -> {
             this.organInfoNameList.add(OrganInfoConverter.convertToOrganInfoFx(organInfo));
