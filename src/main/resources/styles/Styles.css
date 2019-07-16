@@ -1,24 +1,19 @@
 /* 
     Created on : 2019-6-10, 18:04:19
-    Author     : chenxi
+    Author     : qingpengbo, chenxi
 */
 
-.button1{
-    -fx-font: 18 arial; 
-    -fx-base: #11b7d5;    
+/* 登录背景 */
+#mainBackground{
+	-fx-background-image: url("/images/bg.png");
 }
-
-.index-text{-fx-background:#ffffff;-fx-border:none;}
-
-.title-title{
-    -fx-font: 24 arial; 
+/* 登陆按钮样式 */
+.login-btn{
+    -fx-font:24px; 
     -fx-text-fill:#ffffff; 
-}
-.title-left{
-    -fx-font: 28 arial; 
-    -fx-text-fill:#ffffff; 
-    -fx-font-weight:bold;
-    
+    -fx-background-color:#4581bf; 
+    -fx-background-radius:30px;
+    -fx-pref-height: 44px;
 }
 
 /* 机构选择列表控件样式 */
@@ -27,7 +22,6 @@
   -fx-border-color: #ffffff;
   -fx-background-insets: 0;
 }
-
 /* 机构选择列表cell样式 */
 .organ-list-view .list-cell{
   -fx-text-fill: #ffffff;
@@ -39,14 +33,80 @@
   -fx-border-color: #ffffff;
 }
 
-.index-meet{-fx-background-color:transparent}
-
-.title-name{
-    -fx-font: 18 arial; 
-    -fx-text-fill:#ffffff; 
-    
+/* 会议首页样式 */
+.index-title{
+    -fx-text-fill:#000000;
+    -fx-background-color:#ffffff; 
+    -fx-font:28px;
+    -fx-font-weight:bold;
+    -fx-pref-height: 40px;
 }
-#main2{
-	-fx-background-image: url("/images/bg.png");
+.index-title-little{
+    -fx-text-fill:#000000;
+    -fx-background-color:#ffffff; 
+    -fx-font:20px;
+}
+.index-title-little{
+    -fx-text-fill:#000000;
+    -fx-background-color:#ffffff; 
+    -fx-font:20px;
+}
+.index-title-two{
+    -fx-text-fill:#ffffff;
+    -fx-background-color:#4581bf; 
+    -fx-font:20px;
+    -fx-pref-height: 40px;
+}
+.text-area {
+	-fx-background-color:transparent; 
+}
+.text-area .scroll-pane{
+	-fx-background-color:transparent;
+} 
+.text-area .scroll-pane .viewport {
+	-fx-background-color:transparent;
+}
+.text-area .scroll-pane .content {
+	-fx-background-color:transparent; 
+}
+
+/* 左侧会议列表 */
+.meeting-welcome{
+    -fx-font:36px;
+    -fx-background-color: #4581bf;
+    -fx-text-fill:#ffffff;
+    -fx-background-radius:0px;
+    -fx-pref-height: 50px;
+}
+.meeting-user{
+    -fx-font:26px;
+    -fx-background-color: #4581bf;
+    -fx-text-fill:#ffffff;
+    -fx-background-radius:0px;
+    -fx-pref-height: 40px;
+}
+.meeting-list-title
+{ 
+    -fx-text-fill:#4581bf;
+    -fx-font:26 arial;
+    -fx-font-weight:700;
+}
+.meeting-list-view{
+    -fx-background-color:#f1f1f1; 
+    -fx-text-fill:#000000; 
+    -fx-font:24 arial;
+    -fx-pref-height: 70px;
+}
+.meeting-list-view.list-cell{
+    -fx-background-color:#ffffff; 
+    -fx-text-fill:#000000; 
+    -fx-font:24 arial;
+    -fx-pref-height: 70px;
+
+}
+.meeting-btn{
+    -fx-background-color:#4581bf; 
+    -fx-text-fill:#ffffff;
+    -fx-font:26 arial;
 }
 
