@@ -9,8 +9,12 @@ import com.chinaunicom.elemeetingpc.constant.StatusConstant;
 import com.chinaunicom.elemeetingpc.service.LoginService;
 import com.chinaunicom.elemeetingpc.utils.DialogsUtils;
 import com.chinaunicom.elemeetingpc.utils.FxmlUtils;
+import java.io.IOException;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
@@ -99,13 +103,26 @@ public class LoginController {
     /**
      * 展示选择机构列表
      */
-    private void showFxmlOrg(){
-        
-        setCenter(FXML_ORG_FXML);
+    private void showFxmlOrg(){ 
+        try {
+            //setCenter(FXML_ORG_FXML);
+            FXMLLoader loader = FxmlUtils.getFXMLLoader(FXML_ORG_FXML);            
+            borderPaneMain.setCenter(loader.load());
+            
+            OrganInfoController organInfoController = loader.getController();
+            //设置传参loginController
+            organInfoController.setLoginController(this);
+        } catch (IOException ex) {
+            Logger.getLogger(LoginController.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
     
     public void setCenter(String fxmlPath){
         borderPaneMain.setCenter(FxmlUtils.fxmlLoader(fxmlPath));
+    }
+    
+    public BorderPane getBorderPane(){
+        return borderPaneMain;
     }
             
     

@@ -15,6 +15,8 @@ public class GlobalStaticConstant {
     public static String GLOBAL_USERINFO_USERNAME = "1";
     //全局更新机构id
     public static String GLOBAL_ORGANINFO_ORGANIZATIONID = "1";
+    //全局更新机构中对应的用户Id
+    public static String GLOBAL_ORGANINFO_OWNER_USERID = "1";
     //全局更新日期
-    public static String GLOBAL_UPDATEDATE = "1";
+    public static String GLOBAL_UPDATEDATE = "";
 }
