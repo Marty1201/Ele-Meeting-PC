@@ -5,23 +5,24 @@
  */
 package com.chinaunicom.elemeetingpc.modelFx;
 
-import com.chinaunicom.elemeetingpc.database.dao.MeetInfoDao;
-import com.chinaunicom.elemeetingpc.database.models.MeetInfo;
+import com.chinaunicom.elemeetingpc.database.dao.MeetIssueRelationDao;
+import com.chinaunicom.elemeetingpc.database.models.MeetIssueRelation;
 import com.chinaunicom.elemeetingpc.utils.exceptions.ApplicationException;
 
 /**
  *
  * @author zhaojunfeng
  */
-public class MeetInfoModel {
+public class MeetIssueRelationModel {
     
     /**
      * 保存或修改
-     * @param meetInfo
+     * @param meetIssueRelation
      * @throws ApplicationException 
      */
-    public void saveOrUpdateMeetInfo(MeetInfo meetInfo)throws ApplicationException {
-        MeetInfoDao meetInfoDao = new MeetInfoDao();
-        meetInfoDao.saveOrUpdate(meetInfo);
+    public void saveOrUpdate(MeetIssueRelation meetIssueRelation) throws ApplicationException{
+        MeetIssueRelationDao dao = new MeetIssueRelationDao();
+        dao.saveOrUpdate(meetIssueRelation);
     }
+    
 }

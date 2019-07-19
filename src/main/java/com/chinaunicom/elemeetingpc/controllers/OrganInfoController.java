@@ -4,6 +4,7 @@ package com.chinaunicom.elemeetingpc.controllers;
 import com.chinaunicom.elemeetingpc.constant.GlobalStaticConstant;
 import com.chinaunicom.elemeetingpc.modelFx.OrganInfoFx;
 import com.chinaunicom.elemeetingpc.modelFx.OrganInfoModel;
+import com.chinaunicom.elemeetingpc.service.SelectOrganService;
 import com.chinaunicom.elemeetingpc.utils.DialogsUtils;
 import com.chinaunicom.elemeetingpc.utils.FxmlUtils;
 import com.chinaunicom.elemeetingpc.utils.exceptions.ApplicationException;
@@ -66,6 +67,11 @@ public class OrganInfoController {
                     //System.out.println("oldValue: " + oldValue);
                     //System.out.println("observable-OrganId: " + observable.getValue().getOrganizationId());
                     //System.out.println("observable-Organ-UserId: " + observable.getValue().getUserId());  
+                    SelectOrganService service = new SelectOrganService();
+                    //解析数据
+                    service.getMeetInfosFromRemote();
+                    
+                    //跳转界面
                     showFxmlMeet();
         });
     }

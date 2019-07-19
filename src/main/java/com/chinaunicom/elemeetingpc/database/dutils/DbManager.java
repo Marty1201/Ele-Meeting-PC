@@ -1,7 +1,15 @@
 
 package com.chinaunicom.elemeetingpc.database.dutils;
 
+import com.chinaunicom.elemeetingpc.database.models.DictionaryInfo;
+import com.chinaunicom.elemeetingpc.database.models.FileResource;
+import com.chinaunicom.elemeetingpc.database.models.FileUserRelation;
 import com.chinaunicom.elemeetingpc.database.models.IdentityInfo;
+import com.chinaunicom.elemeetingpc.database.models.IssueFileRelation;
+import com.chinaunicom.elemeetingpc.database.models.IssueInfo;
+import com.chinaunicom.elemeetingpc.database.models.MeetInfo;
+import com.chinaunicom.elemeetingpc.database.models.MeetIssueRelation;
+import com.chinaunicom.elemeetingpc.database.models.MeetUserRelation;
 import com.chinaunicom.elemeetingpc.database.models.OrganInfo;
 import com.chinaunicom.elemeetingpc.database.models.UserInfo;
 import com.j256.ormlite.jdbc.JdbcConnectionSource;
@@ -89,6 +97,15 @@ public class DbManager {
             TableUtils.createTableIfNotExists(connectionSource, UserInfo.class);
             TableUtils.createTableIfNotExists(connectionSource, OrganInfo.class);
             TableUtils.createTableIfNotExists(connectionSource, IdentityInfo.class);
+            TableUtils.createTableIfNotExists(connectionSource, MeetInfo.class);
+            TableUtils.createTableIfNotExists(connectionSource, IssueInfo.class);
+            TableUtils.createTableIfNotExists(connectionSource, FileResource.class);
+            TableUtils.createTableIfNotExists(connectionSource, MeetIssueRelation.class);
+            TableUtils.createTableIfNotExists(connectionSource, IssueFileRelation.class);
+            TableUtils.createTableIfNotExists(connectionSource, MeetUserRelation.class);
+            TableUtils.createTableIfNotExists(connectionSource, FileUserRelation.class);
+            
+            TableUtils.createTableIfNotExists(connectionSource, DictionaryInfo.class);
         } catch(SQLException e){
             logger.warn(e.getMessage());
             //e.printStackTrace();
