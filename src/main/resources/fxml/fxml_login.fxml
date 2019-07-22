@@ -43,7 +43,7 @@
                   <Insets bottom="20.0" />
                </VBox.margin>
             </HBox>
-            <Button fx:id="LoginButton" alignment="CENTER" maxWidth="Infinity" mnemonicParsing="false" onAction="#validaNum" prefHeight="26.0" prefWidth="115.0" text="%login.verificationCode" textFill="#0d7ec9">
+            <Button fx:id="LoginButton" alignment="CENTER" maxWidth="Infinity" mnemonicParsing="false" onAction="#showRegiCode" prefHeight="26.0" prefWidth="115.0" text="%login.verificationCode" textFill="#0d7ec9">
                <VBox.margin>
                   <Insets left="200.0" top="-10.0" />
                </VBox.margin>

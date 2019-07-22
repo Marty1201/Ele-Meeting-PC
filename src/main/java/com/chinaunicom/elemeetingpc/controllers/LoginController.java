@@ -1,28 +1,26 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package com.chinaunicom.elemeetingpc.controllers;
 
 import com.chinaunicom.elemeetingpc.constant.StatusConstant;
+import com.chinaunicom.elemeetingpc.modelFx.DictionaryModel;
 import com.chinaunicom.elemeetingpc.service.LoginService;
 import com.chinaunicom.elemeetingpc.utils.DialogsUtils;
 import com.chinaunicom.elemeetingpc.utils.FxmlUtils;
+import com.chinaunicom.elemeetingpc.utils.exceptions.ApplicationException;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import org.apache.commons.lang3.StringUtils;
 
 /**
- *
- * @author zhaojunfeng
+ * 登陆控制器
+ * @author zhaojunfeng, chenxi
  */
 public class LoginController {
     
@@ -33,21 +31,11 @@ public class LoginController {
     private TextField tpasswordfField;
     
     @FXML
-    private PasswordField mpasswordField;
-    
-    @FXML
-    private TextField validaNumField;
-    
-    @FXML
     private BorderPane borderPaneMain;
     
     public static final String FXML_ORG_FXML = "/fxml/fxml_org.fxml";
     
-    private boolean okLogin=false;
-
-    public boolean isOkLogin() {
-        return okLogin;
-    }
+    private DictionaryModel dictionaryModel;
     
     /**
      * 初始化controller
@@ -61,11 +49,10 @@ public class LoginController {
      * 登录方法
      */
     @FXML
-    public void login(){
+    public void login() throws ApplicationException, SQLException{
         String loginName = loginNameField.getText();
         String password = tpasswordfField.getText();
-        //String validaNum = validaNumField.getText();
-        String validaNum="123456";
+        String regiCode = dictionaryModel.queryByFieldIsNotNull();
         if(StringUtils.isBlank(loginName)){
             DialogsUtils.infoAlert("loginController.loginName.not.empty");
             return;
@@ -74,41 +61,41 @@ public class LoginController {
             DialogsUtils.infoAlert("loginController.password.not.empty");
             return;
         }
-        if(StringUtils.isBlank(validaNum)){
-            DialogsUtils.infoAlert("loginController.validaNum.not.empty");
+        if(StringUtils.isBlank(regiCode)){
+            DialogsUtils.infoAlert("loginController.regiCode.not.empty");
             return;
         }
         
         LoginService service = new LoginService();
-        Map<String,String> map  = service.login(loginName, password, validaNum);
+        Map<String,String> map  = service.login(loginName, password, regiCode);
         if(StatusConstant.RESULT_CODE_SUCCESS.endsWith(map.get("code"))){
             //登录成功
-            okLogin=true;
-            //DialogsUtils.infoAlert("loginController.success");
             showFxmlOrg();
         }else{
-            okLogin=false;
-            DialogsUtils.infoAlert("loginController.fail");
+            //登录失败
+            DialogsUtils.loginAlert(map.get("desc"));
         }
     }
     
     /**
-     * 获取验证码
+     * 展示注册码
      */
     @FXML
-    public void validaNum(){
-        System.out.println("获取验证码");
+    public void showRegiCode() throws ApplicationException, SQLException{
+        String regiCode = "";
+        this.dictionaryModel = new DictionaryModel();
+        regiCode = dictionaryModel.queryByFieldIsNotNull();
+        DialogsUtils.registerCodeAlert(regiCode);
     }
     
     /**
      * 展示选择机构列表
      */
-    private void showFxmlOrg(){ 
+    private void showFxmlOrg() {
         try {
-            //setCenter(FXML_ORG_FXML);
-            FXMLLoader loader = FxmlUtils.getFXMLLoader(FXML_ORG_FXML);            
+            FXMLLoader loader = FxmlUtils.getFXMLLoader(FXML_ORG_FXML);
             borderPaneMain.setCenter(loader.load());
-            
+
             OrganInfoController organInfoController = loader.getController();
             //设置传参loginController
             organInfoController.setLoginController(this);
@@ -117,6 +104,9 @@ public class LoginController {
         }
     }
     
+    /**
+     * 替换BorderPane中间区域
+     */
     public void setCenter(String fxmlPath){
         borderPaneMain.setCenter(FxmlUtils.fxmlLoader(fxmlPath));
     }
@@ -124,6 +114,4 @@ public class LoginController {
     public BorderPane getBorderPane(){
         return borderPaneMain;
     }
-            
-    
 }

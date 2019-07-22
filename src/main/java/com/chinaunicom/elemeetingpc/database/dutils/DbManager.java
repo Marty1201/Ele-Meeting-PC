@@ -104,7 +104,6 @@ public class DbManager {
             TableUtils.createTableIfNotExists(connectionSource, IssueFileRelation.class);
             TableUtils.createTableIfNotExists(connectionSource, MeetUserRelation.class);
             TableUtils.createTableIfNotExists(connectionSource, FileUserRelation.class);
-            
             TableUtils.createTableIfNotExists(connectionSource, DictionaryInfo.class);
         } catch(SQLException e){
             logger.warn(e.getMessage());
