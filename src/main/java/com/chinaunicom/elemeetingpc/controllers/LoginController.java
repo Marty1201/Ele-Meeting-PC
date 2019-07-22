@@ -14,6 +14,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import org.apache.commons.lang3.StringUtils;
@@ -28,7 +29,7 @@ public class LoginController {
     private TextField loginNameField;
     
     @FXML
-    private TextField tpasswordfField;
+    private PasswordField tpasswordfField;
     
     @FXML
     private BorderPane borderPaneMain;
@@ -52,6 +53,7 @@ public class LoginController {
     public void login() throws ApplicationException, SQLException{
         String loginName = loginNameField.getText();
         String password = tpasswordfField.getText();
+        this.dictionaryModel = new DictionaryModel();
         String regiCode = dictionaryModel.queryByFieldIsNotNull();
         if(StringUtils.isBlank(loginName)){
             DialogsUtils.infoAlert("loginController.loginName.not.empty");
