@@ -21,9 +21,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * 登录业务逻辑service
+ * 登录业务逻辑service.
  *
- * @author zhaojunfeng
+ * @author zhaojunfeng, chenxi
  */
 public class LoginService {
 
@@ -38,14 +38,14 @@ public class LoginService {
      *
      * @param loginName
      * @param password
-     * @param validaNum
+     * @param regiCode
      * @return
      */
-    public Map<String, String> login(String loginName, String password, String validaNum) {
+    public Map<String, String> login(String loginName, String password, String regiCode) {
         Map<String, String> resultMap = new HashMap();
         try {
             //封装参数
-            String param = this.fzParam(loginName, password, validaNum, validaNum);
+            String param = this.fzParam(loginName, password, regiCode);
             //访问接口
             String result = HttpClientUtil.getInstance().getResponseBodyAsString(ServeIpConstant.loginServicePath(), param);
             //把json字符串转成map
@@ -63,7 +63,7 @@ public class LoginService {
         } catch (Exception ex) {
             Logger.getLogger(LoginService.class.getName()).log(Level.SEVERE, null, ex);
             resultMap.put("code", StatusConstant.RESULT_CODE_FAIL);
-            resultMap.put("desc", "发生异常");
+            resultMap.put("desc", "登录异常");
         }
         return resultMap;
     }
@@ -73,17 +73,14 @@ public class LoginService {
      *
      * @param loginName
      * @param password
-     * @param validaNum
+     * @param regiCode
      * @param updateDate
      * 示例：{loginName:'changlu',password:'757f7fc9ad2ec1a2951fbf3a7bbc2144',deviceToken:'60393D7BF54A',updateDate:''}
      * @return
      */
-    private String fzParam(String loginName, String password, String validaNum, String updateDate) {
+    private String fzParam(String loginName, String password, String regiCode) {
         String md5password = HashUtil.toMD5(password);
-        System.out.println("MD5-password：" + md5password);
-        //md5password="757f7fc9ad2ec1a2951fbf3a7bbc2144";
-        String resultString = "{loginName:'" + loginName + "',password:'" + md5password + "',deviceToken:'862411F32EC6',updateDate:''}";
-
+        String resultString = "{loginName:'" + loginName + "',password:'" + md5password + "',deviceToken:'"+ regiCode +"',updateDate:''}";
         return resultString;
     }
 

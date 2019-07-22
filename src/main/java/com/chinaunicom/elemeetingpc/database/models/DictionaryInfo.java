@@ -18,6 +18,9 @@ public class DictionaryInfo implements BaseModel {
     //更新日期
     @DatabaseField(columnName = "updateDate")
     private String updateDate;
+    //设备注册码
+    @DatabaseField(columnName = "registerCode")
+    private String registerCode;
     
 	public DictionaryInfo(){
         
@@ -37,6 +40,14 @@ public class DictionaryInfo implements BaseModel {
 
     public void setUpdateDate(String updateDate) {
         this.updateDate = updateDate;
+    }
+    
+    public String getRegisterCode() {
+        return registerCode;
+    }
+
+    public void setRegisterCode(String registerCode) {
+        this.registerCode = registerCode;
     }
 
 }

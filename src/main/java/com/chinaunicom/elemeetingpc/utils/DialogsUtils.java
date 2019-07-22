@@ -32,20 +32,43 @@ public class DialogsUtils {
         Alert errorAlert = new Alert(Alert.AlertType.ERROR);
         errorAlert.setTitle(bundle.getString("error.title"));
         errorAlert.setHeaderText(bundle.getString("error.header"));
-        
         TextArea textArea = new TextArea(error);
         errorAlert.getDialogPane().setContent(textArea);
         errorAlert.showAndWait();
     } 
     
-        /**
-     * Show error alert dialog windows.
+    /**
+     * Show info alert dialog windows.
      */
     public static void infoAlert(String infoString){
         Alert infoAlert = new Alert(Alert.AlertType.INFORMATION);
         infoAlert.setTitle(bundle.getString("info.title"));
-        
+        infoAlert.setHeaderText(bundle.getString("info.title"));
         TextArea textArea = new TextArea(bundle.getString(infoString));
+        infoAlert.getDialogPane().setContent(textArea);
+        infoAlert.showAndWait();
+    }
+    
+    /**
+     * Show registerCode alert dialog windows.
+     */
+    public static void registerCodeAlert(String infoString) {
+        Alert infoAlert = new Alert(Alert.AlertType.INFORMATION);
+        infoAlert.setTitle(bundle.getString("info.title"));
+        infoAlert.setHeaderText(bundle.getString("loginController.regiCode"));
+        TextArea textArea = new TextArea(infoString);
+        infoAlert.getDialogPane().setContent(textArea);
+        infoAlert.showAndWait();
+    }
+    
+    /**
+     * Show login failed alert dialog windows.
+     */
+    public static void loginAlert(String infoString) {
+        Alert infoAlert = new Alert(Alert.AlertType.ERROR);
+        infoAlert.setTitle(bundle.getString("error.title"));
+        infoAlert.setHeaderText(bundle.getString("error.title"));
+        TextArea textArea = new TextArea(infoString);
         infoAlert.getDialogPane().setContent(textArea);
         infoAlert.showAndWait();
     } 
