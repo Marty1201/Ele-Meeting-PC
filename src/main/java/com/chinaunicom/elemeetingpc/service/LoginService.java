@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * 登录业务逻辑service.
@@ -48,18 +49,19 @@ public class LoginService {
             String param = this.fzParam(loginName, password, regiCode);
             //访问接口
             String result = HttpClientUtil.getInstance().getResponseBodyAsString(ServeIpConstant.loginServicePath(), param);
-            //把json字符串转成map
-            Map temp_map = GsonUtil.getMap(result);
-            String result_code = String.valueOf(temp_map.get("resultCode"));
-            String resultDesc = String.valueOf(temp_map.get("resultDesc"));
-            resultMap.put("code", result_code);
-            resultMap.put("desc", resultDesc);
-            if (StatusConstant.RESULT_CODE_SUCCESS.equals(result_code)) {
-                String resultData = String.valueOf(temp_map.get("resultData"));
-                Map dataMap = GsonUtil.getMap(resultData);;
-                parseFzDataMap(dataMap);
+            if(StringUtils.isNotBlank(result)){
+                //把json字符串转成map
+                Map temp_map = GsonUtil.getMap(result);
+                String result_code = String.valueOf(temp_map.get("resultCode"));
+                String resultDesc = String.valueOf(temp_map.get("resultDesc"));
+                resultMap.put("code", result_code);
+                resultMap.put("desc", resultDesc);
+                if (StatusConstant.RESULT_CODE_SUCCESS.equals(result_code)) {
+                    String resultData = String.valueOf(temp_map.get("resultData"));
+                    Map dataMap = GsonUtil.getMap(resultData);;
+                    parseFzDataMap(dataMap);
+                }
             }
-
         } catch (Exception ex) {
             Logger.getLogger(LoginService.class.getName()).log(Level.SEVERE, null, ex);
             resultMap.put("code", StatusConstant.RESULT_CODE_FAIL);

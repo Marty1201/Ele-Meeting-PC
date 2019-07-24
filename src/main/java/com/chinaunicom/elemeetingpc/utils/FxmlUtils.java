@@ -30,7 +30,7 @@ public class FxmlUtils {
     }
     
     /**
-     * Load the locale language properties file
+     * Load the locale language properties file.
      *
      * @return ResourceBundle
      */
@@ -39,7 +39,8 @@ public class FxmlUtils {
     }
     
     /**
-     * Return the FXMLLoader
+     * Return a FXMLLoader type loader with fxml templates and localization
+     * set.
      *
      * @return FXMLLoader
      */

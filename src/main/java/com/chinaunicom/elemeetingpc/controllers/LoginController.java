@@ -7,11 +7,11 @@ import com.chinaunicom.elemeetingpc.service.LoginService;
 import com.chinaunicom.elemeetingpc.utils.DialogsUtils;
 import com.chinaunicom.elemeetingpc.utils.FxmlUtils;
 import com.chinaunicom.elemeetingpc.utils.exceptions.ApplicationException;
+import com.j256.ormlite.logger.Logger;
+import com.j256.ormlite.logger.LoggerFactory;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.PasswordField;
@@ -37,6 +37,8 @@ public class LoginController {
     public static final String FXML_ORG_FXML = "/fxml/fxml_org.fxml";
     
     private DictionaryModel dictionaryModel;
+    
+    private static final Logger logger = LoggerFactory.getLogger(LoginController.class);
     
     /**
      * 初始化controller
@@ -91,26 +93,17 @@ public class LoginController {
     }
     
     /**
-     * 展示选择机构列表
+     * 跳转到选择机构列表
      */
     private void showFxmlOrg() {
         try {
             FXMLLoader loader = FxmlUtils.getFXMLLoader(FXML_ORG_FXML);
-            borderPaneMain.setCenter(loader.load());
-
-            OrganInfoController organInfoController = loader.getController();
-            //设置传参loginController
-            organInfoController.setLoginController(this);
-        } catch (IOException ex) {
-            Logger.getLogger(LoginController.class.getName()).log(Level.SEVERE, null, ex);
+            borderPaneMain.setCenter(loader.load()); //将当前BorderPane中间区域加载为机构选择界面
+            OrganInfoController organInfoController = loader.getController(); //从loader中获取OrganInfoController
+            organInfoController.setLoginController(this);//设置传参当前的loginController，以便在OrganInfoController中获取到当前loginController中的BorderPane
+        } catch (IOException e) {
+            logger.error(e.getCause().getMessage());
         }
-    }
-    
-    /**
-     * 替换BorderPane中间区域
-     */
-    public void setCenter(String fxmlPath){
-        borderPaneMain.setCenter(FxmlUtils.fxmlLoader(fxmlPath));
     }
     
     public BorderPane getBorderPane(){
