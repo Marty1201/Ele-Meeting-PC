@@ -5,6 +5,7 @@ import com.j256.ormlite.dao.ForeignCollection;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.field.ForeignCollectionField;
 import com.j256.ormlite.table.DatabaseTable;
+import java.util.Objects;
 
 /**
  * 组织机构
@@ -12,6 +13,7 @@ import com.j256.ormlite.table.DatabaseTable;
  * @author zhaojunfeng, chenxi
  */
 @DatabaseTable(tableName = "OrganInfo")
+@SuppressWarnings("unchecked")
 public class OrganInfo implements BaseModel {
     
     //id
@@ -124,11 +126,27 @@ public class OrganInfo implements BaseModel {
     @Override
     public boolean equals(Object obj)  
    {  
-       //if(this == obj) return true;
-       //if(obj == null || getClass() != obj.getClass()) return false;
+       //任何对象不等于null，比较是否为同一类型
+       if (!(obj instanceof OrganInfo)) return false;
+       //强制类型转换
        OrganInfo organInfo = (OrganInfo)obj;
-       if(id == organInfo.id) return true;
-       if(organizationId == organInfo.organizationId) return true;
-       return organizationName.equals(organInfo.organizationName);
+       //比较属性值
+       return this.id == organInfo.id && 
+               this.organizationId.equals(organInfo.organizationId) && 
+               this.organizationName.equals(organInfo.organizationName);
    }
+
+    /**
+     * 重写hashCode方法,两个对象获取的HashCode也相等.
+     *
+     * @return hash
+     */
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 17 * hash + this.id;
+        hash = 17 * hash + Objects.hashCode(this.organizationName);
+        hash = 17 * hash + Objects.hashCode(this.organizationId);
+        return hash;
+    }
 }

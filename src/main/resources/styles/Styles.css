@@ -9,7 +9,7 @@
 }
 /* 登陆按钮样式 */
 .login-btn{
-    -fx-font:24px; 
+    -fx-font-size:20px; 
     -fx-text-fill:#ffffff; 
     -fx-background-color:#4581bf; 
     -fx-background-radius:30px;
@@ -25,7 +25,7 @@
 /* 机构选择列表cell样式 */
 .organ-list-view .list-cell{
   -fx-text-fill: #ffffff;
-  -fx-font-family: Arial;
+  -fx-font-size-family: Arial;
   -fx-pref-height: 40px;
   -fx-background-radius:30px;
   -fx-background-color: #4581bf;
@@ -37,24 +37,24 @@
 .index-title{
     -fx-text-fill:#000000;
     -fx-background-color:#ffffff; 
-    -fx-font:28px;
-    -fx-font-weight:bold;
+    -fx-font-size:28px;
+    -fx-font-size-weight:bold;
     -fx-pref-height: 40px;
 }
 .index-title-little{
     -fx-text-fill:#000000;
     -fx-background-color:#ffffff; 
-    -fx-font:20px;
+    -fx-font-size:20px;
 }
 .index-title-little{
     -fx-text-fill:#000000;
     -fx-background-color:#ffffff; 
-    -fx-font:20px;
+    -fx-font-size:20px;
 }
 .index-title-two{
     -fx-text-fill:#ffffff;
     -fx-background-color:#4581bf; 
-    -fx-font:20px;
+    -fx-font-size:20px;
     -fx-pref-height: 40px;
 }
 .text-area {
@@ -72,14 +72,14 @@
 
 /* 左侧会议列表 */
 .meeting-welcome{
-    -fx-font:36px;
+    -fx-font-size:36px;
     -fx-background-color: #4581bf;
     -fx-text-fill:#ffffff;
     -fx-background-radius:0px;
     -fx-pref-height: 50px;
 }
 .meeting-user{
-    -fx-font:26px;
+    -fx-font-size:26px;
     -fx-background-color: #4581bf;
     -fx-text-fill:#ffffff;
     -fx-background-radius:0px;
@@ -88,25 +88,25 @@
 .meeting-list-title
 { 
     -fx-text-fill:#4581bf;
-    -fx-font:26 arial;
-    -fx-font-weight:700;
+    -fx-font-size:26 arial;
+    -fx-font-size-weight:700;
 }
 .meeting-list-view{
     -fx-background-color:#f1f1f1; 
     -fx-text-fill:#000000; 
-    -fx-font:24 arial;
+    -fx-font-size:24 arial;
     -fx-pref-height: 70px;
 }
 .meeting-list-view.list-cell{
     -fx-background-color:#ffffff; 
     -fx-text-fill:#000000; 
-    -fx-font:24 arial;
+    -fx-font-size:24 arial;
     -fx-pref-height: 70px;
 
 }
 .meeting-btn{
     -fx-background-color:#4581bf; 
     -fx-text-fill:#ffffff;
-    -fx-font:26 arial;
+    -fx-font-size:26 arial;
 }
 
