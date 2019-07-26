@@ -226,6 +226,7 @@ public class SelectOrganService {
         info.setSort(Double.valueOf(sort).intValue());
         info.setEnglishName(englishName);
         info.setIsEng(isEng);
+        info.setOrganizationId(GlobalStaticConstant.GLOBAL_ORGANINFO_ORGANIZATIONID);
         
         return info;
     }

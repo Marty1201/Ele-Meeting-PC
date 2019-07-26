@@ -48,11 +48,15 @@ public class MeetInfo implements BaseModel{
     //是否英文
     @DatabaseField(columnName = "isEng")
     private String isEng;
+    
+    //所属机构ID
+    @DatabaseField(columnName = "organizationId")
+    private String organizationId;
 
     public MeetInfo() {
     }
 
-    public MeetInfo(String meetingId, String meetingName, String startDateTime, String endDateTime, String state, String createTime, String parentMeetingId, int sort, String englishName, String isEng) {
+    public MeetInfo(String meetingId, String meetingName, String startDateTime, String endDateTime, String state, String createTime, String parentMeetingId, int sort, String englishName, String isEng,String organizationId) {
         this.meetingId = meetingId;
         this.meetingName = meetingName;
         this.startDateTime = startDateTime;
@@ -63,6 +67,15 @@ public class MeetInfo implements BaseModel{
         this.sort = sort;
         this.englishName = englishName;
         this.isEng = isEng;
+        this.organizationId = organizationId;
+    }
+
+    public String getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(String organizationId) {
+        this.organizationId = organizationId;
     }
 
     public String getMeetingId() {
