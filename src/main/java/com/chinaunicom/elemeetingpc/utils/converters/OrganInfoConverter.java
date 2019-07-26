@@ -30,6 +30,8 @@ public class OrganInfoConverter {
         organInfoFx.setOrganizationEnglishName(organInfo.getOrganizationEnglishName());
         organInfoFx.setState(organInfo.getState());
         organInfoFx.setUserId(organInfo.getUserId());
+        organInfoFx.setUpdateDate(organInfo.getUpdateDate());
+        organInfoFx.setCountDownTime(organInfo.getCountDownTime());
         return organInfoFx;
     }
     
@@ -47,6 +49,8 @@ public class OrganInfoConverter {
         organInfo.setOrganizationEnglishName(organInfoFx.getOrganizationEnglishName());
         organInfo.setState(organInfoFx.getState());
         organInfo.setUserId(organInfoFx.getUserId());
+        organInfo.setUpdateDate(organInfoFx.getUpdateDate());
+        organInfo.setCountDownTime(organInfoFx.getCountDownTime());
         return organInfo;
     }
 }

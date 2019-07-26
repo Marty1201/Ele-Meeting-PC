@@ -22,7 +22,11 @@ import java.util.logging.Logger;
 import org.apache.commons.lang3.StringUtils;
 
 /**
- * 登录业务逻辑service.
+ * 负责与后台登陆接口进行数据交互处理（mLogin.do），主要包括以下操作：
+ * 1、接口请求参数封装；
+ * 2、接口请求；
+ * 3、接口数据解析；
+ * 4、调用models层对象进行数据本地保存.
  *
  * @author zhaojunfeng, chenxi
  */
@@ -35,7 +39,7 @@ public class LoginService {
     private IdentityInfoModel identityInfoModel;
 
     /**
-     * 登录
+     * 调用登录接口逻辑处理.
      *
      * @param loginName
      * @param password
@@ -78,7 +82,7 @@ public class LoginService {
      * @param regiCode
      * @param updateDate
      * 示例：{loginName:'changlu',password:'757f7fc9ad2ec1a2951fbf3a7bbc2144',deviceToken:'60393D7BF54A',updateDate:''}
-     * @return
+     * @return resultString
      */
     private String fzParam(String loginName, String password, String regiCode) {
         String md5password = HashUtil.toMD5(password);
@@ -87,7 +91,8 @@ public class LoginService {
     }
 
     /**
-     * 解析数据，封装userInfo对象、organInfo对象、identityInfo对象，并调Model层(保存/修改/删除)的数据库操作.
+     * 解析接口返回的数据，封装userInfo对象、organInfo对象、identityInfo对象，
+     * 并调Model层(保存/修改/删除)的数据库操作.
      *
      * @param dataMap 接口返回的数据对象
      */
