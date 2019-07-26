@@ -60,17 +60,12 @@ public class OrganInfoController {
         //添加事件监听器
         organListView.getSelectionModel().selectedItemProperty().addListener(
                 (ObservableValue<? extends OrganInfoFx> observable, OrganInfoFx oldValue, OrganInfoFx newValue) -> {
-                    //在全局常量里记录当前选择的机构id
+                    //在全局常量里记录当前选择的机构id和用户id（服务器端的id）
                     GlobalStaticConstant.GLOBAL_ORGANINFO_ORGANIZATIONID = observable.getValue().getOrganizationId();
                     GlobalStaticConstant.GLOBAL_ORGANINFO_OWNER_USERID = observable.getValue().getUserId();
-                    //System.out.println("newValue: " + newValue);
-                    //System.out.println("oldValue: " + oldValue);
-                    //System.out.println("observable-OrganId: " + observable.getValue().getOrganizationId());
-                    //System.out.println("observable-Organ-UserId: " + observable.getValue().getUserId());  
                     SelectOrganService service = new SelectOrganService();
                     //解析数据
                     service.getMeetInfosFromRemote();
-                    
                     //跳转界面
                     showFxmlMeet();
         });
@@ -81,7 +76,6 @@ public class OrganInfoController {
      */
     private void showFxmlMeet(){        
         BorderPane borderPane = loginController.getBorderPane();
-        
         //加载顶部
         borderPane.setTop(FxmlUtils.fxmlLoader(FXML_INDEX_TOP));
         //加载左侧

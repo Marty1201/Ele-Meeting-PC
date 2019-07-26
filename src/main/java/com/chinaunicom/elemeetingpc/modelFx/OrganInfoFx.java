@@ -31,6 +31,10 @@ public class OrganInfoFx {
     private final StringProperty state = new SimpleStringProperty();
     //用户ID
     private final StringProperty userId = new SimpleStringProperty();
+    //用户ID
+    private final StringProperty updateDate = new SimpleStringProperty();
+    //用户ID
+    private final StringProperty countDownTime = new SimpleStringProperty();
     
     public OrganInfoFx() {
     }
@@ -117,6 +121,30 @@ public class OrganInfoFx {
 
     public void setUserId(String userId) {
         this.userId.set(userId);
+    }
+    
+    public String getUpdateDate() {
+        return updateDate.get();
+    }
+
+    public StringProperty updateDateProperty() {
+        return updateDate;
+    }
+
+    public void setUpdateDate(String updateDate) {
+        this.updateDate.set(updateDate);
+    }
+    
+    public String getCountDownTime() {
+        return countDownTime.get();
+    }
+
+    public StringProperty countDownTimeProperty() {
+        return countDownTime;
+    }
+
+    public void setCountDownTime(String countDownTime) {
+        this.countDownTime.set(countDownTime);
     }
     
     /**

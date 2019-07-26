@@ -4,7 +4,6 @@ package com.chinaunicom.elemeetingpc.service;
 import com.chinaunicom.elemeetingpc.constant.GlobalStaticConstant;
 import com.chinaunicom.elemeetingpc.constant.ServeIpConstant;
 import com.chinaunicom.elemeetingpc.constant.StatusConstant;
-import com.chinaunicom.elemeetingpc.database.models.DictionaryInfo;
 import com.chinaunicom.elemeetingpc.database.models.FileResource;
 import com.chinaunicom.elemeetingpc.database.models.FileUserRelation;
 import com.chinaunicom.elemeetingpc.database.models.IssueFileRelation;
@@ -12,7 +11,7 @@ import com.chinaunicom.elemeetingpc.database.models.IssueInfo;
 import com.chinaunicom.elemeetingpc.database.models.MeetInfo;
 import com.chinaunicom.elemeetingpc.database.models.MeetIssueRelation;
 import com.chinaunicom.elemeetingpc.database.models.MeetUserRelation;
-import com.chinaunicom.elemeetingpc.modelFx.DictionaryModel;
+import com.chinaunicom.elemeetingpc.database.models.OrganInfo;
 import com.chinaunicom.elemeetingpc.modelFx.FileResourceModel;
 import com.chinaunicom.elemeetingpc.modelFx.FileUserRelationModel;
 import com.chinaunicom.elemeetingpc.modelFx.IssueFileRelationModel;
@@ -20,6 +19,7 @@ import com.chinaunicom.elemeetingpc.modelFx.IssueInfoModel;
 import com.chinaunicom.elemeetingpc.modelFx.MeetInfoModel;
 import com.chinaunicom.elemeetingpc.modelFx.MeetIssueRelationModel;
 import com.chinaunicom.elemeetingpc.modelFx.MeetUserRelationModel;
+import com.chinaunicom.elemeetingpc.modelFx.OrganInfoModel;
 import com.chinaunicom.elemeetingpc.utils.GsonUtil;
 import com.chinaunicom.elemeetingpc.utils.HttpClientUtil;
 import com.chinaunicom.elemeetingpc.utils.exceptions.ApplicationException;
@@ -28,10 +28,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.apache.commons.lang3.StringUtils;
 
 /**
- *选择机构业务逻辑service
- * @author zhaojunfeng
+ * 负责与后台默认会议接口进行数据交互处理（mLogin.do?action=defaultMeeting），主要包括以下操作：
+ * 1、接口请求参数封装；
+ * 2、接口请求；
+ * 3、接口数据解析；
+ * 4、调用models层对象进行数据本地保存.
+ * 
+ * @author zhaojunfeng, chenxi
  */
 public class SelectOrganService {
     
@@ -45,36 +51,43 @@ public class SelectOrganService {
     
     private IssueFileRelationModel issueFileRelationModel;
     
-    private DictionaryModel dictionaryModel;
+    private OrganInfoModel organInfoModel;
     
     private MeetUserRelationModel meetUserRelationModel;
     
     private FileUserRelationModel fileUserRelationModel;
     
     /**
-     * 获取远程服务器上的最新会议相关信息
+     * 调用默认会议接口逻辑处理.
      */
     public void getMeetInfosFromRemote(){        
         try {
             //封装参数
-            String param = this.fzParam(GlobalStaticConstant.GLOBAL_ORGANINFO_OWNER_USERID, GlobalStaticConstant.GLOBAL_ORGANINFO_ORGANIZATIONID, "zh_CN", GlobalStaticConstant.GLOBAL_UPDATEDATE);
+            String updateDate = "";
+            Map<String, String> queryMap = new HashMap<>();
+            this.organInfoModel = new OrganInfoModel();
+            queryMap.put("organizationId", GlobalStaticConstant.GLOBAL_ORGANINFO_ORGANIZATIONID);
+            queryMap.put("userId", GlobalStaticConstant.GLOBAL_ORGANINFO_OWNER_USERID);
+            List<OrganInfo> organInfoList = organInfoModel.queryOrganInfosByMap(queryMap);//根据用户id和机构id查出对应的机构
+            if (!organInfoList.isEmpty()) {
+                updateDate = organInfoList.get(0).getUpdateDate();
+            }
+            String param = this.fzParam(GlobalStaticConstant.GLOBAL_ORGANINFO_OWNER_USERID, GlobalStaticConstant.GLOBAL_ORGANINFO_ORGANIZATIONID, "zh_CN", updateDate); //to do zh_cn添加常量
             //访问接口
             String result = HttpClientUtil.getInstance().getResponseBodyAsString(ServeIpConstant.selectOrganServicePath(), param);
-            System.out.println(result);
-            //把json字符串转成map
-            Map temp_map = GsonUtil.getMap(result);
-            String result_code = String.valueOf(temp_map.get("resultCode"));
-            String resultDesc = String.valueOf(temp_map.get("resultDesc"));
-            if (StatusConstant.RESULT_CODE_SUCCESS.equals(result_code)) {//查询成功
-                String resultData = String.valueOf(temp_map.get("resultData"));
-                Map dataMap = GsonUtil.getMap(resultData);;
-                parseFzDataMap(dataMap);
-            }else{
-                System.out.println("--没有获取远程服务器上的最新会议相关信息");
+            if(StringUtils.isNotBlank(result)){
+                //把json字符串转成map
+                Map temp_map = GsonUtil.getMap(result);
+                String result_code = String.valueOf(temp_map.get("resultCode"));
+                String resultDesc = String.valueOf(temp_map.get("resultDesc"));
+                if (StatusConstant.RESULT_CODE_SUCCESS.equals(result_code)) {//查询成功
+                    String resultData = String.valueOf(temp_map.get("resultData"));
+                    Map dataMap = GsonUtil.getMap(resultData);;
+                    parseFzDataMap(dataMap);
+                }
             }
         } catch (Exception ex) {
             Logger.getLogger(SelectOrganService.class.getName()).log(Level.SEVERE, null, ex);
-            System.out.println("获取远程服务器上的最新会议相关信息--发生异常");
         }        
     }
     
@@ -160,13 +173,6 @@ public class SelectOrganService {
             }
         }
         
-        //当前更新时间updateDate
-        String updateDate = String.valueOf(dataMap.get("updateDate"));
-        this.dictionaryModel = new DictionaryModel();
-        DictionaryInfo dictionaryInfo = new DictionaryInfo();
-        dictionaryInfo.setUpdateDate(updateDate);
-        this.dictionaryModel.saveOrUpdateOrganInfo(dictionaryInfo);
-        
         //处理会议-用户关联信息
         List<Map> meetUserRelationListMap = (List<Map>) dataMap.get("meetingUserInfos");
         if(meetUserRelationListMap!=null && !meetUserRelationListMap.isEmpty()){
@@ -189,6 +195,29 @@ public class SelectOrganService {
                 FileUserRelation mir = new FileUserRelation();
                 this.fileUserRelationModel.saveOrUpdate(this.setPropertiesFileUserRelation(mir, map));
             }
+        }
+        
+        //处理更新时间updateDate和投票倒计时countDownTime
+        String updateDate = String.valueOf(dataMap.get("updateDate"));
+        String countDownTime = String.valueOf(dataMap.get("countDownTime"));
+        Map<String, String> queryMap = new HashMap<>();
+        OrganInfo organInfo = new OrganInfo();
+        this.organInfoModel = new OrganInfoModel();
+        queryMap.put("organizationId", GlobalStaticConstant.GLOBAL_ORGANINFO_ORGANIZATIONID);
+        queryMap.put("userId", GlobalStaticConstant.GLOBAL_ORGANINFO_OWNER_USERID);
+        List<OrganInfo> organInfoList = organInfoModel.queryOrganInfosByMap(queryMap);//根据用户id和机构id查出对应的机构
+        if(!organInfoList.isEmpty()){
+            organInfo = organInfoList.get(0);
+            organInfo.setUpdateDate(updateDate);//更新时间updateDate必须与用户和用户所在机构关联
+            organInfo.setCountDownTime(countDownTime);
+            organInfoModel.saveOrUpdateOrganInfo(organInfo);
+        }
+        
+        // to do处理rabbitmq的syncParams
+        Map syncParamsListMap = new HashMap();
+        syncParamsListMap = (Map) dataMap.get("syncParams");
+        if(!syncParamsListMap.isEmpty()){
+            //to do 到表里查出数据，然后更新
         }
         
         //处理投票信息

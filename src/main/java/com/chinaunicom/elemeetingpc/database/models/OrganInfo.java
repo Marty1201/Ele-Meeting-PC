@@ -37,6 +37,12 @@ public class OrganInfo implements BaseModel {
     //用户ID
     @DatabaseField(columnName = "userId", canBeNull = false)
     private String userId;
+    //更新时间updateDate
+    @DatabaseField(columnName = "updateDate")
+    private String updateDate;
+    //投票倒计时countDownTime
+    @DatabaseField(columnName = "countDownTime")
+    private String countDownTime;
     //身份信息列表
     @ForeignCollectionField
     private ForeignCollection<IdentityInfo> identityList;
@@ -44,13 +50,15 @@ public class OrganInfo implements BaseModel {
     public OrganInfo() {
     }
 
-    public OrganInfo(UserInfo userInfo, String organizationName, String organizationId, String organizationEnglishName, String state, String userId) {
+    public OrganInfo(UserInfo userInfo, String organizationName, String organizationId, String organizationEnglishName, String state, String userId, String updateDate, String countDownTime) {
         this.userInfo = userInfo;
         this.organizationName = organizationName;
         this.organizationId = organizationId;
         this.organizationEnglishName = organizationEnglishName;
         this.state = state;
         this.userId = userId;
+        this.updateDate = updateDate;
+        this.countDownTime = countDownTime;
     }
 
     public int getId() {
@@ -108,7 +116,23 @@ public class OrganInfo implements BaseModel {
     public void setUserId(String userId) {
         this.userId = userId;
     }
+    
+    public String getUpdateDate() {
+        return updateDate;
+    }
 
+    public void setUpdateDate(String updateDate) {
+        this.updateDate = updateDate;
+    }
+
+    public String getCountDownTime() {
+        return countDownTime;
+    }
+
+    public void setCountDownTime(String countDownTime) {
+        this.countDownTime = countDownTime;
+    }
+    
     public ForeignCollection getIdentityList() {
         return identityList;
     }
