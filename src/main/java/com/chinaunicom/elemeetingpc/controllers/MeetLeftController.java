@@ -31,7 +31,7 @@ public class MeetLeftController {
     
     //初始化
     public void initialize(){
-        textFieldUsername.setText(GlobalStaticConstant.GLOBAL_USERINFO_LOGINNAME);
+        textFieldUsername.setText(GlobalStaticConstant.GLOBAL_USERINFO_USERNAME);
         meetInfoModel = new MeetInfoModel();
         meetCurrentListView.setItems(meetInfoModel.getCurrentMeetInfoFxs());
         //添加监听事件

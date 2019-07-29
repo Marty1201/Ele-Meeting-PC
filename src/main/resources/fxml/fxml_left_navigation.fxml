@@ -9,11 +9,11 @@
 
 <VBox fillWidth="false" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="800.0" minWidth="1000.0" prefHeight="1080.0" prefWidth="1920.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.chinaunicom.elemeetingpc.controllers.MeetLeftController">
    <children>
-      <VBox layoutX="-1.0" layoutY="-16.0" prefHeight="1078.0" prefWidth="1925.0" styleClass="meeting-welcome-bg"  AnchorPane.bottomAnchor="0.0" AnchorPane.topAnchor="-1.0">
+      <VBox layoutX="-1.0" layoutY="-16.0" prefHeight="1078.0" prefWidth="1925.0" styleClass="meeting-welcome-bg" AnchorPane.bottomAnchor="0.0" AnchorPane.topAnchor="-1.0">
          <children>
             <VBox prefHeight="939.0" prefWidth="569.0" VBox.vgrow="ALWAYS">
                <children>
-                  <TextField fx:id="textFieldWeclome" prefHeight="39.0" prefWidth="569.0" styleClass="meeting-welcome"  text="欢迎您">
+                  <TextField fx:id="textFieldWeclome" editable="false" prefHeight="39.0" prefWidth="569.0" styleClass="meeting-welcome" text="欢迎您">
                      <font>
                         <Font size="36.0" />
                      </font>
@@ -21,7 +21,7 @@
                         <Insets />
                      </VBox.margin>
                   </TextField>
-                  <TextField fx:id="textFieldUsername" prefHeight="59.0" prefWidth="569.0" styleClass="meeting-user"  text="张大仙">
+                  <TextField fx:id="textFieldUsername" editable="false" prefHeight="59.0" prefWidth="569.0" styleClass="meeting-user" text="张大仙">
                      <font>
                         <Font size="24.0" />
                      </font>
@@ -42,7 +42,7 @@
                               <Insets left="10.0" top="20.0" />
                            </HBox.margin>
                         </ImageView>
-                        <TextField prefHeight="87.0" prefWidth="242.0" style="-fx-background-color: #ffffff;" styleClass="meeting-list-title"  text="正在召开的会议">
+                        <TextField editable="false" prefHeight="87.0" prefWidth="242.0" style="-fx-background-color: #ffffff;" styleClass="meeting-list-title" text="正在召开的会议">
                            <HBox.margin>
                               <Insets top="6.0" />
                            </HBox.margin>
@@ -51,7 +51,7 @@
                   </HBox>
                   <VBox prefWidth="569.0">
                      <children>
-                        <ListView fx:id="meetCurrentListView" prefHeight="78.0" prefWidth="569.0" styleClass="meeting-list-view"  />
+                        <ListView fx:id="meetCurrentListView" prefHeight="78.0" prefWidth="569.0" styleClass="meeting-list-view" />
                         <HBox prefHeight="64.0" prefWidth="1920.0" style="-fx-background-color: #ffffff;">
                            <children>
                               <ImageView fitHeight="56.0" fitWidth="42.0" pickOnBounds="true" preserveRatio="true">
@@ -62,14 +62,14 @@
                                     <Insets left="10.0" top="14.0" />
                                  </HBox.margin>
                               </ImageView>
-                              <TextField prefHeight="90.0" prefWidth="242.0" style="-fx-background-color: #ffffff;" styleClass="meeting-list-title"  text="即将召开会议">
+                              <TextField editable="false" prefHeight="90.0" prefWidth="242.0" style="-fx-background-color: #ffffff;" styleClass="meeting-list-title" text="即将召开会议">
                                  <HBox.margin>
                                     <Insets top="6.0" />
                                  </HBox.margin>
                               </TextField>
                            </children>
                         </HBox>
-                        <ListView fx:id="meetFutureListView" prefHeight="78.0" prefWidth="569.0" styleClass="meeting-list-view"  />
+                        <ListView fx:id="meetFutureListView" prefHeight="78.0" prefWidth="569.0" styleClass="meeting-list-view" />
                         <HBox prefHeight="72.0" prefWidth="1920.0" style="-fx-background-color: #ffffff;">
                            <children>
                               <ImageView fitHeight="56.0" fitWidth="42.0" pickOnBounds="true" preserveRatio="true">
@@ -80,21 +80,21 @@
                                     <Insets left="10.0" top="18.0" />
                                  </HBox.margin>
                               </ImageView>
-                              <TextField prefHeight="90.0" prefWidth="242.0" style="-fx-background-color: #ffffff;" styleClass="meeting-list-title"  text="历史会议">
+                              <TextField editable="false" prefHeight="90.0" prefWidth="242.0" style="-fx-background-color: #ffffff;" styleClass="meeting-list-title" text="历史会议">
                                  <HBox.margin>
                                     <Insets top="6.0" />
                                  </HBox.margin>
                               </TextField>
                            </children>
                         </HBox>
-                        <ListView fx:id="meetHistoryListView" prefHeight="78.0" prefWidth="569.0" styleClass="meeting-list-view"  />
+                        <ListView fx:id="meetHistoryListView" prefHeight="78.0" prefWidth="569.0" styleClass="meeting-list-view" />
                      </children>
                   </VBox>
                </children>
             </VBox>
             <VBox minHeight="-Infinity" prefHeight="80.0" prefWidth="100.0">
                <children>
-                  <Button mnemonicParsing="false" prefHeight="100.0" prefWidth="569.0" styleClass="meeting-btn"  text="退出登录" textAlignment="CENTER" />
+                  <Button mnemonicParsing="false" prefHeight="100.0" prefWidth="569.0" styleClass="meeting-btn" text="退出登录" textAlignment="CENTER" />
                </children>
             </VBox>
          </children>

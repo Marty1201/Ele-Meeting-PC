@@ -77,10 +77,10 @@ public class OrganInfoController {
     private void showFxmlMeet(){        
         BorderPane borderPane = loginController.getBorderPane();
         //加载顶部
-        borderPane.setTop(FxmlUtils.fxmlLoader(FXML_INDEX_TOP));
+        //borderPane.setTop(FxmlUtils.fxmlLoader(FXML_INDEX_TOP));
         //加载左侧
-        borderPane.setLeft(FxmlUtils.fxmlLoader(FXML_LEFT_NAVIGATION));
+        //borderPane.setLeft(FxmlUtils.fxmlLoader(FXML_LEFT_NAVIGATION));
         //加载中部
-        borderPane.setCenter(FxmlUtils.fxmlLoader(FXML_INDEX_CENTER));
+        borderPane.setCenter(FxmlUtils.fxmlLoader(FXML_LEFT_NAVIGATION));
     }
 }

@@ -112,12 +112,14 @@ public class LoginService {
             if (!userList.isEmpty()) {
                 userInfo = userList.get(0);
                 userInfoModel.saveOrUpdateUserInfo(setUserInfoProperties(userInfo, userInfoMap));//解析并封装用户信息,更新对象信息
-                //在全局常量里记录当前登录人的id
+                //在全局常量里记录当前登录人的id和名称
                 GlobalStaticConstant.GLOBAL_USERINFO_ID = userInfo.getId();
+                GlobalStaticConstant.GLOBAL_USERINFO_USERNAME = userInfo.getUserName();
             } else {
                 userInfoModel.saveOrUpdateUserInfo(setUserInfoProperties(userInfo, userInfoMap));//解析并封装用户信息,新建对象信息
-                //在全局常量里记录当前登录人的id
+                //在全局常量里记录当前登录人的id和名称
                 GlobalStaticConstant.GLOBAL_USERINFO_ID = userInfo.getId();
+                GlobalStaticConstant.GLOBAL_USERINFO_USERNAME = userInfo.getUserName();
             }
         }
         //2、处理机构信息
