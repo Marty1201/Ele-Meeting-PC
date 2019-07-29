@@ -12,6 +12,7 @@ import com.chinaunicom.elemeetingpc.database.models.MeetInfo;
 import com.chinaunicom.elemeetingpc.database.models.MeetIssueRelation;
 import com.chinaunicom.elemeetingpc.database.models.MeetUserRelation;
 import com.chinaunicom.elemeetingpc.database.models.OrganInfo;
+import com.chinaunicom.elemeetingpc.database.models.SyncParams;
 import com.chinaunicom.elemeetingpc.modelFx.FileResourceModel;
 import com.chinaunicom.elemeetingpc.modelFx.FileUserRelationModel;
 import com.chinaunicom.elemeetingpc.modelFx.IssueFileRelationModel;
@@ -20,6 +21,7 @@ import com.chinaunicom.elemeetingpc.modelFx.MeetInfoModel;
 import com.chinaunicom.elemeetingpc.modelFx.MeetIssueRelationModel;
 import com.chinaunicom.elemeetingpc.modelFx.MeetUserRelationModel;
 import com.chinaunicom.elemeetingpc.modelFx.OrganInfoModel;
+import com.chinaunicom.elemeetingpc.modelFx.SyncParamsModel;
 import com.chinaunicom.elemeetingpc.utils.GsonUtil;
 import com.chinaunicom.elemeetingpc.utils.HttpClientUtil;
 import com.chinaunicom.elemeetingpc.utils.exceptions.ApplicationException;
@@ -57,6 +59,8 @@ public class SelectOrganService {
     
     private FileUserRelationModel fileUserRelationModel;
     
+    private SyncParamsModel syncParamsModel;
+    
     /**
      * 调用默认会议接口逻辑处理.
      */
@@ -72,7 +76,7 @@ public class SelectOrganService {
             if (!organInfoList.isEmpty()) {
                 updateDate = organInfoList.get(0).getUpdateDate();
             }
-            String param = this.fzParam(GlobalStaticConstant.GLOBAL_ORGANINFO_OWNER_USERID, GlobalStaticConstant.GLOBAL_ORGANINFO_ORGANIZATIONID, "zh_CN", updateDate); //to do zh_cn添加常量
+            String param = this.fzParam(GlobalStaticConstant.GLOBAL_ORGANINFO_OWNER_USERID, GlobalStaticConstant.GLOBAL_ORGANINFO_ORGANIZATIONID, "zh_CN", updateDate);
             //访问接口
             String result = HttpClientUtil.getInstance().getResponseBodyAsString(ServeIpConstant.selectOrganServicePath(), param);
             if(StringUtils.isNotBlank(result)){
@@ -213,11 +217,18 @@ public class SelectOrganService {
             organInfoModel.saveOrUpdateOrganInfo(organInfo);
         }
         
-        // to do处理rabbitmq的syncParams
-        Map syncParamsListMap = new HashMap();
-        syncParamsListMap = (Map) dataMap.get("syncParams");
-        if(!syncParamsListMap.isEmpty()){
-            //to do 到表里查出数据，然后更新
+        //处理rabbitmq的syncParams
+        Map syncParamsMap = (Map) dataMap.get("syncParams");
+        if(!syncParamsMap.isEmpty()){
+            this.syncParamsModel = new SyncParamsModel();
+            SyncParams syncParams = new SyncParams();
+            List<SyncParams> syncParamsList = syncParamsModel.querySyncParamsByOrganId("organizationId", GlobalStaticConstant.GLOBAL_ORGANINFO_ORGANIZATIONID);//根据机构id查询数据库里是否已存在同样的数据
+            if(!syncParamsList.isEmpty()){
+                syncParams = syncParamsList.get(0);
+                syncParamsModel.saveOrUpdateOrganInfo(setSyncParamsProperties(syncParams, syncParamsMap));//解析并封装SyncParams信息,更新对象信息
+            } else {
+                syncParamsModel.saveOrUpdateOrganInfo(setSyncParamsProperties(syncParams, syncParamsMap));//解析并封装SyncParams信息,新建对象信息
+            }
         }
         
         //处理投票信息
@@ -388,6 +399,21 @@ public class SelectOrganService {
         return info;
     }
     
-    
-    
+    /**
+     * 解析数据并封装SyncParams对象.
+     *
+     * @param syncParams
+     * @param syncParamsMap
+     * @return
+     */
+    public SyncParams setSyncParamsProperties(SyncParams syncParams, Map syncParamsMap) {
+        syncParams.setPort(String.valueOf(syncParamsMap.get("port")));
+        syncParams.setOrgNo(String.valueOf(syncParamsMap.get("orgNo")));
+        syncParams.setUserName(String.valueOf(syncParamsMap.get("userName")));
+        syncParams.setPassword(String.valueOf(syncParamsMap.get("password")));
+        syncParams.setIp(String.valueOf(syncParamsMap.get("ip")));
+        syncParams.setOrganizationId(GlobalStaticConstant.GLOBAL_ORGANINFO_ORGANIZATIONID);
+        return syncParams;
+    }
+
 }

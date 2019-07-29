@@ -11,6 +11,7 @@ import com.chinaunicom.elemeetingpc.database.models.MeetInfo;
 import com.chinaunicom.elemeetingpc.database.models.MeetIssueRelation;
 import com.chinaunicom.elemeetingpc.database.models.MeetUserRelation;
 import com.chinaunicom.elemeetingpc.database.models.OrganInfo;
+import com.chinaunicom.elemeetingpc.database.models.SyncParams;
 import com.chinaunicom.elemeetingpc.database.models.UserInfo;
 import com.j256.ormlite.jdbc.JdbcConnectionSource;
 import com.j256.ormlite.logger.Logger;
@@ -105,6 +106,7 @@ public class DbManager {
             TableUtils.createTableIfNotExists(connectionSource, MeetUserRelation.class);
             TableUtils.createTableIfNotExists(connectionSource, FileUserRelation.class);
             TableUtils.createTableIfNotExists(connectionSource, DictionaryInfo.class);
+            TableUtils.createTableIfNotExists(connectionSource, SyncParams.class);
         } catch(SQLException e){
             logger.warn(e.getMessage());
             //e.printStackTrace();
