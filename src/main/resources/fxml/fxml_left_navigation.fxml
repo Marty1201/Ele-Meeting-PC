@@ -21,7 +21,7 @@
                         <Insets />
                      </VBox.margin>
                   </TextField>
-                  <TextField fx:id="textFieldUsername" editable="false" prefHeight="59.0" prefWidth="569.0" styleClass="meeting-user" text="张大仙">
+                  <TextField fx:id="textFieldUsername" editable="false" prefHeight="59.0" prefWidth="569.0" styleClass="meeting-user">
                      <font>
                         <Font size="24.0" />
                      </font>
