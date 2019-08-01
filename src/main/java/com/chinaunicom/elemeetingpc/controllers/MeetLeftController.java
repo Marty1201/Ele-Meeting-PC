@@ -4,7 +4,9 @@ package com.chinaunicom.elemeetingpc.controllers;
 import com.chinaunicom.elemeetingpc.constant.GlobalStaticConstant;
 import com.chinaunicom.elemeetingpc.modelFx.MeetInfoFx;
 import com.chinaunicom.elemeetingpc.modelFx.MeetInfoModel;
+import javafx.application.Platform;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
@@ -30,10 +32,14 @@ public class MeetLeftController {
     private MeetInfoModel meetInfoModel;
     
     //初始化
+    @FXML
     public void initialize(){
         textFieldUsername.setText(GlobalStaticConstant.GLOBAL_USERINFO_USERNAME);
         meetInfoModel = new MeetInfoModel();
-        meetCurrentListView.setItems(meetInfoModel.getCurrentMeetInfoFxs());
+        ObservableList<MeetInfoFx> fxlist1 = meetInfoModel.getCurrentMeetInfoFxs();
+        int fxlist1_size = fxlist1.size();
+        meetCurrentListView.setItems(fxlist1);
+        meetCurrentListView.setPrefHeight(fxlist1_size*40+5);
         //添加监听事件
         meetCurrentListView.getSelectionModel().selectedItemProperty().addListener(
                 (ObservableValue<? extends MeetInfoFx > observable,MeetInfoFx oldValue,MeetInfoFx newValue) -> {
@@ -44,7 +50,10 @@ public class MeetLeftController {
                 }
         );
         
-        meetFutureListView.setItems(meetInfoModel.getFutureMeetInfoFxs());
+        ObservableList<MeetInfoFx> fxlist2 = meetInfoModel.getFutureMeetInfoFxs();
+        int fxlist2_size = fxlist2.size();        
+        meetFutureListView.setItems(fxlist2);
+        meetFutureListView.setPrefHeight(fxlist2_size*40+5);
         //添加监听事件
         meetFutureListView.getSelectionModel().selectedItemProperty().addListener(
                 (ObservableValue<? extends MeetInfoFx > observable,MeetInfoFx oldValue,MeetInfoFx newValue) -> {
@@ -55,7 +64,10 @@ public class MeetLeftController {
                 }
         );
         
-        meetHistoryListView.setItems(meetInfoModel.getHistoryMeetInfoFxs());
+        ObservableList<MeetInfoFx> fxlist3 = meetInfoModel.getHistoryMeetInfoFxs();
+        int fxlist3_size = fxlist3.size();
+        meetHistoryListView.setItems(fxlist3);
+        meetHistoryListView.setPrefHeight(fxlist3_size*40+5);
         //添加监听事件
         meetHistoryListView.getSelectionModel().selectedItemProperty().addListener(
                 (ObservableValue<? extends MeetInfoFx > observable,MeetInfoFx oldValue,MeetInfoFx newValue) -> {
@@ -66,4 +78,13 @@ public class MeetLeftController {
                 }
         );
     }    
+    
+    /**
+     * 退出
+     */
+    @FXML
+    private void handExit(){
+        Platform.exit();
+    }
+       
 }

@@ -94,7 +94,7 @@
             </VBox>
             <VBox minHeight="-Infinity" prefHeight="80.0" prefWidth="100.0">
                <children>
-                  <Button mnemonicParsing="false" prefHeight="100.0" prefWidth="569.0" styleClass="meeting-btn" text="退出登录" textAlignment="CENTER" />
+                  <Button mnemonicParsing="false" onAction="#handExit" prefHeight="100.0" prefWidth="569.0" styleClass="meeting-btn" text="退出登录" textAlignment="CENTER" />
                </children>
             </VBox>
          </children>
