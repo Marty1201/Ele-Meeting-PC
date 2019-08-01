@@ -7,9 +7,9 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox fillWidth="false" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="800.0" minWidth="1000.0" prefHeight="1080.0" prefWidth="1920.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.chinaunicom.elemeetingpc.controllers.MeetLeftController">
+<VBox fillWidth="false" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="800.0" minWidth="1000.0" prefHeight="700.0" prefWidth="1920.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.chinaunicom.elemeetingpc.controllers.MeetLeftController">
    <children>
-      <VBox layoutX="-1.0" layoutY="-16.0" prefHeight="1078.0" prefWidth="1925.0" styleClass="meeting-welcome-bg" AnchorPane.bottomAnchor="0.0" AnchorPane.topAnchor="-1.0">
+      <VBox layoutX="-1.0" layoutY="-16.0" prefHeight="698.0" prefWidth="1920.0" styleClass="meeting-welcome-bg" AnchorPane.bottomAnchor="0.0" AnchorPane.topAnchor="-1.0">
          <children>
             <VBox prefHeight="939.0" prefWidth="569.0" VBox.vgrow="ALWAYS">
                <children>
@@ -92,9 +92,9 @@
                   </VBox>
                </children>
             </VBox>
-            <VBox minHeight="-Infinity" prefHeight="80.0" prefWidth="100.0">
+            <VBox minHeight="-Infinity" prefHeight="80.0" prefWidth="1920.0">
                <children>
-                  <Button mnemonicParsing="false" onAction="#handExit" prefHeight="100.0" prefWidth="569.0" styleClass="meeting-btn" text="退出登录" textAlignment="CENTER" />
+                  <Button mnemonicParsing="false" onAction="#handExit" prefHeight="100.0" prefWidth="1920.0" styleClass="meeting-btn" text="退出登录" textAlignment="CENTER" />
                </children>
             </VBox>
          </children>

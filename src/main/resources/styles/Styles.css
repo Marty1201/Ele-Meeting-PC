@@ -96,13 +96,13 @@
     -fx-background-color:#f1f1f1; 
     -fx-text-fill:#000000; 
     -fx-font-size:24 arial;
-    -fx-pref-height: 70px;
+
 }
 .meeting-list-view.list-cell{
     -fx-background-color:#ffffff; 
     -fx-text-fill:#000000; 
     -fx-font-size:24 arial;
-    -fx-pref-height: 70px;
+    -fx-pref-height: 40px;
 
 }
 .meeting-btn{
