@@ -5,12 +5,18 @@ import com.chinaunicom.elemeetingpc.constant.GlobalStaticConstant;
 import com.chinaunicom.elemeetingpc.modelFx.MeetInfoFx;
 import com.chinaunicom.elemeetingpc.modelFx.MeetInfoModel;
 import com.chinaunicom.elemeetingpc.utils.DialogsUtils;
+import com.chinaunicom.elemeetingpc.utils.FxmlUtils;
+import com.j256.ormlite.logger.Logger;
+import com.j256.ormlite.logger.LoggerFactory;
+import java.io.IOException;
 import javafx.application.Platform;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.BorderPane;
 
 /**
  * 会议左侧列表controller
@@ -32,6 +38,17 @@ public class MeetLeftController {
     
     private MeetInfoModel meetInfoModel;
     
+    private static final Logger logger = LoggerFactory.getLogger(MeetLeftController.class);
+    
+    private BorderPane borderPane;
+
+    public void setBorderPane(BorderPane borderPane) {
+        this.borderPane = borderPane;
+    }
+    
+    //会议界面中部数据
+    public static final String FXML_INDEX = "/fxml/fxml_index.fxml";
+    
     //初始化
     @FXML
     public void initialize(){
@@ -48,6 +65,9 @@ public class MeetLeftController {
                     System.out.println("oldValue: " + oldValue);
                     System.out.println("observable-meetId: " + observable.getValue().getMeetingId());
                     System.out.println("observable-meetName: " + observable.getValue().getMeetingName()); 
+                    
+                    GlobalStaticConstant.GLOBAL_SELECTED_MEETID = observable.getValue().getMeetingId();
+                    showFxmlMeet();
                 }
         );
         
@@ -62,6 +82,8 @@ public class MeetLeftController {
                     System.out.println("oldValue: " + oldValue);
                     System.out.println("observable-meetId: " + observable.getValue().getMeetingId());
                     System.out.println("observable-meetName: " + observable.getValue().getMeetingName()); 
+                    GlobalStaticConstant.GLOBAL_SELECTED_MEETID = observable.getValue().getMeetingId();
+                    showFxmlMeet();
                 }
         );
         
@@ -75,9 +97,12 @@ public class MeetLeftController {
                     System.out.println("newValue: " + newValue);
                     System.out.println("oldValue: " + oldValue);
                     System.out.println("observable-meetId: " + observable.getValue().getMeetingId());
-                    System.out.println("observable-meetName: " + observable.getValue().getMeetingName()); 
+                    System.out.println("observable-meetName: " + observable.getValue().getMeetingName());
+                    GlobalStaticConstant.GLOBAL_SELECTED_MEETID = observable.getValue().getMeetingId();
+                    showFxmlMeet();
                 }
         );
+        
     }    
     
     /**
@@ -89,5 +114,19 @@ public class MeetLeftController {
         if(result = DialogsUtils.confirmationAlert()){
             Platform.exit();
         }
+    }
+    
+     /**
+     * 跳转会议界面
+     */
+    private void showFxmlMeet(){
+        try {            
+            FXMLLoader loader = FxmlUtils.getFXMLLoader(FXML_INDEX);
+            borderPane.setCenter(loader.load()); //将当前BorderPane中间区域加载为机构选择界面
+            MeetController meetController = loader.getController(); //从loader中获取MeetController
+            meetController.setBorderPane(borderPane);//设置传参当前的borderPane，以便在MeetController中获取到当前BorderPane
+        } catch (IOException e) {
+            logger.error(e.getCause().getMessage());
+        }       
     }
 }

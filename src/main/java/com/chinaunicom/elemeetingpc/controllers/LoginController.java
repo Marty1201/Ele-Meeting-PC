@@ -126,7 +126,7 @@ public class LoginController {
             FXMLLoader loader = FxmlUtils.getFXMLLoader(FXML_ORG_FXML);
             borderPaneMain.setCenter(loader.load()); //将当前BorderPane中间区域加载为机构选择界面
             OrganInfoController organInfoController = loader.getController(); //从loader中获取OrganInfoController
-            organInfoController.setLoginController(this);//设置传参当前的loginController，以便在OrganInfoController中获取到当前loginController中的BorderPane
+            organInfoController.setBorderPane(borderPaneMain);//设置传参当前的borderPaneMain，以便在OrganInfoController中获取到当前BorderPane
         } catch (IOException e) {
             logger.error(e.getCause().getMessage());
         }

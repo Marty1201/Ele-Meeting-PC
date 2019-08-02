@@ -17,4 +17,7 @@ public class GlobalStaticConstant {
     public static String GLOBAL_ORGANINFO_ORGANIZATIONID = "1";
     //全局更新机构中对应的用户Id（服务器端用户的id）
     public static String GLOBAL_ORGANINFO_OWNER_USERID = "1";
+    
+    //当前选择的会议ID
+    public static String GLOBAL_SELECTED_MEETID = "1";
 }
