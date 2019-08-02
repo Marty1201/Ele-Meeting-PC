@@ -10,6 +10,74 @@
 
 <VBox fillWidth="false" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="800.0" minWidth="1000.0" prefHeight="1080.0" prefWidth="1920.0" style="-fx-background-color: #f1f1f1;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
    <children>
+      <VBox prefHeight="104.0" prefWidth="1920.0" style="-fx-background-color: #ffffff;">
+         <children>
+            <VBox minHeight="40.0" prefHeight="100.0" prefWidth="1920.0">
+               <children>
+                  <HBox minHeight="66.0" prefHeight="66.0" prefWidth="1920.0">
+                     <children>
+                        <ImageView fitHeight="54.0" fitWidth="36.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@images/menu.png" />
+                           </image>
+                           <HBox.margin>
+                              <Insets right="20.0" />
+                           </HBox.margin>
+                        </ImageView>
+                        <ImageView fitHeight="150.0" fitWidth="36.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@images/home.png" />
+                           </image>
+                           <HBox.margin>
+                              <Insets right="1580.0" />
+                           </HBox.margin>
+                        </ImageView>
+                        <ImageView fitHeight="150.0" fitWidth="32.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@images/date.png" />
+                           </image>
+                           <HBox.margin>
+                              <Insets right="24.0" />
+                           </HBox.margin>
+                        </ImageView>
+                        <ImageView fitHeight="150.0" fitWidth="32.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@images/password.png" />
+                           </image>
+                           <HBox.margin>
+                              <Insets right="24.0" />
+                           </HBox.margin>
+                        </ImageView>
+                        <ImageView fitHeight="150.0" fitWidth="32.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@images/help.png" />
+                           </image>
+                           <HBox.margin>
+                              <Insets right="24.0" />
+                           </HBox.margin>
+                        </ImageView>
+                        <ImageView fitHeight="150.0" fitWidth="32.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@images/message.png" />
+                           </image>
+                        </ImageView>
+                     </children>
+                     <padding>
+                        <Insets left="20.0" top="20.0" />
+                     </padding>
+                  </HBox>
+                  <TextField alignment="CENTER" prefHeight="72.0" prefWidth="1920.0" styleClass="index-title" stylesheets="@Styles.css" text="第六届董事会第十三次会议">
+                     <font>
+                        <Font size="24.0" />
+                     </font>
+                     <VBox.margin>
+                        <Insets top="-10.0" />
+                     </VBox.margin>
+                  </TextField>
+               </children>
+            </VBox>
+         </children>
+      </VBox>
       <VBox prefHeight="54.0" prefWidth="1920.0" style="-fx-background-color: #ffffff;">
          <VBox.margin>
             <Insets top="16.0" />
@@ -19,7 +87,7 @@
                <children>
                   <ImageView fitHeight="36.0" fitWidth="14.0" pickOnBounds="true" preserveRatio="true">
                      <image>
-                        <Image url="images/title-pic.png" />
+                        <Image url="@images/title-pic.png" />
                      </image>
                      <HBox.margin>
                         <Insets left="10.0" top="10.0" />
@@ -57,7 +125,7 @@
                                  <children>
                                     <ImageView fitHeight="150.0" fitWidth="200.0" layoutX="21.0" layoutY="29.0" pickOnBounds="true" preserveRatio="true">
                                        <image>
-                                          <Image url="images/icon-book.jpg" />
+                                          <Image url="@images/icon-book.jpg" />
                                        </image>
                                     </ImageView>
                                     <TextArea layoutX="30.0" layoutY="49.0" prefHeight="104.0" prefWidth="109.0" styleClass="text-area" stylesheets="@Styles.css" text="关于公司2019年度财务预算的汇报" wrapText="true">
@@ -71,7 +139,7 @@
                                  <children>
                                     <ImageView fitHeight="150.0" fitWidth="200.0" layoutX="21.0" layoutY="29.0" pickOnBounds="true" preserveRatio="true">
                                        <image>
-                                          <Image url="images/icon-book.jpg" />
+                                          <Image url="@images/icon-book.jpg" />
                                        </image>
                                     </ImageView>
                                     <TextArea layoutX="28.0" layoutY="48.0" prefHeight="114.0" prefWidth="109.0" stylesheets="@Styles.css" text="关于公司2019年度财务预算的汇报" wrapText="true">
@@ -85,7 +153,7 @@
                                  <children>
                                     <ImageView fitHeight="150.0" fitWidth="200.0" layoutX="21.0" layoutY="29.0" pickOnBounds="true" preserveRatio="true">
                                        <image>
-                                          <Image url="images/icon-book.jpg" />
+                                          <Image url="@images/icon-book.jpg" />
                                        </image>
                                     </ImageView>
                                     <TextArea layoutX="27.0" layoutY="51.0" prefHeight="100.0" prefWidth="109.0" styleClass="index-meet" stylesheets="@Styles.css" text="关于公司2019年度财务预算的汇报" wrapText="true">
@@ -99,7 +167,7 @@
                                  <children>
                                     <ImageView fitHeight="150.0" fitWidth="200.0" layoutX="21.0" layoutY="29.0" pickOnBounds="true" preserveRatio="true">
                                        <image>
-                                          <Image url="images/icon-book.jpg" />
+                                          <Image url="@images/icon-book.jpg" />
                                        </image>
                                     </ImageView>
                                     <TextArea layoutX="30.0" layoutY="48.0" prefHeight="104.0" prefWidth="109.0" stylesheets="@Styles.css" text="关于公司2019年度财务预算的汇报" wrapText="true">
@@ -113,7 +181,7 @@
                                  <children>
                                     <ImageView fitHeight="150.0" fitWidth="200.0" layoutX="21.0" layoutY="29.0" pickOnBounds="true" preserveRatio="true">
                                        <image>
-                                          <Image url="images/icon-book.jpg" />
+                                          <Image url="@images/icon-book.jpg" />
                                        </image>
                                     </ImageView>
                                     <TextArea layoutX="32.0" layoutY="52.0" prefHeight="100.0" prefWidth="109.0" stylesheets="@Styles.css" text="关于公司2019年度财务预算的汇报" wrapText="true">
@@ -127,7 +195,7 @@
                                  <children>
                                     <ImageView fitHeight="150.0" fitWidth="200.0" layoutX="21.0" layoutY="29.0" pickOnBounds="true" preserveRatio="true">
                                        <image>
-                                          <Image url="images/icon-book.jpg" />
+                                          <Image url="@images/icon-book.jpg" />
                                        </image>
                                     </ImageView>
                                     <TextArea layoutX="32.0" layoutY="50.0" prefHeight="100.0" prefWidth="109.0" stylesheets="@Styles.css" text="关于公司2019年度财务预算的汇报" wrapText="true">
@@ -141,7 +209,7 @@
                                  <children>
                                     <ImageView fitHeight="150.0" fitWidth="200.0" layoutX="21.0" layoutY="29.0" pickOnBounds="true" preserveRatio="true">
                                        <image>
-                                          <Image url="images/icon-book.jpg" />
+                                          <Image url="@images/icon-book.jpg" />
                                        </image>
                                     </ImageView>
                                     <TextArea layoutX="30.0" layoutY="51.0" prefHeight="79.0" prefWidth="109.0" stylesheets="@Styles.css" text="关于公司2019年度财务预算的汇报" wrapText="true">
@@ -155,7 +223,7 @@
                                  <children>
                                     <ImageView fitHeight="150.0" fitWidth="200.0" layoutX="21.0" layoutY="29.0" pickOnBounds="true" preserveRatio="true">
                                        <image>
-                                          <Image url="images/icon-book.jpg" />
+                                          <Image url="@images/icon-book.jpg" />
                                        </image>
                                     </ImageView>
                                     <TextArea layoutX="29.0" layoutY="58.0" prefHeight="72.0" prefWidth="109.0" styleClass="index-meet" stylesheets="@Styles.css" text="关于公司2019年度财务预算的汇报" wrapText="true">
@@ -169,7 +237,7 @@
                                  <children>
                                     <ImageView fitHeight="150.0" fitWidth="200.0" layoutX="21.0" layoutY="29.0" pickOnBounds="true" preserveRatio="true">
                                        <image>
-                                          <Image url="images/icon-book.jpg" />
+                                          <Image url="@images/icon-book.jpg" />
                                        </image>
                                     </ImageView>
                                     <TextArea layoutX="32.0" layoutY="57.0" prefHeight="88.0" prefWidth="109.0" stylesheets="@Styles.css" text="关于公司2019年度财务预算的汇报" wrapText="true">
@@ -183,7 +251,7 @@
                                  <children>
                                     <ImageView fitHeight="150.0" fitWidth="200.0" layoutX="19.0" layoutY="19.0" pickOnBounds="true" preserveRatio="true">
                                        <image>
-                                          <Image url="images/icon-book.jpg" />
+                                          <Image url="@images/icon-book.jpg" />
                                        </image>
                                     </ImageView>
                                     <TextArea layoutX="29.0" layoutY="42.0" prefHeight="88.0" prefWidth="109.0" stylesheets="@Styles.css" text="关于公司2019年度财务预算的汇报" wrapText="true">
@@ -197,7 +265,7 @@
                                  <children>
                                     <ImageView fitHeight="150.0" fitWidth="200.0" layoutX="22.0" layoutY="20.0" pickOnBounds="true" preserveRatio="true">
                                        <image>
-                                          <Image url="images/icon-book.jpg" />
+                                          <Image url="@images/icon-book.jpg" />
                                        </image>
                                     </ImageView>
                                     <TextArea layoutX="26.0" layoutY="43.0" prefHeight="88.0" prefWidth="109.0" stylesheets="@Styles.css" text="关于公司2019年度财务预算的汇报" wrapText="true">
@@ -211,7 +279,7 @@
                                  <children>
                                     <ImageView fitHeight="150.0" fitWidth="200.0" layoutX="19.0" layoutY="19.0" pickOnBounds="true" preserveRatio="true">
                                        <image>
-                                          <Image url="images/icon-book.jpg" />
+                                          <Image url="@images/icon-book.jpg" />
                                        </image>
                                     </ImageView>
                                     <TextArea layoutX="29.0" layoutY="42.0" prefHeight="88.0" prefWidth="109.0" stylesheets="@Styles.css" text="关于公司2019年度财务预算的汇报" wrapText="true">
@@ -225,7 +293,7 @@
                                  <children>
                                     <ImageView fitHeight="150.0" fitWidth="200.0" layoutX="19.0" layoutY="19.0" pickOnBounds="true" preserveRatio="true">
                                        <image>
-                                          <Image url="images/icon-book.jpg" />
+                                          <Image url="@images/icon-book.jpg" />
                                        </image>
                                     </ImageView>
                                     <TextArea layoutX="30.0" layoutY="42.0" prefHeight="88.0" prefWidth="109.0" styleClass="index-meet" stylesheets="@Styles.css" text="关于公司2019年度财务预算的汇报" wrapText="true">
@@ -239,7 +307,7 @@
                                  <children>
                                     <ImageView fitHeight="150.0" fitWidth="200.0" layoutX="19.0" layoutY="19.0" pickOnBounds="true" preserveRatio="true">
                                        <image>
-                                          <Image url="images/icon-book.jpg" />
+                                          <Image url="@images/icon-book.jpg" />
                                        </image>
                                     </ImageView>
                                     <TextArea layoutX="29.0" layoutY="42.0" prefHeight="88.0" prefWidth="109.0" stylesheets="@Styles.css" text="关于公司2019年度财务预算的汇报" wrapText="true">
@@ -253,7 +321,7 @@
                                  <children>
                                     <ImageView fitHeight="150.0" fitWidth="200.0" layoutX="19.0" layoutY="19.0" pickOnBounds="true" preserveRatio="true">
                                        <image>
-                                          <Image url="images/icon-book.jpg" />
+                                          <Image url="@images/icon-book.jpg" />
                                        </image>
                                     </ImageView>
                                     <TextArea layoutX="29.0" layoutY="42.0" prefHeight="88.0" prefWidth="109.0" stylesheets="@Styles.css" text="关于公司2019年度财务预算的汇报" wrapText="true">
@@ -290,7 +358,7 @@
                            <children>
                               <ImageView fitHeight="150.0" fitWidth="200.0" layoutX="21.0" layoutY="29.0" pickOnBounds="true" preserveRatio="true">
                                  <image>
-                                    <Image url="images/icon-book.jpg" />
+                                    <Image url="@images/icon-book.jpg" />
                                  </image>
                               </ImageView>
                               <TextArea layoutX="25.0" layoutY="54.0" prefHeight="100.0" prefWidth="124.0" stylesheets="@Styles.css" text="关于公司2019年度财务预算的汇报" wrapText="true">
@@ -304,7 +372,7 @@
                            <children>
                               <ImageView fitHeight="150.0" fitWidth="200.0" layoutX="21.0" layoutY="29.0" pickOnBounds="true" preserveRatio="true">
                                  <image>
-                                    <Image url="images/icon-book.jpg" />
+                                    <Image url="@images/icon-book.jpg" />
                                  </image>
                               </ImageView>
                               <TextArea layoutX="30.0" layoutY="52.0" prefHeight="94.0" prefWidth="109.0" stylesheets="@Styles.css" text="关于公司2019年度财务预算的汇报" wrapText="true">
@@ -318,7 +386,7 @@
                            <children>
                               <ImageView fitHeight="150.0" fitWidth="200.0" layoutX="21.0" layoutY="29.0" pickOnBounds="true" preserveRatio="true">
                                  <image>
-                                    <Image url="images/icon-book.jpg" />
+                                    <Image url="@images/icon-book.jpg" />
                                  </image>
                               </ImageView>
                               <TextArea layoutX="32.0" layoutY="54.0" prefHeight="100.0" prefWidth="109.0" styleClass="index-meet" stylesheets="@Styles.css" text="关于公司2019年度财务预算的汇报" wrapText="true">
@@ -332,7 +400,7 @@
                            <children>
                               <ImageView fitHeight="150.0" fitWidth="200.0" layoutX="21.0" layoutY="29.0" pickOnBounds="true" preserveRatio="true">
                                  <image>
-                                    <Image url="images/icon-book.jpg" />
+                                    <Image url="@images/icon-book.jpg" />
                                  </image>
                               </ImageView>
                               <TextArea layoutX="31.0" layoutY="58.0" prefHeight="94.0" prefWidth="109.0" stylesheets="@Styles.css" text="关于公司2019年度财务预算的汇报" wrapText="true">
@@ -346,7 +414,7 @@
                            <children>
                               <ImageView fitHeight="150.0" fitWidth="200.0" layoutX="22.0" layoutY="25.0" pickOnBounds="true" preserveRatio="true">
                                  <image>
-                                    <Image url="images/icon-book.jpg" />
+                                    <Image url="@images/icon-book.jpg" />
                                  </image>
                               </ImageView>
                               <TextArea layoutX="32.0" layoutY="54.0" prefHeight="88.0" prefWidth="109.0" stylesheets="@Styles.css" text="关于公司2019年度财务预算的汇报" wrapText="true">
@@ -360,7 +428,7 @@
                            <children>
                               <ImageView fitHeight="150.0" fitWidth="200.0" layoutX="21.0" layoutY="29.0" pickOnBounds="true" preserveRatio="true">
                                  <image>
-                                    <Image url="images/icon-book.jpg" />
+                                    <Image url="@images/icon-book.jpg" />
                                  </image>
                               </ImageView>
                               <TextArea layoutX="32.0" layoutY="56.0" prefHeight="94.0" prefWidth="109.0" stylesheets="@Styles.css" text="关于公司2019年度财务预算的汇报" wrapText="true">
@@ -374,7 +442,7 @@
                            <children>
                               <ImageView fitHeight="150.0" fitWidth="200.0" layoutX="21.0" layoutY="29.0" pickOnBounds="true" preserveRatio="true">
                                  <image>
-                                    <Image url="images/icon-book.jpg" />
+                                    <Image url="@images/icon-book.jpg" />
                                  </image>
                               </ImageView>
                               <TextArea layoutX="30.0" layoutY="58.0" prefHeight="88.0" prefWidth="109.0" stylesheets="@Styles.css" text="关于公司2019年度财务预算的汇报" wrapText="true">
@@ -388,7 +456,7 @@
                            <children>
                               <ImageView fitHeight="150.0" fitWidth="200.0" layoutX="21.0" layoutY="29.0" pickOnBounds="true" preserveRatio="true">
                                  <image>
-                                    <Image url="images/icon-book.jpg" />
+                                    <Image url="@images/icon-book.jpg" />
                                  </image>
                               </ImageView>
                               <TextArea layoutX="30.0" layoutY="58.0" prefHeight="94.0" prefWidth="109.0" styleClass="index-meet" stylesheets="@Styles.css" text="关于公司2019年度财务预算的汇报" wrapText="true">
@@ -402,7 +470,7 @@
                            <children>
                               <ImageView fitHeight="150.0" fitWidth="200.0" layoutX="21.0" layoutY="29.0" pickOnBounds="true" preserveRatio="true">
                                  <image>
-                                    <Image url="images/icon-book.jpg" />
+                                    <Image url="@images/icon-book.jpg" />
                                  </image>
                               </ImageView>
                               <TextArea layoutX="30.0" layoutY="58.0" prefHeight="88.0" prefWidth="109.0" stylesheets="@Styles.css" text="关于公司2019年度财务预算的汇报" wrapText="true">

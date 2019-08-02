@@ -1,8 +1,10 @@
 
 package com.chinaunicom.elemeetingpc.utils;
 
+import java.util.Optional;
 import java.util.ResourceBundle;
 import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.TextArea;
 
 
@@ -50,6 +52,23 @@ public class DialogsUtils {
     }
     
     /**
+     * Show confirmation alert dialog windows.
+     * @return answer: click ok button return true, otherwise return false.
+     */
+    public static Boolean confirmationAlert() {
+        boolean answer = false;
+        Alert confirmationAlert = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmationAlert.setTitle(bundle.getString("info.title"));
+        confirmationAlert.setHeaderText(bundle.getString("confirm.header"));
+        confirmationAlert.setContentText(bundle.getString("confirm.content"));
+        Optional<ButtonType> result = confirmationAlert.showAndWait();
+        if(result.get() == ButtonType.OK){
+            answer = true;
+        }
+        return answer;
+    }
+    
+    /**
      * Show registerCode alert dialog windows.
      */
     public static void registerCodeAlert(String infoString) {
@@ -71,5 +90,5 @@ public class DialogsUtils {
         TextArea textArea = new TextArea(infoString);
         infoAlert.getDialogPane().setContent(textArea);
         infoAlert.showAndWait();
-    } 
+    }
 }

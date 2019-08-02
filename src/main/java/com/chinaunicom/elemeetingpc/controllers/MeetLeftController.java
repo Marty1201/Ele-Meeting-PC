@@ -4,6 +4,7 @@ package com.chinaunicom.elemeetingpc.controllers;
 import com.chinaunicom.elemeetingpc.constant.GlobalStaticConstant;
 import com.chinaunicom.elemeetingpc.modelFx.MeetInfoFx;
 import com.chinaunicom.elemeetingpc.modelFx.MeetInfoModel;
+import com.chinaunicom.elemeetingpc.utils.DialogsUtils;
 import javafx.application.Platform;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
@@ -13,7 +14,7 @@ import javafx.scene.control.TextField;
 
 /**
  * 会议左侧列表controller
- * @author zhaojunfeng
+ * @author zhaojunfeng, chenxi
  */
 public class MeetLeftController {
     
@@ -84,7 +85,9 @@ public class MeetLeftController {
      */
     @FXML
     private void handExit(){
-        Platform.exit();
+        boolean result = false;
+        if(result = DialogsUtils.confirmationAlert()){
+            Platform.exit();
+        }
     }
-       
 }

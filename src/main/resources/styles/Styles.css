@@ -70,42 +70,44 @@
 .text-area .scroll-pane .content {
     -fx-background-color:transparent; 
 }
-
-/* 左侧会议列表 */
+/* 左侧会议列表欢迎样式 */
 .meeting-welcome{
     -fx-font-size:36px;
     -fx-background-color: #4581bf;
     -fx-text-fill:#ffffff;
     -fx-background-radius:0px;
-    -fx-pref-height: 50px;
 }
+/* 左侧会议列表用户名称样式 */
 .meeting-user{
     -fx-font-size:26px;
     -fx-background-color: #4581bf;
     -fx-text-fill:#ffffff;
     -fx-background-radius:0px;
-    -fx-pref-height: 40px;
 }
+/* 左侧会议列表会议类型名称样式 */
 .meeting-list-title
-{ 
+{
+    -fx-background-color: #ffffff;
     -fx-text-fill:#4581bf;
     -fx-font-size:26 arial;
     -fx-font-size-weight:700;
 }
+/* 左侧会议列表样式 */
 .meeting-list-view{
     -fx-background-color:#f1f1f1; 
     -fx-text-fill:#000000; 
     -fx-font-size:24 arial;
 
 }
+/* 左侧会议列表cell样式 */
 .meeting-list-view.list-cell{
     -fx-background-color:#ffffff; 
     -fx-text-fill:#000000; 
     -fx-font-size:24 arial;
     -fx-pref-height: 40px;
-
 }
-.meeting-btn{
+/* 左侧会议列表退出按钮样式 */
+.exit-btn{
     -fx-background-color:#4581bf; 
     -fx-text-fill:#ffffff;
     -fx-font-size:26 arial;
