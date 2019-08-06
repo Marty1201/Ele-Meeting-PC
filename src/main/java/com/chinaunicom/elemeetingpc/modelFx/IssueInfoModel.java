@@ -8,6 +8,8 @@ package com.chinaunicom.elemeetingpc.modelFx;
 import com.chinaunicom.elemeetingpc.database.dao.IssueInfoDao;
 import com.chinaunicom.elemeetingpc.database.models.IssueInfo;
 import com.chinaunicom.elemeetingpc.utils.exceptions.ApplicationException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
@@ -23,5 +25,12 @@ public class IssueInfoModel {
     public void saveOrUpdateIssueInfo(IssueInfo issueInfo) throws ApplicationException{
         IssueInfoDao issueInfoDao = new IssueInfoDao();
         issueInfoDao.saveOrUpdate(issueInfo);
+    }
+    
+    public List<IssueInfo> queryIssueById(String issueId, String value) throws ApplicationException {
+        IssueInfoDao issueInfoDao = new IssueInfoDao();
+        List<IssueInfo> issueList = new ArrayList<>();
+        issueList = issueInfoDao.findByFieldNameAndValue(IssueInfo.class, issueId, value);
+        return issueList;
     }
 }

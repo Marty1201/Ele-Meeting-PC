@@ -37,6 +37,8 @@ public class OrganInfoController {
     public static final String FXML_INDEX_TOP = "/fxml/fxml_index_top.fxml";
     //会议界面中部数据
     public static final String FXML_INDEX_CENTER = "/fxml/fxml_index_center.fxml";
+    //会议界面
+    public static final String FXML_INDEX = "/fxml/fxml_index.fxml";
     
     private LoginController loginController;
 
@@ -81,6 +83,6 @@ public class OrganInfoController {
         //加载左侧
         //borderPane.setLeft(FxmlUtils.fxmlLoader(FXML_LEFT_NAVIGATION));
         //加载中部
-        borderPane.setCenter(FxmlUtils.fxmlLoader(FXML_LEFT_NAVIGATION));
+        borderPane.setCenter(FxmlUtils.fxmlLoader(FXML_INDEX));
     }
 }
