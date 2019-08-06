@@ -1,8 +1,4 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package com.chinaunicom.elemeetingpc.modelFx;
 
 import com.chinaunicom.elemeetingpc.database.dao.IssueInfoDao;
@@ -30,7 +26,7 @@ public class IssueInfoModel {
         IssueInfoDao issueInfoDao = new IssueInfoDao();
         issueInfoDao.saveOrUpdate(issueInfo);
     }
-    
+
     /**
      * 根据会议ID获取议题集合 
      * @param meetId
@@ -54,5 +50,12 @@ public class IssueInfoModel {
             Logger.getLogger(IssueInfoModel.class.getName()).log(Level.SEVERE, null, ex);
         }
         return list;
+    }
+    
+    public List<IssueInfo> queryIssueById(String issueId, String value) throws ApplicationException {
+        IssueInfoDao issueInfoDao = new IssueInfoDao();
+        List<IssueInfo> issueList = new ArrayList<>();
+        issueList = issueInfoDao.findByFieldNameAndValue(IssueInfo.class, issueId, value);
+        return issueList;
     }
 }
