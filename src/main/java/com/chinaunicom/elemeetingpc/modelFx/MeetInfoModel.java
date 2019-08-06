@@ -123,5 +123,17 @@ public class MeetInfoModel {
         List<MeetInfo> childMeetInfoList = new ArrayList<>();
         childMeetInfoList = meetInfoDao.findByFieldNameAndValue(MeetInfo.class, parentMeetingId, value);
         return childMeetInfoList;
-    }    
+    }   
+    
+    //根据会议ID获取子会议
+    public List<MeetInfo> queryChildMeetsByParentId(String meetParentId){
+        List<MeetInfo> list = new ArrayList<>();
+        MeetInfoDao dao = new MeetInfoDao();
+        try {
+            list = dao.findByFieldNameAndValue(MeetInfo.class, "parentMeetingId", meetParentId);
+        } catch (ApplicationException ex) {
+            Logger.getLogger(MeetModel.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return list;
+    }
 }
