@@ -118,4 +118,10 @@ public class MeetInfoModel {
         return observableList;
     }  
     
+    public List<MeetInfo> queryChildMeetInfosByParentId(String parentMeetingId, String value) throws ApplicationException {
+        MeetInfoDao meetInfoDao = new MeetInfoDao();
+        List<MeetInfo> childMeetInfoList = new ArrayList<>();
+        childMeetInfoList = meetInfoDao.findByFieldNameAndValue(MeetInfo.class, parentMeetingId, value);
+        return childMeetInfoList;
+    }    
 }

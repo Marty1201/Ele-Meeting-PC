@@ -43,6 +43,8 @@ public class OrganInfoController {
     public static final String FXML_INDEX_TOP = "/fxml/fxml_index_top.fxml";
     //会议界面中部数据
     public static final String FXML_INDEX_CENTER = "/fxml/fxml_index_center.fxml";
+    //会议界面
+    public static final String FXML_INDEX = "/fxml/fxml_index.fxml";
     
     private BorderPane borderPane;
 
@@ -87,9 +89,8 @@ public class OrganInfoController {
         //borderPane.setLeft(FxmlUtils.fxmlLoader(FXML_LEFT_NAVIGATION));
         //加载中部
         //borderPane.setCenter(FxmlUtils.fxmlLoader(FXML_LEFT_NAVIGATION));
-        
         try {            
-            FXMLLoader loader = FxmlUtils.getFXMLLoader(FXML_LEFT_NAVIGATION);
+            FXMLLoader loader = FxmlUtils.getFXMLLoader(FXML_INDEX);
             borderPane.setCenter(loader.load()); //将当前BorderPane中间区域加载为机构选择界面
             MeetLeftController meetLeftController = loader.getController(); //从loader中获取MeetLeftController
             meetLeftController.setBorderPane(borderPane);//设置传参当前的borderPane，以便在MeetLeftController中获取到当前BorderPane

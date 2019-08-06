@@ -34,15 +34,16 @@
     -fx-border-color: #ffffff;
 }
 
-/* 会议首页样式 */
-.index-title{
+/* 会议首页父会名称样式 */
+.index-meeting-title{
     -fx-text-fill:#000000;
     -fx-background-color:#ffffff; 
     -fx-font-size:28px;
     -fx-font-size-weight:bold;
     -fx-pref-height: 40px;
 }
-.index-title-little{
+/* 会议首页"会议信息"名称样式 */
+.index-title{
     -fx-text-fill:#000000;
     -fx-background-color:#ffffff; 
     -fx-font-size:20px;
@@ -52,7 +53,8 @@
     -fx-background-color:#ffffff; 
     -fx-font-size:20px;
 }
-.index-title-two{
+/* 会议首页子会议名称样式 */
+.index-sub-meeting-title{
     -fx-text-fill:#ffffff;
     -fx-background-color:#4581bf; 
     -fx-font-size:20px;
@@ -111,5 +113,11 @@
     -fx-background-color:#4581bf; 
     -fx-text-fill:#ffffff;
     -fx-font-size:26 arial;
+}
+
+.issues{
+    -fx-font-size: 16px;
+    -fx-font-size-family: Arial;
+    -fx-background-color: #ffffff;
 }
 
