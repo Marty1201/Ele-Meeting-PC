@@ -12,10 +12,8 @@ import com.chinaunicom.elemeetingpc.modelFx.IssueFileRelationModel;
 import com.chinaunicom.elemeetingpc.modelFx.IssueInfoModel;
 import com.chinaunicom.elemeetingpc.modelFx.MeetInfoModel;
 import com.chinaunicom.elemeetingpc.modelFx.MeetIssueRelationModel;
-import com.chinaunicom.elemeetingpc.modelFx.MeetModel;
 import com.chinaunicom.elemeetingpc.modelFx.MeetUserRelationModel;
 import com.chinaunicom.elemeetingpc.modelFx.OrganInfoModel;
-import com.chinaunicom.elemeetingpc.modelFx.SyncParamsModel;
 import com.chinaunicom.elemeetingpc.utils.GsonUtil;
 import com.chinaunicom.elemeetingpc.utils.HttpClientUtil;
 import com.chinaunicom.elemeetingpc.utils.exceptions.ApplicationException;
@@ -31,7 +29,6 @@ import org.apache.commons.lang3.StringUtils;
  * @author zhaojunfeng
  */
 public class MeetService {
-    private MeetModel meetModel;
     
     private MeetInfoModel meetInfoModel;
     

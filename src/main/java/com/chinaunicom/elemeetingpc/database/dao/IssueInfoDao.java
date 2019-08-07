@@ -1,8 +1,4 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package com.chinaunicom.elemeetingpc.database.dao;
 
 import com.chinaunicom.elemeetingpc.database.models.IssueInfo;
@@ -17,8 +13,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- *
- * @author zhaojunfeng
+ * IssueInfoDao, 自定义数据库操作方法实现.
+ * 
+ * @author zhaojunfeng, chenxi
  */
 public class IssueInfoDao extends CommonDao{
  private static final Logger logger = LoggerFactory.getLogger(IssueInfoDao.class);
@@ -26,22 +23,26 @@ public class IssueInfoDao extends CommonDao{
         super();
     }
     
-    public List<IssueInfo> findIssueInfosByIds(List<String> arry) throws ApplicationException{
-        List<IssueInfo> list = new ArrayList<>();
+    /**
+     * 根据议题ids批量查询所有议题信息，增加state=0和sort条件.
+     *
+     * @param issueIds
+     * @return issueList 议题列表
+     */
+    public List<IssueInfo> findIssueInfosByIds(List<String> issueIds) throws ApplicationException{
+        List<IssueInfo> issueList = new ArrayList<>();
         try {
             Dao<IssueInfo, Object> dao = getDao(IssueInfo.class);
             QueryBuilder<IssueInfo, Object> queryBuilder = dao.queryBuilder();
-            //机构ID
-            queryBuilder.where().in("issueId", arry).and().eq("state", "0");
-                        
+            queryBuilder.where().in("issueId", issueIds).and().eq("state", "0");
             queryBuilder.orderBy("sort", true);
-            list = dao.query(queryBuilder.prepare());
+            issueList = dao.query(queryBuilder.prepare());
         } catch (SQLException e) {
             logger.warn(e.getCause().getMessage());
             throw new ApplicationException(FxmlUtils.getResourceBundle().getString("error.not.found.all"));
         } finally {
             this.closeDbConnection();
         }
-        return list;
+        return issueList;
     }
 }

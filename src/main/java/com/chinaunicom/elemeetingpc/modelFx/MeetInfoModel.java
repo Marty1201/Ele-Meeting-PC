@@ -116,24 +116,57 @@ public class MeetInfoModel {
             ex.printStackTrace();
         }
         return observableList;
-    }  
+    }
     
-    public List<MeetInfo> queryChildMeetInfosByParentId(String parentMeetingId, String value) throws ApplicationException {
+    /**
+     * 获取正在进行的会议列表，增加state=0和sort条件.
+     *
+     * @return currentMeetInfoList 正在进行的会议列表
+     */
+    public List<MeetInfo> getCurrentMeetInfo() throws ApplicationException, SQLException{
+        MeetInfoDao meetInfoDao = new MeetInfoDao();
+        List<MeetInfo> currentMeetInfoList = new ArrayList<>();
+        String dateTimeString = DateUtil.formatFullDateTime(new Date());
+        currentMeetInfoList = meetInfoDao.findCurrentMeetInfoList(GlobalStaticConstant.GLOBAL_ORGANINFO_ORGANIZATIONID, dateTimeString);
+        return currentMeetInfoList;
+    }
+    
+    /**
+     * 获取即将进行的会议列表，增加state=0和sort条件.
+     *
+     * @return futureMeetInfoList 即将召开的会议列表
+     */
+    public List<MeetInfo> getFutureMeetInfo() throws ApplicationException, SQLException {
+        MeetInfoDao meetInfoDao = new MeetInfoDao();
+        List<MeetInfo> futureMeetInfoList = new ArrayList<>();
+        String dateTimeString = DateUtil.formatFullDateTime(new Date());
+        futureMeetInfoList = meetInfoDao.findFutureMeetInfoList(GlobalStaticConstant.GLOBAL_ORGANINFO_ORGANIZATIONID, dateTimeString);
+        return futureMeetInfoList;
+    }
+
+    /**
+     * 获取历史会议列表，增加state=0和sort条件.
+     *
+     * @return historyMeetInfoList 历史会议列表
+     */
+    public List<MeetInfo> getHistoryMeetInfo() throws ApplicationException, SQLException {
+        MeetInfoDao meetInfoDao = new MeetInfoDao();
+        List<MeetInfo> historyMeetInfoList = new ArrayList<>();
+        String dateTimeString = DateUtil.formatFullDateTime(new Date());
+        historyMeetInfoList = meetInfoDao.findHistoryMeetInfoList(GlobalStaticConstant.GLOBAL_ORGANINFO_ORGANIZATIONID, dateTimeString);
+        return historyMeetInfoList;
+    }
+    
+    /**
+     * 根据父会议id获取子会议信息，增加state=0和sort条件.
+     * 
+     * @param parentMeetingId
+     * @return childMeetInfoList 子会议信息列表
+     */
+    public List<MeetInfo> queryChildMeetInfosByParentId(String parentMeetingId) throws ApplicationException, SQLException {
         MeetInfoDao meetInfoDao = new MeetInfoDao();
         List<MeetInfo> childMeetInfoList = new ArrayList<>();
-        childMeetInfoList = meetInfoDao.findByFieldNameAndValue(MeetInfo.class, parentMeetingId, value);
+        childMeetInfoList = meetInfoDao.findChildMeetInfos(parentMeetingId);
         return childMeetInfoList;
-    }   
-    
-    //根据会议ID获取子会议
-    public List<MeetInfo> queryChildMeetsByParentId(String meetParentId){
-        List<MeetInfo> list = new ArrayList<>();
-        MeetInfoDao dao = new MeetInfoDao();
-        try {
-            list = dao.findByFieldNameAndValue(MeetInfo.class, "parentMeetingId", meetParentId);
-        } catch (ApplicationException ex) {
-            Logger.getLogger(MeetModel.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return list;
     }
 }

@@ -52,10 +52,10 @@ public class IssueInfoModel {
         return list;
     }
     
-    public List<IssueInfo> queryIssueById(String issueId, String value) throws ApplicationException {
+    public List<IssueInfo> queryIssueByIds(List<String> issueIdList) throws ApplicationException {
         IssueInfoDao issueInfoDao = new IssueInfoDao();
         List<IssueInfo> issueList = new ArrayList<>();
-        issueList = issueInfoDao.findByFieldNameAndValue(IssueInfo.class, issueId, value);
+        issueList = issueInfoDao.findIssueInfosByIds(issueIdList);
         return issueList;
     }
 }

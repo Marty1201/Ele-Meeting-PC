@@ -27,10 +27,10 @@ public class MeetIssueRelationModel {
         dao.saveOrUpdate(meetIssueRelation);
     }
     
-    public List<MeetIssueRelation> queryIssueIdByMeetId(String meetingId, String value) throws ApplicationException {
+    public List<MeetIssueRelation> queryMeetIssueRelation(String childMeetingId) throws ApplicationException {
         MeetIssueRelationDao meetIssueRelationDao = new MeetIssueRelationDao();
         List<MeetIssueRelation> meetIssueList = new ArrayList<>();
-        meetIssueList = meetIssueRelationDao.findByFieldNameAndValue(MeetIssueRelation.class, meetingId, value);
+        meetIssueList = meetIssueRelationDao.findMeetIssueRelationByMeetId(childMeetingId);
         return meetIssueList;
     }
     

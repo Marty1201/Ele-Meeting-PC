@@ -22,9 +22,11 @@ import com.chinaunicom.elemeetingpc.modelFx.MeetIssueRelationModel;
 import com.chinaunicom.elemeetingpc.modelFx.MeetUserRelationModel;
 import com.chinaunicom.elemeetingpc.modelFx.OrganInfoModel;
 import com.chinaunicom.elemeetingpc.modelFx.SyncParamsModel;
+import com.chinaunicom.elemeetingpc.utils.DateUtil;
 import com.chinaunicom.elemeetingpc.utils.GsonUtil;
 import com.chinaunicom.elemeetingpc.utils.HttpClientUtil;
 import com.chinaunicom.elemeetingpc.utils.exceptions.ApplicationException;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -64,7 +66,8 @@ public class SelectOrganService {
     /**
      * 调用默认会议接口逻辑处理.
      */
-    public void getMeetInfosFromRemote(){        
+    public void getMeetInfosFromRemote(){
+        String now = DateUtil.formatFullDateTime(new Date());
         try {
             //封装参数
             String updateDate = "";
@@ -78,7 +81,9 @@ public class SelectOrganService {
             }
             String param = this.fzParam(GlobalStaticConstant.GLOBAL_ORGANINFO_OWNER_USERID, GlobalStaticConstant.GLOBAL_ORGANINFO_ORGANIZATIONID, "zh_CN", updateDate);
             //访问接口
+            System.out.println(now.toString() + "调用defaultMeeting接口开始时间： "+ DateUtil.formatFullDateTime(new Date()));
             String result = HttpClientUtil.getInstance().getResponseBodyAsString(ServeIpConstant.selectOrganServicePath(), param);
+            System.out.println(now.toString() + "调用defaultMeeting接口结束时间： "+ DateUtil.formatFullDateTime(new Date()));
             if(StringUtils.isNotBlank(result)){
                 //把json字符串转成map
                 Map temp_map = GsonUtil.getMap(result);
@@ -86,8 +91,10 @@ public class SelectOrganService {
                 String resultDesc = String.valueOf(temp_map.get("resultDesc"));
                 if (StatusConstant.RESULT_CODE_SUCCESS.equals(result_code)) {//查询成功
                     String resultData = String.valueOf(temp_map.get("resultData"));
-                    Map dataMap = GsonUtil.getMap(resultData);;
+                    Map dataMap = GsonUtil.getMap(resultData);
+                    System.out.println(now.toString() + "处理defaultMeeting接口返回数据开始时间： "+ DateUtil.formatFullDateTime(new Date()));
                     parseFzDataMap(dataMap);
+                    System.out.println(now.toString() + "处理defaultMeeting接口返回数据结束时间： "+ DateUtil.formatFullDateTime(new Date()));
                 }
             }
         } catch (Exception ex) {

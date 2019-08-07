@@ -10,16 +10,9 @@ import java.util.logging.Logger;
 
 
 /**
- * Copyright Unicom(HN) 2015. All rights reserved.
- *
- * @File: DateUtil.java
- * @Package: com.unicom.core.util
- * @ClassName: DateUtil
- * @Description: 日期工具类
- * @Author Eleazar chenxi chenxu zhangsq zhaoqing
- * @Date 2015年11月3日
- * @Version V1.0
- * 
+ * 日期工具类.
+ * @author chenxi
+ * 创建时间：2019-6-20 18:06:06
  */
 public class DateUtil
 {

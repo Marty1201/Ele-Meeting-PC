@@ -124,4 +124,26 @@ public class MeetInfoDao extends CommonDao{
         return meetInfoList;
     }
     
+    /**
+     * 根据父会议id获取子会议信息，增加state=0和sort条件.
+     *
+     * @param parentMeetingId
+     * @return childMeetInfoList 子会议信息列表
+     */
+    public List<MeetInfo> findChildMeetInfos(String parentMeetingId) throws ApplicationException, SQLException {
+        List<MeetInfo> childMeetInfoList = new ArrayList<>();
+        try{
+            Dao<MeetInfo, Object> dao = getDao(MeetInfo.class);
+            QueryBuilder<MeetInfo, Object> queryBuilder = dao.queryBuilder();
+            queryBuilder.orderBy("sort", true).where().eq("parentMeetingId", parentMeetingId).and().eq("state", "0");
+            childMeetInfoList = dao.query(queryBuilder.prepare());
+        } catch (SQLException e) {
+            logger.warn(e.getCause().getMessage());
+            throw new ApplicationException(FxmlUtils.getResourceBundle().getString("error.not.found.all"));
+        } finally {
+            this.closeDbConnection();
+        }
+        return childMeetInfoList;
+    }
+    
 }
