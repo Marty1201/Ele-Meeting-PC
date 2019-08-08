@@ -93,7 +93,7 @@ public class SelectOrganService {
                     String resultData = String.valueOf(temp_map.get("resultData"));
                     Map dataMap = GsonUtil.getMap(resultData);
                     System.out.println(now.toString() + "处理defaultMeeting接口返回数据开始时间： "+ DateUtil.formatFullDateTime(new Date()));
-                    parseFzDataMap(dataMap);
+                    parseFzDataMap(dataMap);//to do: the cause of slowness
                     System.out.println(now.toString() + "处理defaultMeeting接口返回数据结束时间： "+ DateUtil.formatFullDateTime(new Date()));
                 }
             }

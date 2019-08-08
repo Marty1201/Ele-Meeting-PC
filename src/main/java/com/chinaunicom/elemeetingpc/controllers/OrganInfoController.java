@@ -27,9 +27,6 @@ import javafx.scene.layout.BorderPane;
  */
 public class OrganInfoController {
     
-//    @FXML
-//    private ListView<String> organListView;
-    
     @FXML
     private ListView<OrganInfoFx> organListView;
     
@@ -37,20 +34,10 @@ public class OrganInfoController {
     
     private static final Logger logger = LoggerFactory.getLogger(OrganInfoController.class);
     
-    //会议界面左侧列表
-    public static final String FXML_LEFT_NAVIGATION = "/fxml/fxml_left_navigation.fxml";
-    //会议界面顶部数据
-    public static final String FXML_INDEX_TOP = "/fxml/fxml_index_top.fxml";
-    //会议界面中部数据
-    public static final String FXML_INDEX_CENTER = "/fxml/fxml_index_center.fxml";
-    //会议界面
+    //会议首界面
     public static final String FXML_INDEX = "/fxml/fxml_index.fxml";
     
-    private BorderPane borderPane;
-
-    public void setBorderPane(BorderPane borderPane) {
-        this.borderPane = borderPane;
-    }
+    private BorderPane borderPaneMain;
     
     //初始化
     public void initialize(){
@@ -75,27 +62,26 @@ public class OrganInfoController {
                     //解析数据
                     service.getMeetInfosFromRemote();
                     //跳转界面
-                    showFxmlMeet();
+                    showFxmlIndex();
         });
     }
     
     /**
-     * 跳转会议界面
+     * 跳转会议首界面
      */
-    private void showFxmlMeet(){  
-        //加载顶部
-        //borderPane.setTop(FxmlUtils.fxmlLoader(FXML_INDEX_TOP));
-        //加载左侧
-        //borderPane.setLeft(FxmlUtils.fxmlLoader(FXML_LEFT_NAVIGATION));
-        //加载中部
-        //borderPane.setCenter(FxmlUtils.fxmlLoader(FXML_LEFT_NAVIGATION));
+    private void showFxmlIndex(){  
         try {            
             FXMLLoader loader = FxmlUtils.getFXMLLoader(FXML_INDEX);
-            borderPane.setCenter(loader.load()); //将当前BorderPane中间区域加载为机构选择界面
-            MeetLeftController meetLeftController = loader.getController(); //从loader中获取MeetLeftController
-            meetLeftController.setBorderPane(borderPane);//设置传参当前的borderPane，以便在MeetLeftController中获取到当前BorderPane
+            borderPaneMain.setCenter(loader.load()); //将当前BorderPane中间区域加载为会议首界面
+            MeetController meetController = loader.getController(); //从loader中获取MeetController
+            meetController.setBorderPane(borderPaneMain);//把borderPane设置为参数继续往下传，以便在MeetController中获取到当前BorderPane
         } catch (IOException e) {
+            e.printStackTrace();
             logger.error(e.getCause().getMessage());
         }
+    }
+    
+    public void setBorderPane(BorderPane borderPaneMain) {
+        this.borderPaneMain = borderPaneMain;
     }
 }

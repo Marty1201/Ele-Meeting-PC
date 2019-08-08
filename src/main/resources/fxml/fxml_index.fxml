@@ -24,7 +24,7 @@
                               <Insets right="20.0" />
                            </HBox.margin>
                         </ImageView>
-                        <ImageView fx:id="home_image" fitHeight="150.0" fitWidth="36.0" onMouseClicked="#shouye" pickOnBounds="true" preserveRatio="true">
+                        <ImageView fx:id="home_image" fitHeight="150.0" fitWidth="36.0" onMouseClicked="#showFxmlOrg" pickOnBounds="true" preserveRatio="true">
                            <image>
                               <Image url="/images/home.png" />
                            </image>

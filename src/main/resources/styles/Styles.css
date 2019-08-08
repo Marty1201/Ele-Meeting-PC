@@ -14,8 +14,19 @@
     -fx-background-color:#4581bf; 
     -fx-background-radius:30px;
     -fx-pref-height: 44px;
+    -fx-effect: dropshadow(three-pass-box, #72b9da, 10.0,0, 0, 0);
+    -fx-cursor: hand;
 }
-
+/* 登陆按钮鼠标选中样式 */
+.login-btn:hover{
+    -fx-font-size:20px; 
+    -fx-text-fill:#ffffff; 
+    -fx-background-color:#36699e; 
+    -fx-background-radius:30px;
+    -fx-pref-height: 44px;
+    -fx-effect: dropshadow(three-pass-box, #72b9da, 10.0,0, 0, 0);
+    -fx-cursor: hand;
+}
 /* 机构选择列表控件样式 */
 .organ-list-view{
     -fx-cursor: hand;
