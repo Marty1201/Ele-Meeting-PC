@@ -43,12 +43,12 @@
                   <Insets bottom="20.0" />
                </VBox.margin>
             </HBox>
-            <Button fx:id="LoginButton" alignment="CENTER" maxWidth="Infinity" mnemonicParsing="false" onAction="#showRegiCode" prefHeight="26.0" prefWidth="115.0" text="%login.verificationCode" textFill="#0d7ec9">
+            <Button alignment="CENTER" maxWidth="Infinity" mnemonicParsing="false" onAction="#showRegiCode" prefHeight="26.0" prefWidth="115.0" text="%login.verificationCode" textFill="#0d7ec9">
                <VBox.margin>
                   <Insets left="200.0" top="-10.0" />
                </VBox.margin>
             </Button>
-            <Button fx:id="LoginButton1" alignment="CENTER" maxWidth="Infinity" mnemonicParsing="false" onAction="#login" prefHeight="36.0" prefWidth="320.0"  styleClass="login-btn" text="%login.loginButton" textFill="WHITE">
+            <Button alignment="CENTER" maxWidth="Infinity" mnemonicParsing="false" onAction="#login" prefHeight="36.0" prefWidth="320.0"  styleClass="login-btn" text="%login.loginButton" textFill="WHITE">
                <VBox.margin>
                   <Insets top="16.0" />
                </VBox.margin>

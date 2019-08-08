@@ -36,12 +36,15 @@ import javafx.scene.layout.VBox;
  */
 public class MeetController {
     
-    //会议界面左侧列表
+    //左侧会议列表界面
     public static final String FXML_LEFT_NAVIGATION = "/fxml/fxml_left_navigation.fxml";
+    
+    //机构选择界面
+    public static final String FXML_ORG_FXML = "/fxml/fxml_org.fxml";
     
     private static final Logger logger = LoggerFactory.getLogger(MeetController.class);
     
-    private BorderPane borderPane;
+    private BorderPane borderPaneMain;
 
     private MeetInfoModel meetInfoModel;
 
@@ -95,8 +98,8 @@ public class MeetController {
                 Image icon = new Image(getClass().getResourceAsStream("/images/icon-book.jpg"));
                 ImageView[] imageViews = new ImageView[issueSize];
                 for (int k = 0; k < issueSize; k++) {
-                    imageViews[i] = new ImageView(icon);
-                    Label issueLabel = new Label(issueList.get(i).getIssueName(), imageViews[i]);
+                    imageViews[k] = new ImageView(icon);
+                    Label issueLabel = new Label(issueList.get(k).getIssueName(), imageViews[k]);
                     issueLabel.setPrefSize(30, 30);
                     issueLabel.setWrapText(true);
                     //issueLabel.setTextAlignment(TextAlignment.LEFT);
@@ -126,22 +129,38 @@ public class MeetController {
     }
     
     /**
-     * 首页（回退）
+     * 跳转左侧会议列表界面.
      */
     @FXML
-    private void shouye() {
+    private void showFxmlLeftNavigation() {
         try {
             FXMLLoader loader = FxmlUtils.getFXMLLoader(FXML_LEFT_NAVIGATION);
-            borderPane.setCenter(loader.load()); //将当前BorderPane中间区域加载为机构选择界面
+            borderPaneMain.setCenter(loader.load()); //将当前BorderPane中间区域加载为机构选择界面
             MeetLeftController meetLeftController = loader.getController(); //从loader中获取MeetLeftController
-            meetLeftController.setBorderPane(borderPane);//设置传参当前的borderPane，以便在MeetLeftController中获取到当前BorderPane
+            meetLeftController.setBorderPane(borderPaneMain);//设置传参当前的borderPane，以便在MeetLeftController中获取到当前BorderPane
         } catch (IOException e) {
             logger.error(e.getCause().getMessage());
         }
     }
     
+    /**
+     * 跳转机构选择界面.
+     */
+    @FXML
+    private void showFxmlOrg() {
+        try {
+            FXMLLoader loader = FxmlUtils.getFXMLLoader(FXML_ORG_FXML);
+            borderPaneMain.setCenter(loader.load()); //将当前BorderPane中间区域加载为机构选择界面
+            OrganInfoController organInfoController = loader.getController(); //从loader中获取OrganInfoController
+            organInfoController.setBorderPane(borderPaneMain);//设置传参当前的borderPaneMain，以便在OrganInfoController中获取到当前BorderPane
+        } catch (IOException e) {
+            e.printStackTrace();
+            logger.error(e.getCause().getMessage());
+        }
+    }
+    
     public void setBorderPane(BorderPane borderPane) {
-        this.borderPane = borderPane;
+        this.borderPaneMain = borderPaneMain;
     }
     
     /**

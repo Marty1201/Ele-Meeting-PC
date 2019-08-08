@@ -36,6 +36,7 @@ public class LoginController {
     @FXML
     private BorderPane borderPaneMain;
 
+    //机构选择界面
     public static final String FXML_ORG_FXML = "/fxml/fxml_org.fxml";
 
     private DictionaryModel dictionaryModel;
@@ -119,7 +120,7 @@ public class LoginController {
     }
 
     /**
-     * 跳转到选择机构列表
+     * 跳转到机构选择界面.
      */
     private void showFxmlOrg() {
         try {
@@ -130,9 +131,5 @@ public class LoginController {
         } catch (IOException e) {
             logger.error(e.getCause().getMessage());
         }
-    }
-
-    public BorderPane getBorderPane() {
-        return borderPaneMain;
     }
 }
