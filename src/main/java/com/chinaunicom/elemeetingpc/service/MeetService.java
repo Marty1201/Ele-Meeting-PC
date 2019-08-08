@@ -4,8 +4,16 @@ package com.chinaunicom.elemeetingpc.service;
 import com.chinaunicom.elemeetingpc.constant.GlobalStaticConstant;
 import com.chinaunicom.elemeetingpc.constant.ServeIpConstant;
 import com.chinaunicom.elemeetingpc.constant.StatusConstant;
+import com.chinaunicom.elemeetingpc.database.models.Annotation;
+import com.chinaunicom.elemeetingpc.database.models.FileResource;
+import com.chinaunicom.elemeetingpc.database.models.FileUserRelation;
+import com.chinaunicom.elemeetingpc.database.models.IssueFileRelation;
 import com.chinaunicom.elemeetingpc.database.models.IssueInfo;
+import com.chinaunicom.elemeetingpc.database.models.MeetInfo;
+import com.chinaunicom.elemeetingpc.database.models.MeetIssueRelation;
+import com.chinaunicom.elemeetingpc.database.models.MeetUserRelation;
 import com.chinaunicom.elemeetingpc.database.models.OrganInfo;
+import com.chinaunicom.elemeetingpc.modelFx.AnnotationModel;
 import com.chinaunicom.elemeetingpc.modelFx.FileResourceModel;
 import com.chinaunicom.elemeetingpc.modelFx.FileUserRelationModel;
 import com.chinaunicom.elemeetingpc.modelFx.IssueFileRelationModel;
@@ -44,7 +52,9 @@ public class MeetService {
     
     private MeetUserRelationModel meetUserRelationModel;
     
-    private FileUserRelationModel fileUserRelationModel;   
+    private FileUserRelationModel fileUserRelationModel;  
+    
+    private AnnotationModel annotationModel;
 
     
     /**
@@ -62,7 +72,7 @@ public class MeetService {
             if (!organInfoList.isEmpty()) {
                 updateDate = organInfoList.get(0).getUpdateDate();
             }
-            String param = this.fzParam(GlobalStaticConstant.GLOBAL_ORGANINFO_OWNER_USERID, GlobalStaticConstant.GLOBAL_ORGANINFO_ORGANIZATIONID, GlobalStaticConstant.GLOBAL_SELECTED_MEETID, updateDate);
+            String param = this.fzParam(GlobalStaticConstant.GLOBAL_ORGANINFO_OWNER_USERID, GlobalStaticConstant.GLOBAL_SELECTED_MEETID, updateDate);
             //访问接口
             String result = HttpClientUtil.getInstance().getResponseBodyAsString(ServeIpConstant.meetingOfOrganServicePath(), param);
             if(StringUtils.isNotBlank(result)){
@@ -85,14 +95,13 @@ public class MeetService {
      * 封装参数为json字符串
      *
      * @param userId
-     * @param orgId
      * @param meetingId
      * @param updateDate
      * 示例：{userId:'20190724085930588875478137127383',meetingId:'20190701145559610372604487039259',organizationId:'20190109175459084818173570055782',updateDate:''}
      * @return
      */
-    private String fzParam(String userId, String orgId, String meetingId, String updateDate) {
-        String resultString = "{userId:'"+userId+"',meetingId:'"+meetingId+"',orgId:'"+orgId+"',updateDate:'"+updateDate+"'}";
+    private String fzParam(String userId, String meetingId, String updateDate) {
+        String resultString = "{userId:'"+userId+"',meetingId:'"+meetingId+"',updateDate:'"+updateDate+"'}";
         return resultString;
     }
     
@@ -102,6 +111,19 @@ public class MeetService {
      * @throws ApplicationException 
      */
     private void parseFzDataMap(Map dataMap) throws ApplicationException {
+        
+        //处理子会议信息        
+        List<Map> meetInfoListMap = (List<Map>) dataMap.get("childMeetings");
+        if(meetInfoListMap!=null && !meetInfoListMap.isEmpty()){
+            this.meetInfoModel = new MeetInfoModel();
+            Map meetInfoMap = new HashMap();
+            for(int i=0;i<meetInfoListMap.size();i++){
+                meetInfoMap = meetInfoListMap.get(i);
+                MeetInfo meetInfo = new MeetInfo();
+                this.meetInfoModel.saveOrUpdateMeetInfo(this.setPropertiesMeetInfo(meetInfo, meetInfoMap));
+            }
+        }
+        
         //处理议题信息
         List<Map> issueInfoListMap = (List<Map>) dataMap.get("issues");
         if(issueInfoListMap!=null && !issueInfoListMap.isEmpty()){
@@ -113,6 +135,111 @@ public class MeetService {
                 this.issueInfoModel.saveOrUpdateIssueInfo(this.setPropertiesIssueInfo(issueInfo, issueInfoMap));
             }
         }
+        
+        //处理文件信息
+        List<Map> fileResourceListMap = (List<Map>) dataMap.get("files");
+        if(fileResourceListMap!=null && !fileResourceListMap.isEmpty()){
+            this.fileResourceModel = new FileResourceModel();
+            Map fileMap = new HashMap();
+            for(int i=0;i<fileResourceListMap.size();i++){
+                fileMap = fileResourceListMap.get(i);
+                FileResource fr = new FileResource();
+                this.fileResourceModel.saveOrUpdateFileResource(this.setPropertiesFileResource(fr, fileMap));
+            }
+        }
+        
+         //处理会议-议题关联信息
+        List<Map> meetIssueRelationListMap = (List<Map>) dataMap.get("meetingIssueInfos");
+        if(meetIssueRelationListMap!=null && !meetIssueRelationListMap.isEmpty()){
+            this.meetIssueRelationModel = new MeetIssueRelationModel();
+            Map map = new HashMap();
+            for(int i=0;i<meetIssueRelationListMap.size();i++){
+                map = meetIssueRelationListMap.get(i);
+                MeetIssueRelation mir = new MeetIssueRelation();
+                this.meetIssueRelationModel.saveOrUpdate(this.setPropertiesMeetIssueRelation(mir, map));
+            }
+        }
+        
+        //处理议题-文件关联信息
+        List<Map> issueFileRelationListMap = (List<Map>) dataMap.get("issueFileInfos");
+        if(issueFileRelationListMap!=null && !issueFileRelationListMap.isEmpty()){
+            this.issueFileRelationModel = new IssueFileRelationModel();
+            Map map = new HashMap();
+            for(int i=0;i<issueFileRelationListMap.size();i++){
+                map = issueFileRelationListMap.get(i);
+                IssueFileRelation mir = new IssueFileRelation();
+                this.issueFileRelationModel.saveOrUpdate(this.setPropertiesIssueFileRelation(mir, map));
+            }
+        }
+        
+        //处理会议-用户关联信息
+        List<Map> meetUserRelationListMap = (List<Map>) dataMap.get("meetingUserInfos");
+        if(meetUserRelationListMap!=null && !meetUserRelationListMap.isEmpty()){
+            this.meetUserRelationModel = new MeetUserRelationModel();
+            Map map = new HashMap();
+            for(int i=0;i<meetUserRelationListMap.size();i++){
+                map = meetUserRelationListMap.get(i);
+                MeetUserRelation mir = new MeetUserRelation();
+                this.meetUserRelationModel.saveOrUpdate(this.setPropertiesMeetUserRelation(mir, map));
+            }
+        }
+        
+        //处理文件-用户关联信息
+        List<Map> fileUserRelationListMap = (List<Map>) dataMap.get("fileUserInfos");
+        if(fileUserRelationListMap!=null && !fileUserRelationListMap.isEmpty()){
+            this.fileUserRelationModel = new FileUserRelationModel();
+            Map map = new HashMap();
+            for(int i=0;i<fileUserRelationListMap.size();i++){
+                map = fileUserRelationListMap.get(i);
+                FileUserRelation mir = new FileUserRelation();
+                this.fileUserRelationModel.saveOrUpdate(this.setPropertiesFileUserRelation(mir, map));
+            }
+        }
+        
+        //处理批注信息       
+        List<Map> annotationListMap = (List<Map>) dataMap.get("annotations");
+        if(annotationListMap!=null && !annotationListMap.isEmpty()){
+            this.annotationModel = new AnnotationModel();
+            Map map = new HashMap();
+            for(int i=0;i<annotationListMap.size();i++){
+                map = annotationListMap.get(i);
+                Annotation mir = new Annotation();
+                this.annotationModel.saveOrUpdate(this.setPropertiesAnnotation(mir, map));
+            }
+        }
+        
+    }
+    
+    /**
+     * 解析数据并封装MeetInfo对象.
+     * @param info
+     * @param meetInfoMap
+     * @return 
+     */
+    public MeetInfo setPropertiesMeetInfo(MeetInfo info,Map meetInfoMap){
+        String meetingId=String.valueOf(meetInfoMap.get("meetingId"));
+        String meetingName=String.valueOf(meetInfoMap.get("meetingName"));
+        String startDateTime=String.valueOf(meetInfoMap.get("startDateTime"));
+        String endDateTime=String.valueOf(meetInfoMap.get("endDateTime"));
+        String state=String.valueOf(meetInfoMap.get("state"));
+        String createTime=String.valueOf(meetInfoMap.get("createTime"));
+        String parentMeetingId=String.valueOf(meetInfoMap.get("parentMeetingId"));
+        String sort=String.valueOf(meetInfoMap.get("sort"));
+        String englishName=String.valueOf(meetInfoMap.get("englishName"));
+        String isEng=String.valueOf(meetInfoMap.get("isEng"));
+        info.setMeetingId(meetingId);
+        info.setMeetingName(meetingName);
+        info.setStartDateTime(startDateTime);
+        info.setEndDateTime(endDateTime);
+        info.setState(state);
+        info.setCreateTime(createTime);
+        info.setParentMeetingId(parentMeetingId);
+        info.setSort(Double.valueOf(sort).intValue());
+        info.setEnglishName(englishName);
+        info.setIsEng(isEng);
+        info.setOrganizationId(GlobalStaticConstant.GLOBAL_ORGANINFO_ORGANIZATIONID);
+        
+        return info;
     }
     
     /**
@@ -132,6 +259,149 @@ public class MeetService {
         info.setState(state);
         info.setSort(Double.valueOf(sort).intValue());
         info.setEnglishName(englishName);
+        
+        return info;
+    }
+    
+    /**
+     * 解析数据并封装FileResource对象.
+     * @param info
+     * @param infoMap
+     * @return 
+     */
+    public FileResource setPropertiesFileResource(FileResource info,Map infoMap){
+        String fileId=String.valueOf(infoMap.get("fileId"));
+        String fileName=String.valueOf(infoMap.get("fileName"));
+        String filePath=String.valueOf(infoMap.get("filePath"));
+        String fileSize=String.valueOf(infoMap.get("fileSize"));
+        String password=String.valueOf(infoMap.get("password"));
+        String state=String.valueOf(infoMap.get("state"));
+        String sort=String.valueOf(infoMap.get("sort"));
+        info.setFileId(fileId);
+        info.setFileName(fileName);
+        info.setFilePath(filePath);
+        info.setFileSize(fileSize);
+        info.setPassword(password);
+        info.setState(state);
+        info.setSort(Double.valueOf(sort).intValue());
+        
+        return info;
+    }
+    
+    /**
+     * 解析数据并封装MeetIssueRelation对象.
+     * @param info
+     * @param infoMap
+     * @return 
+     */
+    public MeetIssueRelation setPropertiesMeetIssueRelation(MeetIssueRelation info,Map infoMap){
+        String meettingIssueId=String.valueOf(infoMap.get("meettingIssueId"));
+        String issueId=String.valueOf(infoMap.get("issueId"));
+        String meetingId=String.valueOf(infoMap.get("meetingId"));
+        String state=String.valueOf(infoMap.get("state"));
+        String sort=String.valueOf(infoMap.get("sort"));
+        info.setMeettingIssueId(meettingIssueId);
+        info.setIssueId(issueId);
+        info.setMeetingId(meetingId);
+        info.setSort(Double.valueOf(sort).intValue());
+        info.setState(state);
+        
+        return info;
+    }
+    
+    /**
+     * 解析数据并封装IssueFileRelation对象.
+     * @param info
+     * @param infoMap
+     * @return 
+     */
+    public IssueFileRelation setPropertiesIssueFileRelation(IssueFileRelation info,Map infoMap){
+        String issueFileInfo=String.valueOf(infoMap.get("issueFileInfo"));
+        String issueId=String.valueOf(infoMap.get("issueId"));
+        String fileId=String.valueOf(infoMap.get("fileId"));
+        String fileName=String.valueOf(infoMap.get("fileName"));
+        String state=String.valueOf(infoMap.get("state"));
+        String sort=String.valueOf(infoMap.get("sort"));
+        info.setIssueFileInfo(issueFileInfo);
+        info.setIssueId(issueId);
+        info.setFileId(fileId);
+        info.setFileName(fileName);
+        info.setSort(Double.valueOf(sort).intValue());
+        info.setState(state);
+        
+        return info;
+    }
+    
+    /**
+     * 解析数据并封装MeetUserRelation对象.
+     * @param info
+     * @param infoMap
+     * @return 
+     */
+    public MeetUserRelation setPropertiesMeetUserRelation(MeetUserRelation info,Map infoMap){
+        String meetingUserId=String.valueOf(infoMap.get("meetingUserId"));
+        String userId=String.valueOf(infoMap.get("userId"));
+        String meetingId=String.valueOf(infoMap.get("meetingId"));
+        String state=String.valueOf(infoMap.get("state"));
+        info.setMeetingUserId(meetingUserId);
+        info.setMeetingId(meetingId);
+        info.setUserId(userId);
+        info.setState(state);
+        
+        return info;
+    }
+    
+    /**
+     * 解析数据并封装FileUserRelation对象.
+     * @param info
+     * @param infoMap
+     * @return 
+     */
+    public FileUserRelation setPropertiesFileUserRelation(FileUserRelation info,Map infoMap){
+        String userFileId=String.valueOf(infoMap.get("userFileId"));
+        String userId=String.valueOf(infoMap.get("userId"));
+        String fileId=String.valueOf(infoMap.get("fileId"));
+        String state=String.valueOf(infoMap.get("state"));
+        info.setUserFileId(userFileId);
+        info.setFileId(fileId);
+        info.setUserId(userId);
+        info.setState(state);
+        
+        return info;
+    }
+    
+    /**
+     * 解析数据并封装Annotation对象.
+     * @param info
+     * @param infoMap
+     * @return 
+     */
+    public Annotation setPropertiesAnnotation(Annotation info,Map infoMap){
+        String annoId=String.valueOf(infoMap.get("annoId"));
+        String annoDate=String.valueOf(infoMap.get("annoDate"));
+        String xPoint=String.valueOf(infoMap.get("xPoint"));
+        String yPoint=String.valueOf(infoMap.get("yPoint"));
+        String content=String.valueOf(infoMap.get("content"));
+        String height=String.valueOf(infoMap.get("height"));
+        String width=String.valueOf(infoMap.get("width"));
+        String pageNum=String.valueOf(infoMap.get("pageNum"));
+        String fileId=String.valueOf(infoMap.get("fileId"));
+        String annoType=String.valueOf(infoMap.get("annoType"));
+        String state=String.valueOf(infoMap.get("state"));
+        String userId=String.valueOf(infoMap.get("userId"));
+        
+        info.setAnnoId(annoId);
+        info.setAnnoDate(annoDate);
+        info.setAnnoType(annoType);
+        info.setContent(content);
+        info.setFileId(fileId);
+        info.setHeight(height);
+        info.setPageNum(Double.valueOf(pageNum).intValue());
+        info.setState(state);
+        info.setUserId(userId);
+        info.setWidth(width);
+        info.setxPoint(xPoint);
+        info.setyPoint(yPoint);
         
         return info;
     }

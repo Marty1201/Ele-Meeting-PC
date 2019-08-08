@@ -18,8 +18,8 @@ public class ServeIpConstant {
     //修改密码接口
     private static final String RESET_PASSWORD_INTERFACE="/mUser.do?action=resetPassword";
     
-    //获取机构的会议列表信息
-    private static final String MEETING_OF_ORGAN_INTEGERFACE="/mMeet.do";
+    //根据会议ID获取子会议、议题、文件等信息
+    private static final String MEETING_OF_ORGAN_INTEGERFACE="/mMeet.do?action=getMeeting";
     
     /**
      * 获取服务接口地址全路径

@@ -1,6 +1,7 @@
 
 package com.chinaunicom.elemeetingpc.database.dutils;
 
+import com.chinaunicom.elemeetingpc.database.models.Annotation;
 import com.chinaunicom.elemeetingpc.database.models.DictionaryInfo;
 import com.chinaunicom.elemeetingpc.database.models.FileResource;
 import com.chinaunicom.elemeetingpc.database.models.FileUserRelation;
@@ -107,6 +108,7 @@ public class DbManager {
             TableUtils.createTableIfNotExists(connectionSource, FileUserRelation.class);
             TableUtils.createTableIfNotExists(connectionSource, DictionaryInfo.class);
             TableUtils.createTableIfNotExists(connectionSource, SyncParams.class);
+            TableUtils.createTableIfNotExists(connectionSource, Annotation.class);
         } catch(SQLException e){
             logger.warn(e.getMessage());
             //e.printStackTrace();

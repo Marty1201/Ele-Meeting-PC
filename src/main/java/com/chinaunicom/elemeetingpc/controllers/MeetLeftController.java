@@ -4,6 +4,7 @@ package com.chinaunicom.elemeetingpc.controllers;
 import com.chinaunicom.elemeetingpc.constant.GlobalStaticConstant;
 import com.chinaunicom.elemeetingpc.modelFx.MeetInfoFx;
 import com.chinaunicom.elemeetingpc.modelFx.MeetInfoModel;
+import com.chinaunicom.elemeetingpc.service.MeetService;
 import com.chinaunicom.elemeetingpc.utils.DialogsUtils;
 import com.chinaunicom.elemeetingpc.utils.FxmlUtils;
 import com.j256.ormlite.logger.Logger;
@@ -54,6 +55,7 @@ public class MeetLeftController {
     public void initialize(){
         textFieldUsername.setText(GlobalStaticConstant.GLOBAL_USERINFO_USERNAME);
         meetInfoModel = new MeetInfoModel();
+        MeetService meetService = new MeetService();
         ObservableList<MeetInfoFx> fxlist1 = meetInfoModel.getCurrentMeetInfoFxs();
         int fxlist1_size = fxlist1.size();
         meetCurrentListView.setItems(fxlist1);
@@ -67,6 +69,8 @@ public class MeetLeftController {
                     System.out.println("observable-meetName: " + observable.getValue().getMeetingName()); 
                     
                     GlobalStaticConstant.GLOBAL_SELECTED_MEETID = observable.getValue().getMeetingId();
+                    //调用接口，从远程服务器上获取会议相关信息
+                    meetService.getMeetInfosFromRemote();
                     showFxmlMeet();
                 }
         );
@@ -83,6 +87,8 @@ public class MeetLeftController {
                     System.out.println("observable-meetId: " + observable.getValue().getMeetingId());
                     System.out.println("observable-meetName: " + observable.getValue().getMeetingName()); 
                     GlobalStaticConstant.GLOBAL_SELECTED_MEETID = observable.getValue().getMeetingId();
+                    //调用接口，从远程服务器上获取会议相关信息
+                    meetService.getMeetInfosFromRemote();
                     showFxmlMeet();
                 }
         );
@@ -99,6 +105,8 @@ public class MeetLeftController {
                     System.out.println("observable-meetId: " + observable.getValue().getMeetingId());
                     System.out.println("observable-meetName: " + observable.getValue().getMeetingName());
                     GlobalStaticConstant.GLOBAL_SELECTED_MEETID = observable.getValue().getMeetingId();
+                    //调用接口，从远程服务器上获取会议相关信息
+                    meetService.getMeetInfosFromRemote();
                     showFxmlMeet();
                 }
         );
