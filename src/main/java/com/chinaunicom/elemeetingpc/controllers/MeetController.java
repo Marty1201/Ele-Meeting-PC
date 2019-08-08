@@ -12,6 +12,7 @@ import com.chinaunicom.elemeetingpc.utils.exceptions.ApplicationException;
 import com.j256.ormlite.logger.Logger;
 import com.j256.ormlite.logger.LoggerFactory;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import javafx.fxml.FXML;
@@ -57,41 +58,26 @@ public class MeetController {
      * @throws ApplicationException
      */
     public void initialize() throws ApplicationException {
-        //业务逻辑
         this.meetInfoModel = new MeetInfoModel();
         this.meetIssueRelationModel = new MeetIssueRelationModel();
         this.issueInfoModel = new IssueInfoModel();
         List<MeetIssueRelation> meetIssueRelationList = new ArrayList<>();
         List<IssueInfo> issueList = new ArrayList<>();
         List<String> issueIdList = new ArrayList<>();
-        String parentMeetingId = "";
         try {
-            //获取默认会议的id
-            List<MeetInfo> currentMeetList = meetInfoModel.getCurrentMeetInfo();
-            List<MeetInfo> futureMeetList = meetInfoModel.getFutureMeetInfo();
-            List<MeetInfo> historyMeetList = meetInfoModel.getHistoryMeetInfo();
-            if(!currentMeetList.isEmpty()){
-                parentMeetingId = currentMeetList.get(0).getMeetingId();
-            } else if(!futureMeetList.isEmpty()){
-                parentMeetingId = futureMeetList.get(0).getMeetingId();
-            } else if(!historyMeetList.isEmpty()){
-                parentMeetingId = historyMeetList.get(0).getMeetingId();
-            }
-            //在MeetInfo表里根据默认会议的id获取其下子会议信息
-            List<MeetInfo> childMeetList = meetInfoModel.queryChildMeetInfosByParentId(parentMeetingId);
-
-            //界面逻辑
+            //获取默认父会议id, 在MeetInfo表里根据默认父会议id查到其下子会议信息
+            List<MeetInfo> childMeetList = meetInfoModel.queryChildMeetInfosByParentId(getDefaultMeetingId());
+            //存放子会议区域控件的list
             List<Node> childMeetingSectionList = new ArrayList<>();
-            int childMeetSize = childMeetList.size(); //子会议个数
             //子会议
-            for (int i = 0; i < childMeetSize; i++) {
+            for (int i = 0; i < childMeetList.size(); i++) {
                 //子会议名称区域
                 TextField childMeetingName = new TextField(childMeetList.get(i).getMeetingName());
                 childMeetingName.setAlignment(Pos.CENTER);
                 childMeetingName.setPrefSize(1920.0, 68.0);
                 childMeetingName.setStyle("-fx-text-fill:#ffffff;-fx-background-color:#4581bf;-fx-font-size:20px;-fx-pref-height: 40px;");
                 childMeetingSectionList.add(childMeetingName);
-                //议题区域
+                //子会议议题区域
                 FlowPane childMeetingFlowPane = new FlowPane(Orientation.HORIZONTAL, 2, 4);
                 childMeetingFlowPane.setPrefWrapLength(240);
                 childMeetingFlowPane.setPrefSize(1920.0, 363.0);
@@ -133,7 +119,6 @@ public class MeetController {
                 //childMeetingSectionList.add(sp);
                 childMeetingSectionList.add(childMeetingFlowPane);
             }
-            
             subMeetingSection.getChildren().addAll(childMeetingSectionList);
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -157,5 +142,27 @@ public class MeetController {
     
     public void setBorderPane(BorderPane borderPane) {
         this.borderPane = borderPane;
+    }
+    
+    /**
+     * 获取默认父会议id，顺序优先级为当前会议 > 即将召开会议 > 历史会议.
+     *
+     * @return parentMeetingId 父会议id
+     * @throws ApplicationException
+     * @throws java.sql.SQLException
+     */
+    public String getDefaultMeetingId() throws ApplicationException, SQLException{
+        String parentMeetingId = "";
+        List<MeetInfo> currentMeetList = meetInfoModel.getCurrentMeetInfo();
+        List<MeetInfo> futureMeetList = meetInfoModel.getFutureMeetInfo();
+        List<MeetInfo> historyMeetList = meetInfoModel.getHistoryMeetInfo();
+        if (!currentMeetList.isEmpty()) {
+            parentMeetingId = currentMeetList.get(0).getMeetingId();
+        } else if (!futureMeetList.isEmpty()) {
+            parentMeetingId = futureMeetList.get(0).getMeetingId();
+        } else if (!historyMeetList.isEmpty()) {
+            parentMeetingId = historyMeetList.get(0).getMeetingId();
+        }
+        return parentMeetingId;
     }
 }
