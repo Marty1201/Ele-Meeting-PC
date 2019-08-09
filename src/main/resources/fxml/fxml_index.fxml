@@ -16,7 +16,7 @@
                <children>
                   <HBox minHeight="66.0" prefHeight="66.0" prefWidth="1920.0">
                      <children>
-                        <ImageView fitHeight="54.0" fitWidth="36.0" pickOnBounds="true" preserveRatio="true">
+                        <ImageView fitHeight="54.0" fitWidth="36.0" onMouseClicked="#showFxmlLeftNavigation" pickOnBounds="true" preserveRatio="true">
                            <image>
                               <Image url="/images/menu.png" />
                            </image>

@@ -1,6 +1,7 @@
 
 package com.chinaunicom.elemeetingpc.controllers;
 
+import com.chinaunicom.elemeetingpc.constant.GlobalStaticConstant;
 import com.chinaunicom.elemeetingpc.database.models.IssueInfo;
 import com.chinaunicom.elemeetingpc.database.models.MeetInfo;
 import com.chinaunicom.elemeetingpc.database.models.MeetIssueRelation;
@@ -28,6 +29,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.VBox;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * 会议首页面控制器
@@ -147,7 +149,7 @@ public class MeetController {
      * 跳转机构选择界面.
      */
     @FXML
-    private void showFxmlOrg() {
+    public void showFxmlOrg() {
         try {
             FXMLLoader loader = FxmlUtils.getFXMLLoader(FXML_ORG_FXML);
             borderPaneMain.setCenter(loader.load()); //将当前BorderPane中间区域加载为机构选择界面
@@ -159,7 +161,7 @@ public class MeetController {
         }
     }
     
-    public void setBorderPane(BorderPane borderPane) {
+    public void setBorderPane(BorderPane borderPaneMain) {
         this.borderPaneMain = borderPaneMain;
     }
     
@@ -171,16 +173,18 @@ public class MeetController {
      * @throws java.sql.SQLException
      */
     public String getDefaultMeetingId() throws ApplicationException, SQLException{
-        String parentMeetingId = "";
-        List<MeetInfo> currentMeetList = meetInfoModel.getCurrentMeetInfo();
-        List<MeetInfo> futureMeetList = meetInfoModel.getFutureMeetInfo();
-        List<MeetInfo> historyMeetList = meetInfoModel.getHistoryMeetInfo();
-        if (!currentMeetList.isEmpty()) {
-            parentMeetingId = currentMeetList.get(0).getMeetingId();
-        } else if (!futureMeetList.isEmpty()) {
-            parentMeetingId = futureMeetList.get(0).getMeetingId();
-        } else if (!historyMeetList.isEmpty()) {
-            parentMeetingId = historyMeetList.get(0).getMeetingId();
+        String parentMeetingId = GlobalStaticConstant.GLOBAL_SELECTED_MEETID;
+        if (StringUtils.isBlank(parentMeetingId)) {
+            List<MeetInfo> currentMeetList = meetInfoModel.getCurrentMeetInfo();
+            List<MeetInfo> futureMeetList = meetInfoModel.getFutureMeetInfo();
+            List<MeetInfo> historyMeetList = meetInfoModel.getHistoryMeetInfo();
+            if (!currentMeetList.isEmpty()) {
+                parentMeetingId = currentMeetList.get(0).getMeetingId();
+            } else if (!futureMeetList.isEmpty()) {
+                parentMeetingId = futureMeetList.get(0).getMeetingId();
+            } else if (!historyMeetList.isEmpty()) {
+                parentMeetingId = historyMeetList.get(0).getMeetingId();
+            }
         }
         return parentMeetingId;
     }

@@ -19,5 +19,5 @@ public class GlobalStaticConstant {
     public static String GLOBAL_ORGANINFO_OWNER_USERID = "1";
     
     //当前选择的会议ID
-    public static String GLOBAL_SELECTED_MEETID = "1";
+    public static String GLOBAL_SELECTED_MEETID = "";
 }

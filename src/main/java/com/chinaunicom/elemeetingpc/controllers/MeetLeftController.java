@@ -41,11 +41,7 @@ public class MeetLeftController {
     
     private static final Logger logger = LoggerFactory.getLogger(MeetLeftController.class);
     
-    private BorderPane borderPane;
-
-    public void setBorderPane(BorderPane borderPane) {
-        this.borderPane = borderPane;
-    }
+    private BorderPane borderPaneMain;
     
     //会议界面中部数据
     public static final String FXML_INDEX = "/fxml/fxml_index.fxml";
@@ -130,11 +126,15 @@ public class MeetLeftController {
     private void showFxmlMeet(){
         try {            
             FXMLLoader loader = FxmlUtils.getFXMLLoader(FXML_INDEX);
-            borderPane.setCenter(loader.load()); //将当前BorderPane中间区域加载为机构选择界面
+            borderPaneMain.setCenter(loader.load()); //将当前BorderPane中间区域加载为机构选择界面
             MeetController meetController = loader.getController(); //从loader中获取MeetController
-            meetController.setBorderPane(borderPane);//设置传参当前的borderPane，以便在MeetController中获取到当前BorderPane
+            meetController.setBorderPane(borderPaneMain);//设置传参当前的borderPane，以便在MeetController中获取到当前BorderPane
         } catch (IOException e) {
             logger.error(e.getCause().getMessage());
         }       
+    }
+    
+    public void setBorderPane(BorderPane borderPaneMain) {
+        this.borderPaneMain = borderPaneMain;
     }
 }
