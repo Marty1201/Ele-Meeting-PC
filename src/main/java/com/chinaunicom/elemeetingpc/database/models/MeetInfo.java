@@ -52,6 +52,12 @@ public class MeetInfo implements BaseModel{
     //所属机构ID
     @DatabaseField(columnName = "organizationId")
     private String organizationId;
+    
+    //更新时间
+    @DatabaseField(columnName = "updateDate")
+    private String updateDate;
+
+
 
     public MeetInfo() {
     }
@@ -158,6 +164,12 @@ public class MeetInfo implements BaseModel{
         this.isEng = isEng;
     }
     
-    
+    public String getUpdateDate() {
+        return updateDate;
+    }
+
+    public void setUpdateDate(String updateDate) {
+        this.updateDate = updateDate;
+    }  
     
 }

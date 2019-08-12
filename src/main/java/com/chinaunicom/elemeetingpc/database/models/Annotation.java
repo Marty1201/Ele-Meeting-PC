@@ -12,7 +12,7 @@ import com.j256.ormlite.table.DatabaseTable;
  * 批注类
  * @author zhaojunfeng
  */
-@DatabaseTable(tableName = "meet_annotation")
+@DatabaseTable(tableName = "meetAnnotation")
 public class Annotation  implements BaseModel{
     //id
     @DatabaseField(columnName = "annoId",id = true)
