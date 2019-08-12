@@ -1,11 +1,6 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package com.chinaunicom.elemeetingpc.modelFx;
 
-import com.chinaunicom.elemeetingpc.constant.GlobalStaticConstant;
 import com.chinaunicom.elemeetingpc.database.dao.MeetInfoDao;
 import com.chinaunicom.elemeetingpc.database.models.MeetInfo;
 import com.chinaunicom.elemeetingpc.utils.DateUtil;
@@ -21,8 +16,8 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 /**
- *
- * @author zhaojunfeng
+ * 会议信息Dao层业务实现.
+ * @author zhaojunfeng, chenxi
  */
 public class MeetInfoModel {
     
@@ -40,13 +35,13 @@ public class MeetInfoModel {
      * 获取正在进行的会议列表
      * @return 
      */
-    public ObservableList<MeetInfoFx> getCurrentMeetInfoFxs(){
+    public ObservableList<MeetInfoFx> getCurrentMeetInfoFxs(List<String> parentMeetIdList){
         ObservableList<MeetInfoFx> observableList = FXCollections.observableArrayList();
         MeetInfoDao meetInfoDao = new MeetInfoDao();
         try {
             String dateTimeString = DateUtil.formatFullDateTime(new Date());
             List<MeetInfo> meetInfoList = meetInfoDao.findCurrentMeetInfoList(
-                    GlobalStaticConstant.GLOBAL_ORGANINFO_ORGANIZATIONID,dateTimeString);
+                    parentMeetIdList,dateTimeString);
             List<MeetInfoFx> fxList = new ArrayList<>();
             meetInfoList.forEach(meet -> {
                 fxList.add(MeetInfoConverter.convertToMeetInfoFx(meet));
@@ -68,13 +63,13 @@ public class MeetInfoModel {
      * 获取即将进行的会议
      * @return 
      */
-    public ObservableList<MeetInfoFx> getFutureMeetInfoFxs(){
+    public ObservableList<MeetInfoFx> getFutureMeetInfoFxs(List<String> parentMeetIdList){
         ObservableList<MeetInfoFx> observableList = FXCollections.observableArrayList();
         MeetInfoDao meetInfoDao = new MeetInfoDao();
         try {
             String dateTimeString = DateUtil.formatFullDateTime(new Date());
             List<MeetInfo> meetInfoList = meetInfoDao.findFutureMeetInfoList(
-                    GlobalStaticConstant.GLOBAL_ORGANINFO_ORGANIZATIONID,dateTimeString);
+                    parentMeetIdList,dateTimeString);
             List<MeetInfoFx> fxList = new ArrayList<>();
             meetInfoList.forEach(meet -> {
                 fxList.add(MeetInfoConverter.convertToMeetInfoFx(meet));
@@ -95,13 +90,13 @@ public class MeetInfoModel {
      * 获取会议的历史记录
      * @return 
      */
-    public ObservableList<MeetInfoFx> getHistoryMeetInfoFxs(){
+    public ObservableList<MeetInfoFx> getHistoryMeetInfoFxs(List<String> parentMeetIdList){
         ObservableList<MeetInfoFx> observableList = FXCollections.observableArrayList();
         MeetInfoDao meetInfoDao = new MeetInfoDao();
         try {
             String dateTimeString = DateUtil.formatFullDateTime(new Date());
             List<MeetInfo> meetInfoList = meetInfoDao.findHistoryMeetInfoList(
-                    GlobalStaticConstant.GLOBAL_ORGANINFO_ORGANIZATIONID,dateTimeString);
+                    parentMeetIdList,dateTimeString);
             List<MeetInfoFx> fxList = new ArrayList<>();
             meetInfoList.forEach(meet -> {
                 fxList.add(MeetInfoConverter.convertToMeetInfoFx(meet));
@@ -121,39 +116,42 @@ public class MeetInfoModel {
     /**
      * 获取正在进行的会议列表，增加state=0和sort条件.
      *
+     * @param parentMeetIdList 父会议id列表
      * @return currentMeetInfoList 正在进行的会议列表
      */
-    public List<MeetInfo> getCurrentMeetInfo() throws ApplicationException, SQLException{
+    public List<MeetInfo> getCurrentMeetInfo(List<String> parentMeetIdList) throws ApplicationException, SQLException{
         MeetInfoDao meetInfoDao = new MeetInfoDao();
         List<MeetInfo> currentMeetInfoList = new ArrayList<>();
         String dateTimeString = DateUtil.formatFullDateTime(new Date());
-        currentMeetInfoList = meetInfoDao.findCurrentMeetInfoList(GlobalStaticConstant.GLOBAL_ORGANINFO_ORGANIZATIONID, dateTimeString);
+        currentMeetInfoList = meetInfoDao.findCurrentMeetInfoList(parentMeetIdList, dateTimeString);
         return currentMeetInfoList;
     }
     
     /**
      * 获取即将进行的会议列表，增加state=0和sort条件.
      *
+     * @param parentMeetIdList 父会议id列表
      * @return futureMeetInfoList 即将召开的会议列表
      */
-    public List<MeetInfo> getFutureMeetInfo() throws ApplicationException, SQLException {
+    public List<MeetInfo> getFutureMeetInfo(List<String> parentMeetIdList) throws ApplicationException, SQLException {
         MeetInfoDao meetInfoDao = new MeetInfoDao();
         List<MeetInfo> futureMeetInfoList = new ArrayList<>();
         String dateTimeString = DateUtil.formatFullDateTime(new Date());
-        futureMeetInfoList = meetInfoDao.findFutureMeetInfoList(GlobalStaticConstant.GLOBAL_ORGANINFO_ORGANIZATIONID, dateTimeString);
+        futureMeetInfoList = meetInfoDao.findFutureMeetInfoList(parentMeetIdList, dateTimeString);
         return futureMeetInfoList;
     }
 
     /**
      * 获取历史会议列表，增加state=0和sort条件.
      *
+     * @param parentMeetIdList 父会议id列表
      * @return historyMeetInfoList 历史会议列表
      */
-    public List<MeetInfo> getHistoryMeetInfo() throws ApplicationException, SQLException {
+    public List<MeetInfo> getHistoryMeetInfo(List<String> parentMeetIdList) throws ApplicationException, SQLException {
         MeetInfoDao meetInfoDao = new MeetInfoDao();
         List<MeetInfo> historyMeetInfoList = new ArrayList<>();
         String dateTimeString = DateUtil.formatFullDateTime(new Date());
-        historyMeetInfoList = meetInfoDao.findHistoryMeetInfoList(GlobalStaticConstant.GLOBAL_ORGANINFO_ORGANIZATIONID, dateTimeString);
+        historyMeetInfoList = meetInfoDao.findHistoryMeetInfoList(parentMeetIdList, dateTimeString);
         return historyMeetInfoList;
     }
     
@@ -168,5 +166,18 @@ public class MeetInfoModel {
         List<MeetInfo> childMeetInfoList = new ArrayList<>();
         childMeetInfoList = meetInfoDao.findChildMeetInfos(parentMeetingId);
         return childMeetInfoList;
+    }
+    
+    /**
+     * 根据子会议id查询会议信息.
+     *
+     * @param childMeetId
+     * @return meetInfo 会议信息
+     */
+    public List<MeetInfo> queryMeetInfoByChildMeetId(String childMeetId) throws ApplicationException, SQLException {
+        MeetInfoDao meetInfoDao = new MeetInfoDao();
+        List<MeetInfo> meetInfoList = new ArrayList<>();
+        meetInfoList = meetInfoDao.findByFieldNameAndValue(MeetInfo.class, "meetingId", childMeetId);
+        return meetInfoList;
     }
 }

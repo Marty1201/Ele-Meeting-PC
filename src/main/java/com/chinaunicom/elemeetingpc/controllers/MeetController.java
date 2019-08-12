@@ -5,9 +5,11 @@ import com.chinaunicom.elemeetingpc.constant.GlobalStaticConstant;
 import com.chinaunicom.elemeetingpc.database.models.IssueInfo;
 import com.chinaunicom.elemeetingpc.database.models.MeetInfo;
 import com.chinaunicom.elemeetingpc.database.models.MeetIssueRelation;
+import com.chinaunicom.elemeetingpc.database.models.MeetUserRelation;
 import com.chinaunicom.elemeetingpc.modelFx.IssueInfoModel;
 import com.chinaunicom.elemeetingpc.modelFx.MeetInfoModel;
 import com.chinaunicom.elemeetingpc.modelFx.MeetIssueRelationModel;
+import com.chinaunicom.elemeetingpc.modelFx.MeetUserRelationModel;
 import com.chinaunicom.elemeetingpc.utils.FxmlUtils;
 import com.chinaunicom.elemeetingpc.utils.exceptions.ApplicationException;
 import com.j256.ormlite.logger.Logger;
@@ -16,6 +18,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Orientation;
@@ -53,6 +56,8 @@ public class MeetController {
     private MeetIssueRelationModel meetIssueRelationModel;
 
     private IssueInfoModel issueInfoModel;
+    
+    private MeetUserRelationModel meetUserRelationModel;
 
     @FXML
     private VBox subMeetingSection;
@@ -70,7 +75,7 @@ public class MeetController {
         List<IssueInfo> issueList = new ArrayList<>();
         List<String> issueIdList = new ArrayList<>();
         try {
-            //获取默认父会议id, 在MeetInfo表里根据默认父会议id查到其下子会议信息
+            //获取默认会议的父会议id, 在MeetInfo表里根据父会议id查到其下子会议信息
             List<MeetInfo> childMeetList = meetInfoModel.queryChildMeetInfosByParentId(getDefaultMeetingId());
             //存放子会议区域控件的list
             List<Node> childMeetingSectionList = new ArrayList<>();
@@ -134,7 +139,7 @@ public class MeetController {
      * 跳转左侧会议列表界面.
      */
     @FXML
-    private void showFxmlLeftNavigation() {
+    public void showFxmlLeftNavigation() {
         try {
             FXMLLoader loader = FxmlUtils.getFXMLLoader(FXML_LEFT_NAVIGATION);
             borderPaneMain.setCenter(loader.load()); //将当前BorderPane中间区域加载为机构选择界面
@@ -166,8 +171,10 @@ public class MeetController {
     }
     
     /**
-     * 获取默认父会议id，顺序优先级为当前会议 > 即将召开会议 > 历史会议.
-     *
+     * 获取默认父会议id，存在两种情况：
+     * 1、未选择左侧会议列表中的会议，则获取默认父会议id的顺序优先级为当前会议 > 即将召开会议 > 历史会议
+     * 2、已选择左侧会议列表中的会议，则从全局常量中的GLOBAL_SELECTED_MEETID获取默认父会议id.
+     * 
      * @return parentMeetingId 父会议id
      * @throws ApplicationException
      * @throws java.sql.SQLException
@@ -175,17 +182,62 @@ public class MeetController {
     public String getDefaultMeetingId() throws ApplicationException, SQLException{
         String parentMeetingId = GlobalStaticConstant.GLOBAL_SELECTED_MEETID;
         if (StringUtils.isBlank(parentMeetingId)) {
-            List<MeetInfo> currentMeetList = meetInfoModel.getCurrentMeetInfo();
-            List<MeetInfo> futureMeetList = meetInfoModel.getFutureMeetInfo();
-            List<MeetInfo> historyMeetList = meetInfoModel.getHistoryMeetInfo();
-            if (!currentMeetList.isEmpty()) {
-                parentMeetingId = currentMeetList.get(0).getMeetingId();
-            } else if (!futureMeetList.isEmpty()) {
-                parentMeetingId = futureMeetList.get(0).getMeetingId();
-            } else if (!historyMeetList.isEmpty()) {
-                parentMeetingId = historyMeetList.get(0).getMeetingId();
+            List<String> parentMeetIdList = new ArrayList<>();
+            parentMeetIdList = getParentMeetList(GlobalStaticConstant.GLOBAL_ORGANINFO_OWNER_USERID);
+            if (!parentMeetIdList.isEmpty()) {
+                List<MeetInfo> currentMeetList = meetInfoModel.getCurrentMeetInfo(parentMeetIdList);
+                List<MeetInfo> futureMeetList = meetInfoModel.getFutureMeetInfo(parentMeetIdList);
+                List<MeetInfo> historyMeetList = meetInfoModel.getHistoryMeetInfo(parentMeetIdList);
+                if (!currentMeetList.isEmpty()) {
+                    parentMeetingId = currentMeetList.get(0).getMeetingId();
+                } else if (!futureMeetList.isEmpty()) {
+                    parentMeetingId = futureMeetList.get(0).getMeetingId();
+                } else if (!historyMeetList.isEmpty()) {
+                    parentMeetingId = historyMeetList.get(0).getMeetingId();
+                }
             }
         }
         return parentMeetingId;
+    }
+    
+    /**
+     * 根据用户id获取其所在的父会议id列表.
+     *
+     * @param userId
+     * @return parentMeetIdList 父会议id列表
+     * @throws ApplicationException
+     * @throws java.sql.SQLException
+     */
+    public List<String> getParentMeetList(String userId) throws ApplicationException, SQLException{
+        List<String> parentMeetIdList = new ArrayList<>();
+        this.meetUserRelationModel = new MeetUserRelationModel();
+        List<MeetUserRelation> meetUserRelationList = new ArrayList<>();
+        //根据用户id在会议用户关系表里查询其对应的所有子会议
+        meetUserRelationList = meetUserRelationModel.queryMeetUserRelationByUserId(userId);
+        for(MeetUserRelation meetUserRelation:meetUserRelationList){
+            //根据子会议获取其父会议
+            parentMeetIdList.add(getParentMeetIdByChildMeetId(meetUserRelation.getMeetingId()));
+        }
+        //去重
+        parentMeetIdList = parentMeetIdList.stream().distinct().collect(Collectors.toList());
+        return parentMeetIdList;
+    }
+    
+    /**
+     * 根据子会议id获取其父会议id.
+     *
+     * @param childMeetId
+     * @return parentMeetId 父会议id
+     * @throws ApplicationException
+     * @throws java.sql.SQLException
+     */
+    public String getParentMeetIdByChildMeetId(String childMeetId) throws ApplicationException, SQLException{
+        String parentMeetId = "";
+        this.meetInfoModel = new MeetInfoModel();
+        List<MeetInfo> meetInfoList = meetInfoModel.queryMeetInfoByChildMeetId(childMeetId);
+        if(!meetInfoList.isEmpty()){
+            parentMeetId = meetInfoList.get(0).getParentMeetingId();
+        }
+        return parentMeetId;
     }
 }
