@@ -10,6 +10,8 @@ import com.chinaunicom.elemeetingpc.utils.FxmlUtils;
 import com.j256.ormlite.logger.Logger;
 import com.j256.ormlite.logger.LoggerFactory;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import javafx.application.Platform;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
@@ -52,7 +54,8 @@ public class MeetLeftController {
         textFieldUsername.setText(GlobalStaticConstant.GLOBAL_USERINFO_USERNAME);
         meetInfoModel = new MeetInfoModel();
         MeetService meetService = new MeetService();
-        ObservableList<MeetInfoFx> fxlist1 = meetInfoModel.getCurrentMeetInfoFxs();
+        List<String> parentMeetIdList = new ArrayList<>();//to do: zhaojunfeng
+        ObservableList<MeetInfoFx> fxlist1 = meetInfoModel.getCurrentMeetInfoFxs(parentMeetIdList);
         int fxlist1_size = fxlist1.size();
         meetCurrentListView.setItems(fxlist1);
         meetCurrentListView.setPrefHeight(fxlist1_size*40+5);
@@ -70,8 +73,8 @@ public class MeetLeftController {
                     showFxmlMeet();
                 }
         );
-        
-        ObservableList<MeetInfoFx> fxlist2 = meetInfoModel.getFutureMeetInfoFxs();
+
+        ObservableList<MeetInfoFx> fxlist2 = meetInfoModel.getFutureMeetInfoFxs(parentMeetIdList);//to do: zhaojunfeng
         int fxlist2_size = fxlist2.size();        
         meetFutureListView.setItems(fxlist2);
         meetFutureListView.setPrefHeight(fxlist2_size*40+5);
@@ -89,7 +92,7 @@ public class MeetLeftController {
                 }
         );
         
-        ObservableList<MeetInfoFx> fxlist3 = meetInfoModel.getHistoryMeetInfoFxs();
+        ObservableList<MeetInfoFx> fxlist3 = meetInfoModel.getHistoryMeetInfoFxs(parentMeetIdList);//to do: zhaojunfeng
         int fxlist3_size = fxlist3.size();
         meetHistoryListView.setItems(fxlist3);
         meetHistoryListView.setPrefHeight(fxlist3_size*40+5);
@@ -113,7 +116,7 @@ public class MeetLeftController {
      * 退出
      */
     @FXML
-    private void handExit(){
+    public void handExit(){
         boolean result = false;
         if(result = DialogsUtils.confirmationAlert()){
             Platform.exit();
@@ -123,7 +126,7 @@ public class MeetLeftController {
      /**
      * 跳转会议界面
      */
-    private void showFxmlMeet(){
+    public void showFxmlMeet(){
         try {            
             FXMLLoader loader = FxmlUtils.getFXMLLoader(FXML_INDEX);
             borderPaneMain.setCenter(loader.load()); //将当前BorderPane中间区域加载为机构选择界面

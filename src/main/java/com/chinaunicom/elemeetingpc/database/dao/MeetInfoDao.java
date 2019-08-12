@@ -12,8 +12,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- *
- * @author zhaojunfeng
+ * MeetInfoDao, 自定义数据库操作方法实现.
+ * @author zhaojunfeng, chenxi
  */
 public class MeetInfoDao extends CommonDao{
     private static final Logger logger = LoggerFactory.getLogger(MeetInfoDao.class);
@@ -24,29 +24,20 @@ public class MeetInfoDao extends CommonDao{
     
     
     /**
-     * 获取正在进行的会议列表
-     * @param organationId 机构ID
+     * 获取正在进行的会议列表.
+     * @param parentMeetIdList 父会议id列表
      * @param dateTimeString 时间字符串yyyy-MM-dd hh:mm:ss
-     * @return
+     * @return meetInfoList
      * @throws ApplicationException
      * @throws SQLException 
      */
-    public List<MeetInfo> findCurrentMeetInfoList(String organationId,String dateTimeString)  throws ApplicationException, SQLException {
+    public List<MeetInfo> findCurrentMeetInfoList(List<String> parentMeetIdList, String dateTimeString)  throws ApplicationException, SQLException {
         List<MeetInfo> meetInfoList = new ArrayList<>();
         try {
             Dao<MeetInfo, Object> dao = getDao(MeetInfo.class);
             QueryBuilder<MeetInfo, Object> queryBuilder = dao.queryBuilder();
-            //机构ID
-            queryBuilder.where().eq("organizationId", organationId).and().eq("state", "0").and().eq("parentMeetingId", "00000000000000000000000000000000")
+            queryBuilder.where().in("meetingId", parentMeetIdList).and().eq("state", "0").and().eq("parentMeetingId", "00000000000000000000000000000000")
                     .and().le("startDateTime", dateTimeString).and().ge("endDateTime", dateTimeString);
-            //状态
-            //queryBuilder.where().eq("state", "0");
-            //父会议ID
-            //queryBuilder.where().eq("parentMeetingId", "00000000000000000000000000000000");
-            //会议开始时间
-            //queryBuilder.where().ge("startDateTime", dateTimeString);
-            //会议结束时间
-            //queryBuilder.where().le("endDateTime", dateTimeString);
             queryBuilder.orderBy("sort", true);
             meetInfoList = dao.query(queryBuilder.prepare());
         } catch (SQLException e) {
@@ -59,27 +50,20 @@ public class MeetInfoDao extends CommonDao{
     }
     
     /**
-     * 获取即将进行的会议列表
-     * @param organationId 机构ID
+     * 获取即将进行的会议列表。
+     * @param parentMeetIdList 父会议id列表
      * @param dateTimeString 时间字符串yyyy-MM-dd hh:mm:ss
-     * @return
+     * @return meetInfoList
      * @throws ApplicationException
      * @throws SQLException 
      */
-    public List<MeetInfo> findFutureMeetInfoList(String organationId,String dateTimeString)  throws ApplicationException, SQLException {
+    public List<MeetInfo> findFutureMeetInfoList(List<String> parentMeetIdList,String dateTimeString)  throws ApplicationException, SQLException {
         List<MeetInfo> meetInfoList = new ArrayList<>();
         try {
             Dao<MeetInfo, Object> dao = getDao(MeetInfo.class);
             QueryBuilder<MeetInfo, Object> queryBuilder = dao.queryBuilder();
-            //机构ID
-            queryBuilder.where().eq("organizationId", organationId).and().eq("state", "0").and().eq("parentMeetingId", "00000000000000000000000000000000")
-                    .and().gt("startDateTime", dateTimeString);
-            //状态
-            //queryBuilder.where().eq("state", "0");
-            //父会议ID
-            //queryBuilder.where().eq("parentMeetingId", "00000000000000000000000000000000");
-            //会议开始时间
-            //queryBuilder.where().gt("startDateTime", dateTimeString);            
+            queryBuilder.where().in("meetingId", parentMeetIdList).and().eq("state", "0").and().eq("parentMeetingId", "00000000000000000000000000000000")
+                    .and().gt("startDateTime", dateTimeString);           
             queryBuilder.orderBy("sort", true);
             meetInfoList = dao.query(queryBuilder.prepare());
         } catch (SQLException e) {
@@ -92,27 +76,20 @@ public class MeetInfoDao extends CommonDao{
     }
     
     /**
-     * 获取会议的历史记录列表
-     * @param organationId 机构ID
+     * 获取会议的历史记录列表.
+     * @param parentMeetIdList 父会议id列表
      * @param dateTimeString 时间字符串yyyy-MM-dd hh:mm:ss
-     * @return
+     * @return meetInfoList
      * @throws ApplicationException
      * @throws SQLException 
      */
-    public List<MeetInfo> findHistoryMeetInfoList(String organationId,String dateTimeString)  throws ApplicationException, SQLException {
+    public List<MeetInfo> findHistoryMeetInfoList(List<String> parentMeetIdList,String dateTimeString)  throws ApplicationException, SQLException {
         List<MeetInfo> meetInfoList = new ArrayList<>();
         try {
             Dao<MeetInfo, Object> dao = getDao(MeetInfo.class);
             QueryBuilder<MeetInfo, Object> queryBuilder = dao.queryBuilder();
-            //机构ID
-            queryBuilder.where().eq("organizationId", organationId).and().eq("state", "0").and().eq("parentMeetingId", "00000000000000000000000000000000")
+            queryBuilder.where().in("meetingId", parentMeetIdList).and().eq("state", "0").and().eq("parentMeetingId", "00000000000000000000000000000000")
                     .and().lt("endDateTime", dateTimeString);
-            //状态
-            //queryBuilder.where().eq("state", "0");
-            //父会议ID
-            //queryBuilder.where().eq("parentMeetingId", "00000000000000000000000000000000");
-            //会议结束时间
-            //queryBuilder.where().lt("endDateTime", dateTimeString);
             queryBuilder.orderBy("sort", true);
             meetInfoList = dao.query(queryBuilder.prepare());
         } catch (SQLException e) {

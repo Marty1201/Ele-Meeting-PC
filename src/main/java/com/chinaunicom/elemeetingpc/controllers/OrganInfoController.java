@@ -69,7 +69,7 @@ public class OrganInfoController {
     /**
      * 跳转会议首界面
      */
-    private void showFxmlIndex(){  
+    public void showFxmlIndex(){  
         try {            
             FXMLLoader loader = FxmlUtils.getFXMLLoader(FXML_INDEX);
             borderPaneMain.setCenter(loader.load()); //将当前BorderPane中间区域加载为会议首界面

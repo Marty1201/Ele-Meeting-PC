@@ -122,7 +122,7 @@ public class LoginController {
     /**
      * 跳转到机构选择界面.
      */
-    private void showFxmlOrg() {
+    public void showFxmlOrg() {
         try {
             FXMLLoader loader = FxmlUtils.getFXMLLoader(FXML_ORG_FXML);
             borderPaneMain.setCenter(loader.load()); //将当前BorderPane中间区域加载为机构选择界面
