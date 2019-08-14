@@ -102,17 +102,18 @@ public class MeetInfoDao extends CommonDao{
     }
     
     /**
-     * 根据父会议id获取子会议信息，增加state=0和sort条件.
+     * 根据父会议id和子会议id列表获取子会议信息，增加state=0和sort条件.
      *
      * @param parentMeetingId
+     * @param childMeetIdList
      * @return childMeetInfoList 子会议信息列表
      */
-    public List<MeetInfo> findChildMeetInfos(String parentMeetingId) throws ApplicationException, SQLException {
+    public List<MeetInfo> findChildMeetInfos(String parentMeetingId, List<String> childMeetIdList) throws ApplicationException, SQLException {
         List<MeetInfo> childMeetInfoList = new ArrayList<>();
         try{
             Dao<MeetInfo, Object> dao = getDao(MeetInfo.class);
             QueryBuilder<MeetInfo, Object> queryBuilder = dao.queryBuilder();
-            queryBuilder.orderBy("sort", true).where().eq("parentMeetingId", parentMeetingId).and().eq("state", "0");
+            queryBuilder.orderBy("sort", true).where().in("meetingId", childMeetIdList).and().eq("parentMeetingId", parentMeetingId).and().eq("state", "0");
             childMeetInfoList = dao.query(queryBuilder.prepare());
         } catch (SQLException e) {
             logger.warn(e.getCause().getMessage());
@@ -123,4 +124,25 @@ public class MeetInfoDao extends CommonDao{
         return childMeetInfoList;
     }
     
+    /**
+     * 根据会议id获取会议信息，增加state=0和sort条件.
+     *
+     * @param meetingId
+     * @return meetInfoList 会议信息列表
+     */
+    public List<MeetInfo> findMeetInfosById(String meetingId) throws ApplicationException, SQLException {
+        List<MeetInfo> meetInfoList = new ArrayList<>();
+        try {
+            Dao<MeetInfo, Object> dao = getDao(MeetInfo.class);
+            QueryBuilder<MeetInfo, Object> queryBuilder = dao.queryBuilder();
+            queryBuilder.orderBy("sort", true).where().eq("meetingId", meetingId).and().eq("state", "0");
+            meetInfoList = dao.query(queryBuilder.prepare());
+        } catch (SQLException e) {
+            logger.warn(e.getCause().getMessage());
+            throw new ApplicationException(FxmlUtils.getResourceBundle().getString("error.not.found.all"));
+        } finally {
+            this.closeDbConnection();
+        }
+        return meetInfoList;
+    }
 }
