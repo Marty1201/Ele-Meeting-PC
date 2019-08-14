@@ -156,15 +156,16 @@ public class MeetInfoModel {
     }
     
     /**
-     * 根据父会议id获取子会议信息，增加state=0和sort条件.
+     * 根据父会议id和子会议id列表获取子会议信息，增加state=0和sort条件.
      * 
      * @param parentMeetingId
+     * @param childMeetIdList
      * @return childMeetInfoList 子会议信息列表
      */
-    public List<MeetInfo> queryChildMeetInfosByParentId(String parentMeetingId) throws ApplicationException, SQLException {
+    public List<MeetInfo> queryChildMeetInfosByParentId(String parentMeetingId, List<String> childMeetIdList) throws ApplicationException, SQLException {
         MeetInfoDao meetInfoDao = new MeetInfoDao();
         List<MeetInfo> childMeetInfoList = new ArrayList<>();
-        childMeetInfoList = meetInfoDao.findChildMeetInfos(parentMeetingId);
+        childMeetInfoList = meetInfoDao.findChildMeetInfos(parentMeetingId, childMeetIdList);
         return childMeetInfoList;
     }
     
@@ -177,7 +178,20 @@ public class MeetInfoModel {
     public List<MeetInfo> queryMeetInfoByChildMeetId(String childMeetId) throws ApplicationException, SQLException {
         MeetInfoDao meetInfoDao = new MeetInfoDao();
         List<MeetInfo> meetInfoList = new ArrayList<>();
-        meetInfoList = meetInfoDao.findByFieldNameAndValue(MeetInfo.class, "meetingId", childMeetId);
+        meetInfoList = meetInfoDao.findMeetInfosById(childMeetId);
+        return meetInfoList;
+    }
+    
+    /**
+     * 根据父会议id查询会议信息.
+     *
+     * @param parentMeetId
+     * @return meetInfo 会议信息
+     */
+    public List<MeetInfo> queryMeetInfoByParentMeetId(String parentMeetId) throws ApplicationException, SQLException {
+        MeetInfoDao meetInfoDao = new MeetInfoDao();
+        List<MeetInfo> meetInfoList = new ArrayList<>();
+        meetInfoList = meetInfoDao.findMeetInfosById(parentMeetId);
         return meetInfoList;
     }
 }
