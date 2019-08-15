@@ -65,13 +65,20 @@ public class MeetService {
             //封装参数
             String updateDate = "";
             Map<String, String> queryMap = new HashMap<>();
-            this.organInfoModel = new OrganInfoModel();
-            queryMap.put("organizationId", GlobalStaticConstant.GLOBAL_ORGANINFO_ORGANIZATIONID);
-            queryMap.put("userId", GlobalStaticConstant.GLOBAL_ORGANINFO_OWNER_USERID);
-            List<OrganInfo> organInfoList = organInfoModel.queryOrganInfosByMap(queryMap);//根据用户id和机构id查出对应的机构
-            if (!organInfoList.isEmpty()) {
-                updateDate = organInfoList.get(0).getUpdateDate();
+            this.meetInfoModel = new MeetInfoModel();
+            MeetInfo info = meetInfoModel.getMeetInfoByMeetId(GlobalStaticConstant.GLOBAL_SELECTED_MEETID);
+            if(info!=null){
+                String update = info.getUpdateDate();
+                if(StringUtils.isNotBlank(update)){
+                    updateDate = update;
+                }
             }
+            //queryMap.put("organizationId", GlobalStaticConstant.GLOBAL_ORGANINFO_ORGANIZATIONID);
+            //queryMap.put("userId", GlobalStaticConstant.GLOBAL_ORGANINFO_OWNER_USERID);
+            //List<OrganInfo> organInfoList = organInfoModel.queryOrganInfosByMap(queryMap);//根据用户id和机构id查出对应的机构
+            //if (!organInfoList.isEmpty()) {
+            //    updateDate = organInfoList.get(0).getUpdateDate();
+            //}
             String param = this.fzParam(GlobalStaticConstant.GLOBAL_ORGANINFO_OWNER_USERID, GlobalStaticConstant.GLOBAL_SELECTED_MEETID, updateDate);
             //访问接口
             String result = HttpClientUtil.getInstance().getResponseBodyAsString(ServeIpConstant.meetingOfOrganServicePath(), param);

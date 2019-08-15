@@ -180,4 +180,19 @@ public class MeetInfoModel {
         meetInfoList = meetInfoDao.findByFieldNameAndValue(MeetInfo.class, "meetingId", childMeetId);
         return meetInfoList;
     }
+    
+    /**
+     * 根据meetID获取会议基本信息
+     * @param meetId
+     * @return 
+     */
+    public MeetInfo getMeetInfoByMeetId(String meetId) throws ApplicationException{
+        MeetInfo info = null;
+        MeetInfoDao meetInfoDao = new MeetInfoDao();
+        List<MeetInfo> meetInfoList = meetInfoDao.findByFieldNameAndValue(MeetInfo.class, "meetingId", meetId);
+        if(meetInfoList!=null && meetInfoList.size()>0){
+            info = meetInfoList.get(0);
+        }
+        return info;
+    }
 }
