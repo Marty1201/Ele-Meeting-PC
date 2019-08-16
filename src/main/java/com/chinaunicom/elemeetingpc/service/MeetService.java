@@ -215,6 +215,18 @@ public class MeetService {
             }
         }
         
+        //处理更新时间的问题updateDate
+        Object _tempupdate = dataMap.get("updateDate");
+        if(_tempupdate!=null){
+            String temp_updateDate = String.valueOf(_tempupdate);
+            meetInfoModel = new MeetInfoModel();
+            MeetInfo info = meetInfoModel.getMeetInfoByMeetId(GlobalStaticConstant.GLOBAL_SELECTED_MEETID);
+            if(info!=null){
+               info.setUpdateDate(temp_updateDate);
+               meetInfoModel.saveOrUpdateMeetInfo(info);
+            }
+        }
+        
     }
     
     /**
