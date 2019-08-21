@@ -8,101 +8,71 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox fillWidth="false" maxHeight="-Infinity" maxWidth="-Infinity" prefWidth="1900.0" prefHeight="1000.0" style="-fx-background-color: #f1f1f1;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.chinaunicom.elemeetingpc.controllers.MeetController">
-   <children>
-      <VBox prefWidth="1900.0" prefHeight="138.0" minHeight="138.0" style="-fx-background-color: #ffffff;" VBox.vgrow="ALWAYS">
-         <children>
-
-                  <HBox prefWidth="1900.0" prefHeight="66.0" minHeight="66.0" VBox.vgrow="ALWAYS">
-                     <children>
-                        <ImageView fitHeight="65.0" fitWidth="32.0" onMouseClicked="#showFxmlLeftNavigation" pickOnBounds="true" preserveRatio="true">
-                           <image>
-                              <Image url="/images/menu.png" />
-                           </image>
-                           <HBox.margin>
-                              <Insets right="20.0" />
-                           </HBox.margin>
-                        </ImageView>
-                        <ImageView fitHeight="65.0" fitWidth="32.0" onMouseClicked="#showFxmlOrg" pickOnBounds="true" preserveRatio="true">
-                           <image>
-                              <Image url="/images/home.png" />
-                           </image>
-                           <HBox.margin>
-                              <Insets right="1580.0" />
-                           </HBox.margin>
-                        </ImageView>
-                        <ImageView fitHeight="65.0" fitWidth="32.0" pickOnBounds="true" preserveRatio="true">
-                           <image>
-                              <Image url="/images/date.png" />
-                           </image>
-                           <HBox.margin>
-                              <Insets right="24.0" />
-                           </HBox.margin>
-                        </ImageView>
-                        <ImageView fitHeight="65.0" fitWidth="32.0" pickOnBounds="true" preserveRatio="true">
-                           <image>
-                              <Image url="/images/password.png" />
-                           </image>
-                           <HBox.margin>
-                              <Insets right="24.0" />
-                           </HBox.margin>
-                        </ImageView>
-                        <ImageView fitHeight="65.0" fitWidth="32.0" pickOnBounds="true" preserveRatio="true">
-                           <image>
-                              <Image url="/images/help.png" />
-                           </image>
-                           <HBox.margin>
-                              <Insets right="24.0" />
-                           </HBox.margin>
-                        </ImageView>
-                        <ImageView fitHeight="65.0" fitWidth="32.0" pickOnBounds="true" preserveRatio="true">
-                           <image>
-                              <Image url="/images/message.png" />
-                           </image>
-                        </ImageView>
-                     </children>
-                     <padding>
-                        <Insets left="20.0" top="20.0" />
-                     </padding>
-                  </HBox>
-                  <TextField fx:id="indexMeetTitle" alignment="CENTER" editable="false" prefWidth="1900.0"  prefHeight="72.0" minHeight="72.0" styleClass="index-meeting-title">
-                     <VBox.margin>
-                        <Insets top="-10.0" />
-                     </VBox.margin>
-                  </TextField>
-
-         </children>
-      </VBox>
-      <VBox prefWidth="1900.0" prefHeight="54.0" minHeight="54.0" style="-fx-background-color: #ffffff;" VBox.vgrow="ALWAYS"> <!-- 可以去掉吧, 感觉多余 -->
-         <VBox.margin>
-            <Insets top="16.0" />
-         </VBox.margin>
-         <children>
-            <HBox prefWidth="1900.0" prefHeight="50.0" minHeight="50.0" VBox.vgrow="ALWAYS">
-               <children>
-                  <ImageView fitHeight="25.0" fitWidth="14.0" preserveRatio="true">
-                     <image>
+<VBox alignment="CENTER" BorderPane.alignment="CENTER" prefWidth="1300.0" style="-fx-background-color: #f1f1f1;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.chinaunicom.elemeetingpc.controllers.MeetController">
+    <children>
+        <!-- 菜单区域 -->
+        <AnchorPane prefHeight="120.0" prefWidth="1300.0" style="-fx-background-color: #ffffff;">
+            <children>
+                <ImageView fitHeight="46.0" fitWidth="38.0" layoutX="28.0" layoutY="19.0" pickOnBounds="true" preserveRatio="true" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="10.0" onMouseClicked="#showFxmlLeftNavigation">
+                    <image>
+                        <Image url="/images/menu.png" />
+                    </image>
+                </ImageView>
+                <ImageView fitHeight="46.0" fitWidth="38.0" layoutX="80.0" layoutY="19.0" pickOnBounds="true" preserveRatio="true" AnchorPane.leftAnchor="60.0" AnchorPane.topAnchor="10.0" onMouseClicked="#showFxmlOrg">
+                    <image>
+                        <Image url="/images/home.png" />
+                    </image>
+                </ImageView>
+                <ImageView fitHeight="40.0" fitWidth="42.0" layoutX="1250.0" layoutY="19.0" pickOnBounds="true" preserveRatio="true" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0">
+                    <image>
+                        <Image url="/images/password.png" />
+                    </image>
+                </ImageView>
+                <ImageView fitHeight="40.0" fitWidth="42.0" layoutX="1190.0" layoutY="19.0" pickOnBounds="true" preserveRatio="true" AnchorPane.rightAnchor="70.0" AnchorPane.topAnchor="10.0">
+                    <image>
+                        <Image url="/images/message.png" />
+                    </image>
+                </ImageView>
+                <ImageView fitHeight="40.0" fitWidth="42.0" layoutX="1130.0" layoutY="19.0" pickOnBounds="true" preserveRatio="true" AnchorPane.rightAnchor="130.0" AnchorPane.topAnchor="10.0">
+                    <image>
+                        <Image url="/images/help.png" />
+                    </image>
+                </ImageView>
+            </children>
+            <padding>
+                <Insets bottom="5.0" left="10.0" right="10.0" top="5.0" />
+            </padding>
+        </AnchorPane>
+        <!-- 父会议标题区域 -->
+        <TextField fx:id="indexMeetTitle" editable="false" minHeight="80.0" prefHeight="80.0" prefWidth="1300.0" alignment="CENTER" styleClass="index-meeting-title" />
+        <!-- 会议信息区域 -->
+        <HBox fillHeight="false" minHeight="50.0" prefHeight="50.0" prefWidth="1300.0" style="-fx-background-color: #ffffff;">
+            <children>
+                <ImageView fitHeight="25.0" fitWidth="14.0" preserveRatio="true">
+                    <image>
                         <Image url="/images/title-pic.png" />
-                     </image>
-                     <HBox.margin>
+                    </image>
+                    <HBox.margin>
                         <Insets left="10.0" top="10.0" />
-                     </HBox.margin>
-                  </ImageView>
-                  <TextField editable="false" prefWidth="1900.0" prefHeight="25.0" styleClass="index-title" text="会议信息"> <!-- 国际化 -->
-                     <HBox.margin>
+                    </HBox.margin>
+                </ImageView>
+                <TextField editable="false" prefHeight="25.0" prefWidth="1000.0" styleClass="index-title" text="会议信息"> <!-- 国际化 -->
+                    <HBox.margin>
                         <Insets top="5.0" />
-                     </HBox.margin>
-                  </TextField>
-               </children>
-            </HBox>
-         </children>
-      </VBox>
-      <VBox fx:id="subMeetingSection" prefWidth="1900.0" prefHeight="808.0" style="-fx-background-color: #4581bf;" VBox.vgrow="ALWAYS">
-         <VBox.margin>
-            <Insets top="10.0" />
-         </VBox.margin>
-         <children>
-         </children>
-      </VBox>
-   </children>
+                    </HBox.margin>
+                </TextField>
+            </children>
+            <VBox.margin>
+                <Insets top="10.0" />
+            </VBox.margin>
+        </HBox>
+        <!-- 子会议标题和议题区域 -->
+        <VBox fx:id="subMeetingSection" fillWidth="true" prefWidth="1300.0">
+            <VBox.margin>
+                <Insets top="10.0" />
+            </VBox.margin>
+            <children>
+            </children>
+        </VBox>
+    </children>
 </VBox>
