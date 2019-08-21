@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -31,7 +32,6 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
-import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import org.apache.commons.lang3.StringUtils;
 
@@ -98,16 +98,17 @@ public class MeetController {
                     //子会议名称区域
                     TextField childMeetingName = new TextField(childMeetList.get(i).getMeetingName());
                     childMeetingName.setAlignment(Pos.CENTER);
-                    childMeetingName.setPrefSize(1900.0, 65.0);
+                    childMeetingName.setPrefSize(1300.0, 60.0);
                     childMeetingName.setEditable(false);
                     childMeetingName.setStyle("-fx-text-fill:#ffffff;-fx-background-color:#4581bf;-fx-font-size:20px;-fx-pref-height: 40px;");
                     childMeetingSectionList.add(childMeetingName);
                     //子会议议题区域
-                    FlowPane childMeetingFlowPane = new FlowPane(Orientation.HORIZONTAL, 2, 4);
-                    childMeetingFlowPane.setPrefWrapLength(600);//1900
-                    childMeetingFlowPane.setPrefSize(1900.0, 200.0);
+                    FlowPane childMeetingFlowPane = new FlowPane(Orientation.HORIZONTAL, 10.0, 10.0);
+                    childMeetingFlowPane.setPadding(new Insets(5.0, 3.0, 5.0, 3.0));
+                    //childMeetingFlowPane.setPrefWrapLength(600);//1900
+                    //childMeetingFlowPane.setPrefSize(1900.0, 200.0);
                     childMeetingFlowPane.setStyle("-fx-font-size: 16px;-fx-font-size-family: Arial;-fx-background-color: #ffffff;");
-                    VBox.setVgrow(childMeetingFlowPane, Priority.ALWAYS);
+                    //VBox.setVgrow(childMeetingFlowPane, Priority.ALWAYS);
 
                     //在MeetIssueRelation表里根据子会议id获取对应的会议和议题关系
                     meetIssueRelationList = meetIssueRelationModel.queryMeetIssueRelation(childMeetList.get(i).getMeetingId());
@@ -124,7 +125,7 @@ public class MeetController {
                     for (int k = 0; k < issueSize; k++) {
                         imageViews[k] = new ImageView(icon);
                         Label issueLabel = new Label(issueList.get(k).getIssueName(), imageViews[k]);
-                        issueLabel.setPrefSize(200, 150);
+                        //issueLabel.setPrefSize(161, 185);
                         issueLabel.setWrapText(true);
                         //issueLabel.setTextAlignment(TextAlignment.LEFT);
                         //issueLabel.setAlignment(Pos.TOP_LEFT); //to do: issues title start from top
@@ -147,7 +148,7 @@ public class MeetController {
                     childMeetingSectionList.add(childMeetingFlowPane);
                 }
             }
-            VBox.setVgrow(subMeetingSection, Priority.ALWAYS);
+            //VBox.setVgrow(subMeetingSection, Priority.ALWAYS);
             subMeetingSection.getChildren().addAll(childMeetingSectionList);
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -161,6 +162,7 @@ public class MeetController {
     public void showFxmlLeftNavigation() {
         try {
             FXMLLoader loader = FxmlUtils.getFXMLLoader(FXML_LEFT_NAVIGATION);
+            borderPaneMain.getChildren().remove(borderPaneMain.getCenter());//清除当前BorderPane内中间区域的内容
             borderPaneMain.setCenter(loader.load()); //将当前BorderPane中间区域加载为机构选择界面
             MeetLeftController meetLeftController = loader.getController(); //从loader中获取MeetLeftController
             meetLeftController.setBorderPane(borderPaneMain);//设置传参当前的borderPane，以便在MeetLeftController中获取到当前BorderPane
@@ -176,6 +178,7 @@ public class MeetController {
     public void showFxmlOrg() {
         try {
             FXMLLoader loader = FxmlUtils.getFXMLLoader(FXML_ORG_FXML);
+            borderPaneMain.getChildren().remove(borderPaneMain.getCenter());//清除当前BorderPane内中间区域的内容
             borderPaneMain.setCenter(loader.load()); //将当前BorderPane中间区域加载为机构选择界面
             OrganInfoController organInfoController = loader.getController(); //从loader中获取OrganInfoController
             organInfoController.setBorderPane(borderPaneMain);//设置传参当前的borderPaneMain，以便在OrganInfoController中获取到当前BorderPane

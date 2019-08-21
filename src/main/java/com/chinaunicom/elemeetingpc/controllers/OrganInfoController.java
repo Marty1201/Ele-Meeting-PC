@@ -72,6 +72,7 @@ public class OrganInfoController {
     public void showFxmlIndex(){  
         try {            
             FXMLLoader loader = FxmlUtils.getFXMLLoader(FXML_INDEX);
+            borderPaneMain.getChildren().remove(borderPaneMain.getCenter());//清除当前BorderPane内中间区域的内容
             borderPaneMain.setCenter(loader.load()); //将当前BorderPane中间区域加载为会议首界面
             MeetController meetController = loader.getController(); //从loader中获取MeetController
             meetController.setBorderPane(borderPaneMain);//把borderPane设置为参数继续往下传，以便在MeetController中获取到当前BorderPane

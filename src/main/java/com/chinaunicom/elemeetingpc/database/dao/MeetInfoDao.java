@@ -138,6 +138,7 @@ public class MeetInfoDao extends CommonDao{
             queryBuilder.orderBy("sort", true).where().eq("meetingId", meetingId).and().eq("state", "0");
             meetInfoList = dao.query(queryBuilder.prepare());
         } catch (SQLException e) {
+            e.printStackTrace();
             logger.warn(e.getCause().getMessage());
             throw new ApplicationException(FxmlUtils.getResourceBundle().getString("error.not.found.all"));
         } finally {
