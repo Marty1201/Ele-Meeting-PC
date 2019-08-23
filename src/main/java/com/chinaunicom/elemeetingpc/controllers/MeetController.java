@@ -212,7 +212,9 @@ public class MeetController {
         if (!meetUserRelationList.isEmpty()) {
             for (MeetUserRelation meetUserRelation : meetUserRelationList) {
                 //根据子会议获取其父会议
-                parentMeetIdList.add(getParentMeetIdByChildMeetId(meetUserRelation.getMeetingId()));
+                String parentMeetId = getParentMeetIdByChildMeetId(meetUserRelation.getMeetingId());
+                if(StringUtils.isNotBlank(parentMeetId))
+                parentMeetIdList.add(parentMeetId);
             }
             //去重
             parentMeetIdList = parentMeetIdList.stream().distinct().collect(Collectors.toList());

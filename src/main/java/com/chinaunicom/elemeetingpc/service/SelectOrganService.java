@@ -78,6 +78,9 @@ public class SelectOrganService {
             List<OrganInfo> organInfoList = organInfoModel.queryOrganInfosByMap(queryMap);//根据用户id和机构id查出对应的机构
             if (!organInfoList.isEmpty()) {
                 updateDate = organInfoList.get(0).getUpdateDate();
+                if(StringUtils.isBlank(updateDate)){//解决首次请求接口updateDate值传null的问题
+                    updateDate = "";
+                }
             }
             String param = this.fzParam(GlobalStaticConstant.GLOBAL_ORGANINFO_OWNER_USERID, GlobalStaticConstant.GLOBAL_ORGANINFO_ORGANIZATIONID, "zh_CN", updateDate);
             //访问接口
