@@ -1,4 +1,3 @@
-
 package com.chinaunicom.elemeetingpc.controllers;
 
 import com.chinaunicom.elemeetingpc.constant.GlobalStaticConstant;
@@ -25,13 +24,14 @@ import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
-import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
+import javafx.scene.control.OverrunStyle;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import org.apache.commons.lang3.StringUtils;
 
@@ -41,15 +41,15 @@ import org.apache.commons.lang3.StringUtils;
  * @author zhaojunfeng, chenxi
  */
 public class MeetController {
-    
+
     //左侧会议列表界面
     public static final String FXML_LEFT_NAVIGATION = "/fxml/fxml_left_navigation.fxml";
-    
+
     //机构选择界面
     public static final String FXML_ORG_FXML = "/fxml/fxml_org.fxml";
-    
+
     private static final Logger logger = LoggerFactory.getLogger(MeetController.class);
-    
+
     private BorderPane borderPaneMain;
 
     private MeetInfoModel meetInfoModel;
@@ -57,17 +57,17 @@ public class MeetController {
     private MeetIssueRelationModel meetIssueRelationModel;
 
     private IssueInfoModel issueInfoModel;
-    
+
     private MeetUserRelationModel meetUserRelationModel;
 
     @FXML
     private VBox subMeetingSection;
-    
+
     @FXML
     private TextField indexMeetTitle;
 
     /**
-     * 会议首页面初始化.
+     * 会议首页面布局初始化.
      *
      * @throws ApplicationException
      */
@@ -78,83 +78,56 @@ public class MeetController {
         List<MeetIssueRelation> meetIssueRelationList = new ArrayList<>();
         List<IssueInfo> issueList = new ArrayList<>();
         List<String> issueIdList = new ArrayList<>();
-        indexMeetTitle.clear();
-        //存放子会议区域控件的list
-        List<Node> childMeetingSectionList = new ArrayList<>();
+        //存放界面UI控件的list
+        List<Node> uiControlsList = new ArrayList<>();
         String parentMeetId = "";
         try {
             //获取默认会议的父会议id
             parentMeetId = getDefaultMeetingId();
-            //获取父会议名称
-            List<MeetInfo> parentMeetList = meetInfoModel.queryMeetInfoByParentMeetId(parentMeetId);
-            if (!parentMeetList.isEmpty()) {
-                indexMeetTitle.setText(parentMeetList.get(0).getMeetingName());
-            }
+            //父会议名称区域
+            createParentMeetingTitle(parentMeetId);
             //获取当前登录用户所属子会议信息
             List<String> childMeetIdList = getChildMeetList(GlobalStaticConstant.GLOBAL_ORGANINFO_OWNER_USERID);
             List<MeetInfo> childMeetList = meetInfoModel.queryChildMeetInfosByParentId(parentMeetId, childMeetIdList);
             if (!childMeetList.isEmpty()) {
                 for (int i = 0; i < childMeetList.size(); i++) {
                     //子会议名称区域
-                    TextField childMeetingName = new TextField(childMeetList.get(i).getMeetingName());
-                    childMeetingName.setAlignment(Pos.CENTER);
-                    childMeetingName.setPrefSize(1300.0, 60.0);
-                    childMeetingName.setEditable(false);
-                    childMeetingName.setStyle("-fx-text-fill:#ffffff;-fx-background-color:#4581bf;-fx-font-size:20px;-fx-pref-height: 40px;");
-                    childMeetingSectionList.add(childMeetingName);
-                    //子会议议题区域
-                    FlowPane childMeetingFlowPane = new FlowPane(Orientation.HORIZONTAL, 10.0, 10.0);
-                    childMeetingFlowPane.setPadding(new Insets(5.0, 3.0, 5.0, 3.0));
-                    //childMeetingFlowPane.setPrefWrapLength(600);//1900
-                    //childMeetingFlowPane.setPrefSize(1900.0, 200.0);
-                    childMeetingFlowPane.setStyle("-fx-font-size: 16px;-fx-font-size-family: Arial;-fx-background-color: #ffffff;");
-                    //VBox.setVgrow(childMeetingFlowPane, Priority.ALWAYS);
-
+                    createSubMeetingTitle(childMeetList.get(i).getMeetingName(), uiControlsList);
                     //在MeetIssueRelation表里根据子会议id获取对应的会议和议题关系
                     meetIssueRelationList = meetIssueRelationModel.queryMeetIssueRelation(childMeetList.get(i).getMeetingId());
-                    //获取所有议题ids
-                    for (int j = 0; j < meetIssueRelationList.size(); j++) {
-                        issueIdList.add(meetIssueRelationList.get(j).getIssueId());
+                    if (!meetIssueRelationList.isEmpty()) {
+                        //获取所有议题ids
+                        for (int j = 0; j < meetIssueRelationList.size(); j++) {
+                            issueIdList.add(meetIssueRelationList.get(j).getIssueId());
+                        }
+                        //根据议题ids获取议题信息
+                        issueList = issueInfoModel.queryIssueByIds(issueIdList);
+                        issueIdList.clear();
+                        int issueSize = issueList.size(); //议题个数
+                        //议题区域
+                        createMeetingIssues(issueSize, issueList, uiControlsList);
+                        //to do: 增加滚动条或者滚动pane
+//                        //滚动条
+//                        ScrollBar sc = new ScrollBar();
+//                        sc.setOrientation(Orientation.HORIZONTAL);
+//                        sc.setMin(0);
+//                        sc.setMax(100);
+//                        //sc.setPrefHeight(180);
+//                        sc.setValue(50);
+//                        childMeetingFlowPane.getChildren().addAll(sc);
+//                        //滚动pane
+//                        ScrollPane sp = new ScrollPane();
+//                        sp.setContent(childMeetingFlowPane);
+//                        uiControlsList.add(sp);
                     }
-                    //根据议题ids获取议题信息
-                    issueList = issueInfoModel.queryIssueByIds(issueIdList);
-                    issueIdList.clear();
-                    int issueSize = issueList.size(); //议题个数
-                    Image icon = new Image(getClass().getResourceAsStream("/images/icon-book.jpg"));
-                    ImageView[] imageViews = new ImageView[issueSize];
-                    for (int k = 0; k < issueSize; k++) {
-                        imageViews[k] = new ImageView(icon);
-                        Label issueLabel = new Label(issueList.get(k).getIssueName(), imageViews[k]);
-                        //issueLabel.setPrefSize(161, 185);
-                        issueLabel.setWrapText(true);
-                        //issueLabel.setTextAlignment(TextAlignment.LEFT);
-                        //issueLabel.setAlignment(Pos.TOP_LEFT); //to do: issues title start from top
-                        issueLabel.setContentDisplay(ContentDisplay.CENTER);
-                        childMeetingFlowPane.getChildren().addAll(issueLabel);
-                    }
-                    //滚动条
-//                ScrollBar sc = new ScrollBar();
-//                sc.setOrientation(Orientation.HORIZONTAL);
-//                sc.setMin(0);
-//                sc.setMax(100);
-//                //sc.setPrefHeight(180);
-//                sc.setValue(50);
-//                childMeetingFlowPane.getChildren().addAll(sc);
-
-                    //滚动pane
-                    //ScrollPane sp = new ScrollPane();
-                    //sp.setContent(childMeetingFlowPane);
-                    //childMeetingSectionList.add(sp);
-                    childMeetingSectionList.add(childMeetingFlowPane);
                 }
             }
-            //VBox.setVgrow(subMeetingSection, Priority.ALWAYS);
-            subMeetingSection.getChildren().addAll(childMeetingSectionList);
+            subMeetingSection.getChildren().addAll(uiControlsList);
         } catch (Exception ex) {
             ex.printStackTrace();
         }
     }
-    
+
     /**
      * 跳转左侧会议列表界面.
      */
@@ -170,7 +143,7 @@ public class MeetController {
             logger.error(e.getCause().getMessage());
         }
     }
-    
+
     /**
      * 跳转机构选择界面.
      */
@@ -187,21 +160,20 @@ public class MeetController {
             logger.error(e.getCause().getMessage());
         }
     }
-    
+
     public void setBorderPane(BorderPane borderPaneMain) {
         this.borderPaneMain = borderPaneMain;
     }
-    
+
     /**
-     * 获取默认父会议id，存在两种情况：
-     * 1、未选择左侧会议列表中的会议，则获取默认父会议id的顺序优先级为当前会议 > 即将召开会议 > 历史会议
+     * 获取默认父会议id，存在两种情况： 1、未选择左侧会议列表中的会议，则获取默认父会议id的顺序优先级为当前会议 > 即将召开会议 > 历史会议
      * 2、已选择左侧会议列表中的会议，则从全局常量中的GLOBAL_SELECTED_MEETID获取默认父会议id.
-     * 
+     *
      * @return parentMeetingId 父会议id
      * @throws ApplicationException
      * @throws java.sql.SQLException
      */
-    public String getDefaultMeetingId() throws ApplicationException, SQLException{
+    public String getDefaultMeetingId() throws ApplicationException, SQLException {
         String parentMeetingId = GlobalStaticConstant.GLOBAL_SELECTED_MEETID;
         if (StringUtils.isBlank(parentMeetingId)) {
             List<String> parentMeetIdList = new ArrayList<>();
@@ -222,7 +194,7 @@ public class MeetController {
         }
         return parentMeetingId;
     }
-    
+
     /**
      * 根据用户id获取其所在的父会议id列表.
      *
@@ -231,7 +203,7 @@ public class MeetController {
      * @throws ApplicationException
      * @throws java.sql.SQLException
      */
-    public List<String> getParentMeetList(String userId) throws ApplicationException, SQLException{
+    public List<String> getParentMeetList(String userId) throws ApplicationException, SQLException {
         List<String> parentMeetIdList = new ArrayList<>();
         this.meetUserRelationModel = new MeetUserRelationModel();
         List<MeetUserRelation> meetUserRelationList = new ArrayList<>();
@@ -247,7 +219,7 @@ public class MeetController {
         }
         return parentMeetIdList;
     }
-    
+
     /**
      * 根据子会议id获取其父会议id.
      *
@@ -256,16 +228,16 @@ public class MeetController {
      * @throws ApplicationException
      * @throws java.sql.SQLException
      */
-    public String getParentMeetIdByChildMeetId(String childMeetId) throws ApplicationException, SQLException{
+    public String getParentMeetIdByChildMeetId(String childMeetId) throws ApplicationException, SQLException {
         String parentMeetId = "";
         this.meetInfoModel = new MeetInfoModel();
         List<MeetInfo> meetInfoList = meetInfoModel.queryMeetInfoByChildMeetId(childMeetId);
-        if(!meetInfoList.isEmpty()){
+        if (!meetInfoList.isEmpty()) {
             parentMeetId = meetInfoList.get(0).getParentMeetingId();
         }
         return parentMeetId;
     }
-    
+
     /**
      * 根据用户id获取其所在的子会议id列表.
      *
@@ -286,5 +258,72 @@ public class MeetController {
             }
         }
         return childMeetIdList;
+    }
+
+    /**
+     * 创建父会议标题.
+     *
+     * @param parentMeetId
+     */
+    public void createParentMeetingTitle(String parentMeetId) throws ApplicationException, SQLException {
+        //获取父会议名称
+        List<MeetInfo> parentMeetList = meetInfoModel.queryMeetInfoByParentMeetId(parentMeetId);
+        if (!parentMeetList.isEmpty()) {
+            indexMeetTitle.clear();
+            //父会议名称区域赋值
+            indexMeetTitle.setText(parentMeetList.get(0).getMeetingName());
+        }
+    }
+    
+    /**
+     * 创建子会议标题.
+     *
+     * @param meetingName
+     * @param uiControlsList
+     */
+    public void createSubMeetingTitle(String meetingName, List<Node> uiControlsList) {
+        TextField childMeetingName = new TextField(meetingName);
+        childMeetingName.setAlignment(Pos.CENTER);
+        childMeetingName.setEditable(false);
+        childMeetingName.setStyle("-fx-font-size-family: Arial;-fx-font-size:20px;-fx-text-fill:#ffffff;-fx-background-color:#4581bf;-fx-pref-height: 60px;-fx-pref-width: 1300px;");
+        uiControlsList.add(childMeetingName);
+    }
+
+    /**
+     * 创建议题，从低层到顶层所用的UI控件分别是：FlowPane -> StackPane ->
+     * ImageView -> Label.
+     *
+     * @param issueSize
+     * @param issueList
+     * @param uiControlsList
+     */
+    public void createMeetingIssues(int issueSize, List<IssueInfo> issueList, List<Node> uiControlsList) {
+        //设置FlowPane样式
+        FlowPane childMeetingFlowPane = new FlowPane(Orientation.HORIZONTAL, 10.0, 10.0);
+        childMeetingFlowPane.setPadding(new Insets(5.0, 3.0, 5.0, 3.0));
+        //childMeetingFlowPane.setPrefWrapLength(1300);//内容换行使用默认宽度
+        childMeetingFlowPane.setStyle("-fx-background-color: #ffffff;");
+        //议题区域（单个议题实现方式：StackPane + ImageView + Label）
+        Image icon = new Image(getClass().getResourceAsStream("/images/icon-book.jpg"));
+        ImageView[] imageViews = new ImageView[issueSize];
+        for (int k = 0; k < issueSize; k++) {
+            imageViews[k] = new ImageView(icon);
+            Label issueNameLabel = new Label(issueList.get(k).getIssueName());
+            StackPane issueStackPane = new StackPane();
+            //设置Label样式
+            issueNameLabel.setStyle("-fx-font-size: 16px;-fx-font-size-family: Arial");
+            issueNameLabel.setPrefSize(161, 185);
+            issueNameLabel.setWrapText(true);
+            issueNameLabel.setTextOverrun(OverrunStyle.ELLIPSIS);
+            issueNameLabel.setPadding(new Insets(15, 20, 35, 25)); //通过内间距padding控制文字内容的位置
+            //issueLabel.setLineSpacing(1.0);
+            //设置StackPane样式
+            issueStackPane.setPrefSize(161.0, 185.0);
+            issueStackPane.getChildren().addAll(imageViews[k], issueNameLabel);
+            issueStackPane.setAlignment(Pos.TOP_LEFT);
+            //StackPane.setMargin(issueName, new Insets(15, 25, 50, 25));//或通过外间距margin控制文字内容的位置
+            childMeetingFlowPane.getChildren().addAll(issueStackPane);
+        }
+        uiControlsList.add(childMeetingFlowPane);
     }
 }
