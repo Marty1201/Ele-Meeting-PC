@@ -1,4 +1,3 @@
-
 package com.chinaunicom.elemeetingpc.controllers;
 
 import com.chinaunicom.elemeetingpc.constant.GlobalStaticConstant;
@@ -17,41 +16,39 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.control.ListView;
 import javafx.scene.layout.BorderPane;
 
-
-
 /**
- * 组织机构控制器，在界面的列表上加载登陆人所属机构名称，选择机构后进入会议
- * 主界面.
- * @author chenxi
- * 创建时间：2019-6-27 14:20:17
+ * 组织机构控制器，在界面的列表上加载登陆人所属机构名称，选择机构后进入会议 主界面.
+ *
+ * @author chenxi 创建时间：2019-6-27 14:20:17
  */
 public class OrganInfoController {
-    
+
     @FXML
     private ListView<OrganInfoFx> organListView;
-    
+
     private OrganInfoModel organInfoModel;
-    
+
     private static final Logger logger = LoggerFactory.getLogger(OrganInfoController.class);
-    
+
     //会议首界面
     public static final String FXML_INDEX = "/fxml/fxml_index.fxml";
-    
+
     private BorderPane borderPaneMain;
-    
+
     //初始化
-    public void initialize(){
+    public void initialize() {
         this.organInfoModel = new OrganInfoModel();
-        try{
+        try {
             organInfoModel.init();
-        }catch(ApplicationException e){
+        } catch (ApplicationException e) {
             DialogsUtils.errorAlert(e.getMessage());
         }
         int listSize = this.organInfoModel.getOrganInfoNameObservableList().size();
         organListView.setItems(this.organInfoModel.getOrganInfoNameObservableList());
-        
-        //ListView的高=list的size X 每条list-cell的size + 5(间距)
-        organListView.setPrefHeight(listSize * 40 + 5);
+
+        //ListView的高=list的size X 每条list-cell的size + 5(padding)
+        organListView.setFixedCellSize(40.0);
+        organListView.setPrefHeight(listSize * 40.0 + 5.0);
         //添加事件监听器
         organListView.getSelectionModel().selectedItemProperty().addListener(
                 (ObservableValue<? extends OrganInfoFx> observable, OrganInfoFx oldValue, OrganInfoFx newValue) -> {
@@ -63,14 +60,14 @@ public class OrganInfoController {
                     service.getMeetInfosFromRemote();
                     //跳转界面
                     showFxmlIndex();
-        });
+                });
     }
-    
+
     /**
      * 跳转会议首界面
      */
-    public void showFxmlIndex(){  
-        try {            
+    public void showFxmlIndex() {
+        try {
             FXMLLoader loader = FxmlUtils.getFXMLLoader(FXML_INDEX);
             borderPaneMain.getChildren().remove(borderPaneMain.getCenter());//清除当前BorderPane内中间区域的内容
             borderPaneMain.setCenter(loader.load()); //将当前BorderPane中间区域加载为会议首界面
@@ -81,7 +78,7 @@ public class OrganInfoController {
             logger.error(e.getCause().getMessage());
         }
     }
-    
+
     public void setBorderPane(BorderPane borderPaneMain) {
         this.borderPaneMain = borderPaneMain;
     }

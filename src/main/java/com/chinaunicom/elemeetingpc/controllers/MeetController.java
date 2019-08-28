@@ -47,6 +47,9 @@ public class MeetController {
 
     //机构选择界面
     public static final String FXML_ORG_FXML = "/fxml/fxml_org.fxml";
+    
+    //左侧会议列表默认收起状态
+    private boolean isFolded = true;
 
     private static final Logger logger = LoggerFactory.getLogger(MeetController.class);
 
@@ -129,18 +132,25 @@ public class MeetController {
     }
 
     /**
-     * 跳转左侧会议列表界面.
+     * 展开/收起左侧会议列表界面，默认isFolded为收起状态.
      */
     @FXML
     public void showFxmlLeftNavigation() {
         try {
-            FXMLLoader loader = FxmlUtils.getFXMLLoader(FXML_LEFT_NAVIGATION);
-            borderPaneMain.getChildren().remove(borderPaneMain.getCenter());//清除当前BorderPane内中间区域的内容
-            borderPaneMain.setCenter(loader.load()); //将当前BorderPane中间区域加载为机构选择界面
-            MeetLeftController meetLeftController = loader.getController(); //从loader中获取MeetLeftController
-            meetLeftController.setBorderPane(borderPaneMain);//设置传参当前的borderPane，以便在MeetLeftController中获取到当前BorderPane
+            if (isFolded) {
+                FXMLLoader loader = FxmlUtils.getFXMLLoader(FXML_LEFT_NAVIGATION);
+                borderPaneMain.setLeft(loader.load()); //将当前BorderPane左侧区域加载为会议列表界面
+                borderPaneMain.setCenter(borderPaneMain.getCenter());//重新加载中间区域
+                MeetLeftController meetLeftController = loader.getController(); //从loader中获取MeetLeftController
+                meetLeftController.setBorderPane(borderPaneMain);//设置传参当前的borderPane，以便在MeetLeftController中获取到当前BorderPane
+                isFolded = false;//设置为展开状态
+            } else {
+                borderPaneMain.getChildren().remove(borderPaneMain.getLeft());//清除当前BorderPane内左侧区域的内容
+                isFolded = true;//设置为收起状态
+            }
         } catch (IOException e) {
             logger.error(e.getCause().getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -152,6 +162,7 @@ public class MeetController {
         try {
             FXMLLoader loader = FxmlUtils.getFXMLLoader(FXML_ORG_FXML);
             borderPaneMain.getChildren().remove(borderPaneMain.getCenter());//清除当前BorderPane内中间区域的内容
+            borderPaneMain.getChildren().remove(borderPaneMain.getLeft());//清除当前BorderPane内左侧区域的内容
             borderPaneMain.setCenter(loader.load()); //将当前BorderPane中间区域加载为机构选择界面
             OrganInfoController organInfoController = loader.getController(); //从loader中获取OrganInfoController
             organInfoController.setBorderPane(borderPaneMain);//设置传参当前的borderPaneMain，以便在OrganInfoController中获取到当前BorderPane

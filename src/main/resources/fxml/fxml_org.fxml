@@ -19,7 +19,7 @@
             <Insets />
          </VBox.margin>
       </ImageView>
-      <ListView fx:id="organListView" fixedCellSize="40.0" prefHeight="42.0" prefWidth="303.0" styleClass="organ-list-view">
+      <ListView fx:id="organListView" prefWidth="303.0" styleClass="organ-list-view">
          <VBox.margin>
             <Insets top="10.0" />
          </VBox.margin>

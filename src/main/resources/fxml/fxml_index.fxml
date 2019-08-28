@@ -7,7 +7,7 @@
 <?import javafx.scene.image.*?>
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
-
+<!-- to do: 如果子会议下没有议题，则顶部格式会乱，以后有时间再调调 -->
 <VBox alignment="CENTER" BorderPane.alignment="CENTER" prefWidth="1300.0" style="-fx-background-color: #f1f1f1;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.chinaunicom.elemeetingpc.controllers.MeetController">
     <children>
         <!-- 菜单区域 -->
@@ -56,7 +56,7 @@
                         <Insets left="10.0" top="10.0" />
                     </HBox.margin>
                 </ImageView>
-                <TextField editable="false" prefHeight="25.0" prefWidth="1000.0" styleClass="index-title" text="会议信息"> <!-- 国际化 -->
+                <TextField editable="false" prefHeight="25.0" prefWidth="1000.0" styleClass="index-title" text="%index.meetingInfo">
                     <HBox.margin>
                         <Insets top="5.0" />
                     </HBox.margin>
@@ -66,7 +66,7 @@
                 <Insets top="10.0" />
             </VBox.margin>
         </HBox>
-        <!-- 子会议标题和议题区域 -->
+        <!-- 子会议标题和议题区域 to do：议题区域可以设置一个默认值，这样不至于如果没有议题，所有子会议都挤到一起，非常难看，以后再优化 -->
         <VBox fx:id="subMeetingSection" fillWidth="true" prefWidth="1300.0">
             <VBox.margin>
                 <Insets top="10.0" />
