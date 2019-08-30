@@ -13,27 +13,27 @@
         <!-- 菜单区域 -->
         <AnchorPane prefHeight="120.0" prefWidth="1300.0" style="-fx-background-color: #ffffff;">
             <children>
-                <ImageView fitHeight="46.0" fitWidth="38.0" layoutX="28.0" layoutY="19.0" pickOnBounds="true" preserveRatio="true" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="10.0" onMouseClicked="#showFxmlLeftNavigation">
+                <ImageView fitHeight="46.0" fitWidth="38.0" layoutX="28.0" layoutY="19.0" pickOnBounds="true" preserveRatio="true" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="10.0" onMouseClicked="#showFxmlLeftNavigation" styleClass="cursor-hand">
                     <image>
                         <Image url="/images/menu.png" />
                     </image>
                 </ImageView>
-                <ImageView fitHeight="46.0" fitWidth="38.0" layoutX="80.0" layoutY="19.0" pickOnBounds="true" preserveRatio="true" AnchorPane.leftAnchor="60.0" AnchorPane.topAnchor="10.0" onMouseClicked="#showFxmlOrg">
+                <ImageView fitHeight="46.0" fitWidth="38.0" layoutX="80.0" layoutY="19.0" pickOnBounds="true" preserveRatio="true" AnchorPane.leftAnchor="60.0" AnchorPane.topAnchor="10.0" onMouseClicked="#showFxmlOrg" styleClass="cursor-hand">
                     <image>
                         <Image url="/images/home.png" />
                     </image>
                 </ImageView>
-                <ImageView fitHeight="40.0" fitWidth="42.0" layoutX="1250.0" layoutY="19.0" pickOnBounds="true" preserveRatio="true" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0">
+                <ImageView fitHeight="40.0" fitWidth="42.0" layoutX="1250.0" layoutY="19.0" pickOnBounds="true" preserveRatio="true" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0" styleClass="cursor-hand">
                     <image>
                         <Image url="/images/password.png" />
                     </image>
                 </ImageView>
-                <ImageView fitHeight="40.0" fitWidth="42.0" layoutX="1190.0" layoutY="19.0" pickOnBounds="true" preserveRatio="true" AnchorPane.rightAnchor="70.0" AnchorPane.topAnchor="10.0">
+                <ImageView fitHeight="40.0" fitWidth="42.0" layoutX="1190.0" layoutY="19.0" pickOnBounds="true" preserveRatio="true" AnchorPane.rightAnchor="70.0" AnchorPane.topAnchor="10.0" styleClass="cursor-hand">
                     <image>
                         <Image url="/images/message.png" />
                     </image>
                 </ImageView>
-                <ImageView fitHeight="40.0" fitWidth="42.0" layoutX="1130.0" layoutY="19.0" pickOnBounds="true" preserveRatio="true" AnchorPane.rightAnchor="130.0" AnchorPane.topAnchor="10.0">
+                <ImageView fitHeight="40.0" fitWidth="42.0" layoutX="1130.0" layoutY="19.0" pickOnBounds="true" preserveRatio="true" AnchorPane.rightAnchor="130.0" AnchorPane.topAnchor="10.0" styleClass="cursor-hand">
                     <image>
                         <Image url="/images/help.png" />
                     </image>
@@ -44,7 +44,7 @@
             </padding>
         </AnchorPane>
         <!-- 父会议标题区域 -->
-        <TextField fx:id="indexMeetTitle" editable="false" minHeight="80.0" prefHeight="80.0" prefWidth="1300.0" alignment="CENTER" styleClass="index-meeting-title" />
+        <Label fx:id="indexMeetTitle" minHeight="80.0" prefHeight="80.0" prefWidth="1366.0" styleClass="index-meeting-title" />
         <!-- 会议信息区域 -->
         <HBox fillHeight="false" minHeight="50.0" prefHeight="50.0" prefWidth="1300.0" style="-fx-background-color: #ffffff;">
             <children>

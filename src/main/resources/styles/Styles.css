@@ -4,6 +4,10 @@
     Author     : qingpengbo, chenxi
 */
 
+/* 通用Cursor样式 */
+.cursor-hand{
+    -fx-cursor:hand;
+}
 /* 登录背景 */
 #mainBackground{
     -fx-background-image:url("/images/bg.png");
@@ -117,7 +121,7 @@
 .meeting-list-view .scroll-bar:vertical .increment-arrow,
 .meeting-list-view .scroll-bar:vertical .decrement-arrow,
 .meeting-list-view .scroll-bar:vertical .increment-button,
-.meeting-list-view .scroll-bar:vertical .decrement-button {
+.meeting-list-view .scroll-bar:vertical .decrement-button{
     -fx-padding:0.0px;
 }
 /* 左侧会议列表退出按钮样式 */
@@ -128,4 +132,16 @@
     -fx-background-color:#4581bf; 
     -fx-background-radius:0.0px;
     -fx-border-radius:0.0px;
+    -fx-cursor:hand;
+}
+/* 退出按钮鼠标选中样式 */
+.exit-btn:hover{
+    -fx-background-color:#36699e; 
+}
+/* 文件界面议题名称样式 */
+.file-issueName{
+    -fx-font-size:22.0px;
+    -fx-font-family:"Arial";
+    -fx-text-fill:#000000; 
+    -fx-background-color:#ffffff; 
 }

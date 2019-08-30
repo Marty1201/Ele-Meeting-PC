@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.*?>
 <?import javafx.scene.effect.*?>
 <?import javafx.scene.text.*?>
 <?import javafx.scene.control.*?>
@@ -8,34 +9,34 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox alignment="CENTER" BorderPane.alignment="CENTER" prefWidth="1300.0" prefHeight="700.0" style="-fx-background-color: #f1f1f1;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.chinaunicom.elemeetingpc.controllers.FileController">
+<VBox alignment="CENTER" prefHeight="700.0" prefWidth="1300.0" style="-fx-background-color: #f1f1f1;" BorderPane.alignment="CENTER" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.chinaunicom.elemeetingpc.controllers.FileController">
     <children>
         <!-- 菜单区域 -->
         <AnchorPane prefHeight="120.0" prefWidth="1300.0" style="-fx-background-color: #ffffff;">
             <children>
-                <ImageView fitHeight="46.0" fitWidth="38.0" layoutX="28.0" layoutY="19.0" pickOnBounds="true" preserveRatio="true" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="10.0">
+                <ImageView fitHeight="46.0" fitWidth="38.0" layoutX="28.0" layoutY="19.0" onMouseClicked="#showFxmlLeftNavigation" pickOnBounds="true" preserveRatio="true" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="10.0" styleClass="cursor-hand">
                     <image>
-                        <Image url="/fxmlexample/menu.png" />
+                        <Image url="/images/menu.png" />
                     </image>
                 </ImageView>
-                <ImageView fitHeight="46.0" fitWidth="38.0" layoutX="80.0" layoutY="19.0" pickOnBounds="true" preserveRatio="true" AnchorPane.leftAnchor="60.0" AnchorPane.topAnchor="10.0">
+                <ImageView fitHeight="46.0" fitWidth="38.0" layoutX="80.0" layoutY="19.0" onMouseClicked="#showFxmlOrg" pickOnBounds="true" preserveRatio="true" AnchorPane.leftAnchor="60.0" AnchorPane.topAnchor="10.0" styleClass="cursor-hand">
                     <image>
-                        <Image url="/fxmlexample/home.png" />
+                        <Image url="/images/home.png" />
                     </image>
                 </ImageView>
-                <ImageView fitHeight="40.0" fitWidth="42.0" layoutX="1250.0" layoutY="19.0" pickOnBounds="true" preserveRatio="true" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0">
+                <ImageView fitHeight="40.0" fitWidth="42.0" layoutX="1250.0" layoutY="19.0" pickOnBounds="true" preserveRatio="true" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0" styleClass="cursor-hand">
                     <image>
-                        <Image url="/fxmlexample/help.png" />
+                        <Image url="/images/help.png" />
                     </image>
                 </ImageView>
-                <ImageView fitHeight="40.0" fitWidth="42.0" layoutX="1190.0" layoutY="19.0" pickOnBounds="true" preserveRatio="true" AnchorPane.rightAnchor="70.0" AnchorPane.topAnchor="10.0">
+                <ImageView fitHeight="40.0" fitWidth="42.0" layoutX="1190.0" layoutY="19.0" pickOnBounds="true" preserveRatio="true" AnchorPane.rightAnchor="70.0" AnchorPane.topAnchor="10.0" styleClass="cursor-hand">
                     <image>
-                        <Image url="/fxmlexample/message.png" />
+                        <Image url="/images/message.png" />
                     </image>
                 </ImageView>
-                <ImageView fitHeight="40.0" fitWidth="42.0" layoutX="1130.0" layoutY="19.0" pickOnBounds="true" preserveRatio="true" AnchorPane.rightAnchor="130.0" AnchorPane.topAnchor="10.0">
+                <ImageView fitHeight="40.0" fitWidth="42.0" layoutX="1130.0" layoutY="19.0" pickOnBounds="true" preserveRatio="true" AnchorPane.rightAnchor="130.0" AnchorPane.topAnchor="10.0" styleClass="cursor-hand">
                     <image>
-                        <Image url="/fxmlexample/password.png" />
+                        <Image url="/images/password.png" />
                     </image>
                 </ImageView>
             </children>
@@ -44,13 +45,13 @@
             </padding>
         </AnchorPane>
         <!-- 议题名称区域 -->
-        <TextField fx:id="issueTitle" editable="false" prefHeight="50.0" minHeight="50.0" prefWidth="1300.0" alignment="CENTER"  styleClass="meeting-file-headline" text="城市化、聚集效应和经济发展" />
+        <Label fx:id="issueTitle" minHeight="50.0" prefHeight="50.0" prefWidth="1366.0" styleClass="file-issueName" />
         <!-- 返回区域 -->
         <HBox fillHeight="false" prefHeight="56.0" prefWidth="1300.0" style="-fx-background-color: #ffffff;">
             <children>
-                <ImageView fitHeight="56.0" fitWidth="100.0" pickOnBounds="true" preserveRatio="true">
+                <ImageView fitHeight="56.0" fitWidth="100.0" onMouseClicked="#showFxmlMeet" pickOnBounds="true" preserveRatio="true" styleClass="cursor-hand">
                     <image>
-                        <Image url="/fxmlexample/back.png" />
+                        <Image url="/images/back.png" />
                     </image>
                     <HBox.margin>
                         <Insets left="10.0" top="10.0" />
@@ -59,7 +60,7 @@
             </children>
         </HBox>
         <!-- 文件区域 -->
-        <VBox fx:id="fileSection" fillWidth="true" prefWidth="1300.0" prefHeight="500.0">
+        <VBox fx:id="fileSection" fillWidth="true" prefHeight="500.0" prefWidth="1300.0">
             <VBox.margin>
                 <Insets top="10.0" />
             </VBox.margin>

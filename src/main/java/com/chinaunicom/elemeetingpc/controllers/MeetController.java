@@ -18,6 +18,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
@@ -26,13 +27,14 @@ import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.OverrunStyle;
-import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.TextAlignment;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -47,7 +49,10 @@ public class MeetController {
 
     //机构选择界面
     public static final String FXML_ORG_FXML = "/fxml/fxml_org.fxml";
-    
+
+    //文件列表界面
+    public static final String FXML_FILE = "/fxml/fxml_file.fxml";
+
     //左侧会议列表默认收起状态
     private boolean isFolded = true;
 
@@ -67,7 +72,7 @@ public class MeetController {
     private VBox subMeetingSection;
 
     @FXML
-    private TextField indexMeetTitle;
+    private Label indexMeetTitle;
 
     /**
      * 会议首页面布局初始化.
@@ -78,11 +83,12 @@ public class MeetController {
         this.meetInfoModel = new MeetInfoModel();
         this.meetIssueRelationModel = new MeetIssueRelationModel();
         this.issueInfoModel = new IssueInfoModel();
-        List<MeetIssueRelation> meetIssueRelationList = new ArrayList<>();
-        List<IssueInfo> issueList = new ArrayList<>();
-        List<String> issueIdList = new ArrayList<>();
-        //存放界面UI控件的list
-        List<Node> uiControlsList = new ArrayList<>();
+        List<MeetInfo> childMeetList = new ArrayList<>();//子会议列表
+        List<String> childMeetIdList = new ArrayList<>();//子会议id列表
+        List<MeetIssueRelation> meetIssueRelationList = new ArrayList<>();//子会议与议题关系列表
+        List<IssueInfo> issueList = new ArrayList<>();//议题列表
+        List<String> issueIdList = new ArrayList<>();//议题id列表
+        List<Node> uiControlsList = new ArrayList<>();//存放界面UI控件的列表
         String parentMeetId = "";
         try {
             //获取默认会议的父会议id
@@ -90,8 +96,8 @@ public class MeetController {
             //父会议名称区域
             createParentMeetingTitle(parentMeetId);
             //获取当前登录用户所属子会议信息
-            List<String> childMeetIdList = getChildMeetList(GlobalStaticConstant.GLOBAL_ORGANINFO_OWNER_USERID);
-            List<MeetInfo> childMeetList = meetInfoModel.queryChildMeetInfosByParentId(parentMeetId, childMeetIdList);
+            childMeetIdList = getChildMeetList(GlobalStaticConstant.GLOBAL_ORGANINFO_OWNER_USERID);
+            childMeetList = meetInfoModel.queryChildMeetInfosByParentId(parentMeetId, childMeetIdList);
             if (!childMeetList.isEmpty()) {
                 for (int i = 0; i < childMeetList.size(); i++) {
                     //子会议名称区域
@@ -172,6 +178,25 @@ public class MeetController {
         }
     }
 
+    /**
+     * 跳转文件列表界面.
+     */
+    @FXML
+    public void showFxmlFile(IssueInfo issueInfo) throws ApplicationException {
+        try {
+            FXMLLoader loader = FxmlUtils.getFXMLLoader(FXML_FILE);
+            borderPaneMain.getChildren().remove(borderPaneMain.getCenter());//清除当前BorderPane内中间区域的内容
+            borderPaneMain.getChildren().remove(borderPaneMain.getLeft());//清除当前BorderPane内左侧区域的内容
+            borderPaneMain.setCenter(loader.load()); //将当前BorderPane中间区域加载为文件列表界面
+            FileController fileController = loader.getController(); //从loader中获取FileController
+            fileController.setBorderPane(borderPaneMain);//设置传参当前的borderPaneMain，以便在FileController中获取到当前BorderPane
+            fileController.initData(issueInfo);//把当前选择的议题传到FileController里，以便在下个控制器中使用，注意这里调用的是重写过的初始化方法
+        } catch (IOException e) {
+            e.printStackTrace();
+            logger.error(e.getCause().getMessage());
+        }
+    }
+
     public void setBorderPane(BorderPane borderPaneMain) {
         this.borderPaneMain = borderPaneMain;
     }
@@ -224,8 +249,9 @@ public class MeetController {
             for (MeetUserRelation meetUserRelation : meetUserRelationList) {
                 //根据子会议获取其父会议
                 String parentMeetId = getParentMeetIdByChildMeetId(meetUserRelation.getMeetingId());
-                if(StringUtils.isNotBlank(parentMeetId))
-                parentMeetIdList.add(parentMeetId);
+                if (StringUtils.isNotBlank(parentMeetId)) {
+                    parentMeetIdList.add(parentMeetId);
+                }
             }
             //去重
             parentMeetIdList = parentMeetIdList.stream().distinct().collect(Collectors.toList());
@@ -282,12 +308,16 @@ public class MeetController {
         //获取父会议名称
         List<MeetInfo> parentMeetList = meetInfoModel.queryMeetInfoByParentMeetId(parentMeetId);
         if (!parentMeetList.isEmpty()) {
-            indexMeetTitle.clear();
             //父会议名称区域赋值
             indexMeetTitle.setText(parentMeetList.get(0).getMeetingName());
+            indexMeetTitle.setTextAlignment(TextAlignment.CENTER);
+            indexMeetTitle.setTextOverrun(OverrunStyle.ELLIPSIS);
+            indexMeetTitle.setWrapText(true);
+            indexMeetTitle.setPadding(new Insets(5, 15, 5, 15));
+            indexMeetTitle.setAlignment(Pos.CENTER);
         }
     }
-    
+
     /**
      * 创建子会议标题.
      *
@@ -295,16 +325,18 @@ public class MeetController {
      * @param uiControlsList
      */
     public void createSubMeetingTitle(String meetingName, List<Node> uiControlsList) {
-        TextField childMeetingName = new TextField(meetingName);
+        Label childMeetingName = new Label(meetingName);
         childMeetingName.setAlignment(Pos.CENTER);
-        childMeetingName.setEditable(false);
-        childMeetingName.setStyle("-fx-font-size-family: Arial;-fx-font-size:20px;-fx-text-fill:#ffffff;-fx-background-color:#4581bf;-fx-pref-height: 60px;-fx-pref-width: 1300px;");
+        childMeetingName.setTextAlignment(TextAlignment.CENTER);
+        childMeetingName.setTextOverrun(OverrunStyle.ELLIPSIS);
+        childMeetingName.setWrapText(true);
+        childMeetingName.setPadding(new Insets(5, 15, 5, 15));
+        childMeetingName.setStyle("-fx-font-size-family:Arial;-fx-font-size:20.0px;-fx-text-fill:#ffffff;-fx-background-color:#4581bf;-fx-pref-height:60.0px;-fx-pref-width:1366.0px;");
         uiControlsList.add(childMeetingName);
     }
 
     /**
-     * 创建议题，从低层到顶层所用的UI控件分别是：FlowPane -> StackPane ->
-     * ImageView -> Label.
+     * 创建议题，从低层到顶层所用的UI控件分别是：FlowPane -> StackPane -> ImageView -> Label.
      *
      * @param issueSize
      * @param issueList
@@ -315,21 +347,24 @@ public class MeetController {
         FlowPane childMeetingFlowPane = new FlowPane(Orientation.HORIZONTAL, 10.0, 10.0);
         childMeetingFlowPane.setPadding(new Insets(5.0, 3.0, 5.0, 3.0));
         //childMeetingFlowPane.setPrefWrapLength(1300);//内容换行使用默认宽度
-        childMeetingFlowPane.setStyle("-fx-background-color: #ffffff;");
+        childMeetingFlowPane.setStyle("-fx-background-color:#ffffff;");
         //议题区域（单个议题实现方式：StackPane + ImageView + Label）
         Image icon = new Image(getClass().getResourceAsStream("/images/icon-book.jpg"));
         ImageView[] imageViews = new ImageView[issueSize];
         for (int k = 0; k < issueSize; k++) {
             imageViews[k] = new ImageView(icon);
             Label issueNameLabel = new Label(issueList.get(k).getIssueName());
+            IssueInfo issue = issueList.get(k);
             StackPane issueStackPane = new StackPane();
             //设置Label样式
-            issueNameLabel.setStyle("-fx-font-size: 16px;-fx-font-size-family: Arial");
+            issueNameLabel.setStyle("-fx-font-size:16.0px;-fx-font-size-family:Arial;-fx-cursor:hand;");
             issueNameLabel.setPrefSize(161, 185);
             issueNameLabel.setWrapText(true);
             issueNameLabel.setTextOverrun(OverrunStyle.ELLIPSIS);
             issueNameLabel.setPadding(new Insets(15, 20, 35, 25)); //通过内间距padding控制文字内容的位置
             //issueLabel.setLineSpacing(1.0);
+            //给Label添加鼠标点击事件
+            addMouseClickEvent(issueNameLabel, issue);
             //设置StackPane样式
             issueStackPane.setPrefSize(161.0, 185.0);
             issueStackPane.getChildren().addAll(imageViews[k], issueNameLabel);
@@ -338,5 +373,23 @@ public class MeetController {
             childMeetingFlowPane.getChildren().addAll(issueStackPane);
         }
         uiControlsList.add(childMeetingFlowPane);
+    }
+
+    /**
+     * 给Label上添加点击事件.
+     *
+     * @param issueNameLabel
+     */
+    public void addMouseClickEvent(Label issueNameLabel, IssueInfo issue) {
+        issueNameLabel.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
+            public void handle(final MouseEvent event) {
+                try {
+                    //System.out.println("issueName is: " + issueNameLabel.getText());
+                    showFxmlFile(issue);//跳转到文件列表界面
+                } catch (ApplicationException ex) {
+                    ex.printStackTrace();
+                }
+            }
+        });
     }
 }

@@ -190,6 +190,8 @@ public class MeetLeftController {
     public void showFxmlMeet() {
         try {
             FXMLLoader loader = FxmlUtils.getFXMLLoader(FXML_INDEX);
+            borderPaneMain.getChildren().remove(borderPaneMain.getCenter());//清除当前BorderPane内中间区域的内容
+            borderPaneMain.getChildren().remove(borderPaneMain.getLeft());//清除当前BorderPane内左侧区域的内容
             borderPaneMain.setCenter(loader.load()); //将当前BorderPane中间区域加载为机构选择界面
             MeetController meetController = loader.getController(); //从loader中获取MeetController
             meetController.setBorderPane(borderPaneMain);//设置传参当前的borderPane，以便在MeetController中获取到当前BorderPane
