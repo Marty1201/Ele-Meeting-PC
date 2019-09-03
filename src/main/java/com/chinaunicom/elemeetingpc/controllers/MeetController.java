@@ -182,7 +182,7 @@ public class MeetController {
      * 跳转文件列表界面.
      */
     @FXML
-    public void showFxmlFile(IssueInfo issueInfo) throws ApplicationException {
+    public void showFxmlFile(IssueInfo issueInfo) throws ApplicationException, SQLException {
         try {
             FXMLLoader loader = FxmlUtils.getFXMLLoader(FXML_FILE);
             borderPaneMain.getChildren().remove(borderPaneMain.getCenter());//清除当前BorderPane内中间区域的内容
@@ -387,6 +387,8 @@ public class MeetController {
                     //System.out.println("issueName is: " + issueNameLabel.getText());
                     showFxmlFile(issue);//跳转到文件列表界面
                 } catch (ApplicationException ex) {
+                    ex.printStackTrace();
+                } catch (SQLException ex) {
                     ex.printStackTrace();
                 }
             }

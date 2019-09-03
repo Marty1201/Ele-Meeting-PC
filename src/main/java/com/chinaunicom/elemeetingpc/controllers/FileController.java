@@ -1,11 +1,19 @@
 package com.chinaunicom.elemeetingpc.controllers;
 
+import com.chinaunicom.elemeetingpc.constant.GlobalStaticConstant;
+import com.chinaunicom.elemeetingpc.database.models.FileUserRelation;
+import com.chinaunicom.elemeetingpc.database.models.IssueFileRelation;
 import com.chinaunicom.elemeetingpc.database.models.IssueInfo;
+import com.chinaunicom.elemeetingpc.modelFx.FileUserRelationModel;
+import com.chinaunicom.elemeetingpc.modelFx.IssueFileRelationModel;
 import com.chinaunicom.elemeetingpc.utils.FxmlUtils;
 import com.chinaunicom.elemeetingpc.utils.exceptions.ApplicationException;
 import com.j256.ormlite.logger.Logger;
 import com.j256.ormlite.logger.LoggerFactory;
 import java.io.IOException;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
@@ -22,6 +30,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.TextAlignment;
 
 /**
+ * 文件控制器.
  *
  * @author chenxi 创建时间：2019-8-29 15:31:28
  */
@@ -49,6 +58,10 @@ public class FileController {
 
     private BorderPane borderPaneMain;
 
+    private IssueFileRelationModel issueFileRelationModel;
+
+    private FileUserRelationModel FileUserRelationModel;
+
     /**
      * 默认文件页面布局初始化.
      *
@@ -64,46 +77,81 @@ public class FileController {
      * @param issueInfo
      * @throws ApplicationException
      */
-    public void initData(IssueInfo issueInfo) throws ApplicationException {
-        //议题名称区域
-        issueTitle.setText(issueInfo.getIssueName());
-        issueTitle.setTextAlignment(TextAlignment.CENTER);
-        issueTitle.setTextOverrun(OverrunStyle.ELLIPSIS);
-        issueTitle.setWrapText(true);
-        issueTitle.setPadding(new Insets(5, 15, 5, 15));
-        issueTitle.setAlignment(Pos.CENTER);
-        //flowpane
-        FlowPane filesFlowPane = new FlowPane(Orientation.HORIZONTAL, 10.0, 10.0);
-        filesFlowPane.setPadding(new Insets(5.0, 3.0, 5.0, 3.0));
-        //childMeetingFlowPane.setPrefWrapLength(350.0);//it seems this method will not behave inside the vbox?
-        //childMeetingFlowPane.setPrefSize(50.0, 50.0);
-        filesFlowPane.setStyle("-fx-background-color: #ebebeb;");
-        //VBox.setVgrow(childMeetingFlowPane, Priority.ALWAYS);
-        //create flowpane contents
-        createFiles(filesFlowPane);
-        fileSection.getChildren().addAll(filesFlowPane);
+    public void initData(IssueInfo issueInfo) throws ApplicationException, SQLException {
+        this.issueFileRelationModel = new IssueFileRelationModel();
+        this.FileUserRelationModel = new FileUserRelationModel();
+        List<String> issueFileIdList = new ArrayList<>();//议题文件关系表文件id列表
+        List<String> fileUserFileList = new ArrayList<>();//文件人员关系表文件id列表
+        try {
+            //议题名称区域
+            createIssueTitle(issueInfo);
+            //根据议题id查询议题文件关系表对应的文件id
+            String issueId = issueInfo.getIssueId();
+            List<IssueFileRelation> issueFileRelationList = issueFileRelationModel.queryIssueFileRelationByIssueId(issueId);
+            if (!issueFileRelationList.isEmpty()) {
+                for (IssueFileRelation issueFileRelation : issueFileRelationList) {
+                    issueFileIdList.add(issueFileRelation.getFileId());
+                }
+            }
+            //根据当前登录用户id查询文件人员关系表对应的文件id
+            List<FileUserRelation> fileUserRelationList = FileUserRelationModel.queryFileUserRelationByUserId(GlobalStaticConstant.GLOBAL_ORGANINFO_OWNER_USERID);
+            if (!fileUserRelationList.isEmpty()) {
+                for (FileUserRelation fileUserRelation : fileUserRelationList) {
+                    fileUserFileList.add(fileUserRelation.getFileId());
+                }
+            }
+            //比较两个列表并获取两个列表中重合的数据
+            issueFileIdList.retainAll(fileUserFileList);
+            //根据筛选过的文件id列表和议题id获取IssueFileRelation表里的数据
+            List<IssueFileRelation> issueFileList = issueFileRelationModel.queryIssueFileRelationByFileIds(issueFileIdList, issueId);
+            if (!issueFileList.isEmpty()) {
+                //文件区域，注意：文件名称是从议题文件关系表里获取的，而不是从文件表里获取的，故此处传入的是IssueFileRelation列表
+                createFiles(issueFileList, fileSection);
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
     }
 
-    public void createFiles(FlowPane filesFlowPane) {
+    /**
+     * 创建文件，从低层到顶层所用的UI控件分别是：FlowPane -> StackPane -> ImageView -> Label.
+     *
+     * @param issueFileList
+     * @param fileSection
+     */
+    public void createFiles(List<IssueFileRelation> issueFileList, VBox fileSection) {
+        //设置FlowPane样式
+        FlowPane filesFlowPane = new FlowPane(Orientation.HORIZONTAL, 10.0, 10.0);
+        filesFlowPane.setPadding(new Insets(5.0, 3.0, 5.0, 3.0));
+        //childMeetingFlowPane.setPrefWrapLength(1300);//内容换行使用默认宽度
+        //childMeetingFlowPane.setPrefSize(50.0, 50.0);
+        filesFlowPane.setStyle("-fx-background-color: #ebebeb;");
+        //文件区域（单个文件实现方式：StackPane + ImageView + Label）
         Image image = new Image(getClass().getResourceAsStream("/images/icon-book.jpg"));
-        int fileListSize = 12;
-        ImageView[] imageList = new ImageView[fileListSize];
-        for (int k = 0; k < fileListSize; k++) {
+        int issueFileListSize = issueFileList.size();
+        ImageView[] imageList = new ImageView[issueFileListSize];
+        for (int k = 0; k < issueFileListSize; k++) {
             imageList[k] = new ImageView(image);
-            Label fileLabel = new Label("第十三章关于动态计量经济模型-分布滞后模型与自回归第十三章关于动态计量经济模型-分布滞后模型与自回归第十三章关于动态计量经济模型-分布滞后模型与自回归");//issueList.get(k).getIssueName()
-            //issueName.setPrefSize(120.0, 160.0);
-            fileLabel.setPrefSize(161.0, 185.0);
-            fileLabel.setTextOverrun(OverrunStyle.ELLIPSIS);
-            fileLabel.setWrapText(true);
-            fileLabel.setPadding(new Insets(15, 20, 35, 25));
-            //issueName.setLineSpacing(1.0);
+            Label issueFileLabel = new Label(issueFileList.get(k).getFileName());
             StackPane fileStackPane = new StackPane();
+            //todo:根据文件id列表查询文件，用于下面鼠标点击事件传参
+            //设置Label样式
+            issueFileLabel.setStyle("-fx-font-size:16.0px;-fx-font-size-family:Arial;-fx-cursor:hand;");
+            issueFileLabel.setPrefSize(161.0, 185.0);
+            issueFileLabel.setTextOverrun(OverrunStyle.ELLIPSIS);
+            issueFileLabel.setWrapText(true);
+            issueFileLabel.setPadding(new Insets(15, 20, 35, 25)); //通过内间距padding控制文字内容的位置
+            //fileLabel.setLineSpacing(1.0);
+            //todo:给Label添加鼠标点击事件
+            //addMouseClickEvent(issueNameLabel, issue);
+            //设置StackPane样式
             fileStackPane.setPrefSize(161.0, 185.0);
-            fileStackPane.getChildren().addAll(imageList[k], fileLabel);
+            fileStackPane.getChildren().addAll(imageList[k], issueFileLabel);
             fileStackPane.setAlignment(Pos.TOP_LEFT);
-            //StackPane.setMargin(issueName, new Insets(15, 25, 50, 25));    
+            //StackPane.setMargin(issueName, new Insets(15, 25, 50, 25));//或通过外间距margin控制文字内容的位置  
             filesFlowPane.getChildren().addAll(fileStackPane);
         }
+        fileSection.getChildren().addAll(filesFlowPane);
     }
 
     /**
@@ -146,7 +194,7 @@ public class FileController {
             e.printStackTrace();
         }
     }
-    
+
     /**
      * 跳转会议界面.
      */
@@ -166,5 +214,19 @@ public class FileController {
 
     public void setBorderPane(BorderPane borderPaneMain) {
         this.borderPaneMain = borderPaneMain;
+    }
+
+    /**
+     * 创建议题名称.
+     *
+     * @param issueInfo
+     */
+    public void createIssueTitle(IssueInfo issueInfo) {
+        issueTitle.setText(issueInfo.getIssueName());
+        issueTitle.setTextAlignment(TextAlignment.CENTER);
+        issueTitle.setTextOverrun(OverrunStyle.ELLIPSIS);
+        issueTitle.setWrapText(true);
+        issueTitle.setPadding(new Insets(5, 15, 5, 15));
+        issueTitle.setAlignment(Pos.CENTER);
     }
 }

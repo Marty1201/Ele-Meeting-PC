@@ -1,29 +1,44 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.chinaunicom.elemeetingpc.modelFx;
 
 import com.chinaunicom.elemeetingpc.database.dao.FileUserRelationDao;
 import com.chinaunicom.elemeetingpc.database.models.FileUserRelation;
 import com.chinaunicom.elemeetingpc.utils.exceptions.ApplicationException;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
+ * This class provides various methods implementation for FileUserRelation,
+ * mainly focus on the logic for the Dao operation.
  *
- * @author zhaojunfeng
+ * @author zhaojunfeng, chenxi
  */
 public class FileUserRelationModel {
-    
+
     /**
      * 保存或修改
+     *
      * @param fileUserRelation
-     * @throws ApplicationException 
+     * @throws ApplicationException
      */
-    public void saveOrUpdate(FileUserRelation fileUserRelation) throws ApplicationException{
+    public void saveOrUpdate(FileUserRelation fileUserRelation) throws ApplicationException {
         FileUserRelationDao dao = new FileUserRelationDao();
         dao.saveOrUpdate(fileUserRelation);
-        
+
     }
-    
+
+    /**
+     * 在文件人员关系表中根据人员id获取文件与人员的关系（文件id），增加state=0条件.
+     *
+     * @param userId
+     * @return fileUserList 文件与人员对应关系列表
+     * @throws ApplicationException
+     * @throws SQLException
+     */
+    public List<FileUserRelation> queryFileUserRelationByUserId(String userId) throws ApplicationException, SQLException{
+        FileUserRelationDao fileUserRelationDao = new FileUserRelationDao();
+        List<FileUserRelation> fileUserList = new ArrayList<>();
+        fileUserList = fileUserRelationDao.findFileUserRelationByUserId(userId);
+        return fileUserList;
+    }
 }
