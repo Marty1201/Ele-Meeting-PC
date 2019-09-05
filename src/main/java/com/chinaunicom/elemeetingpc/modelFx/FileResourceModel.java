@@ -39,4 +39,19 @@ public class FileResourceModel {
         fileList = fileResourceDao.findFilesById(fileIdList);
         return fileList;
     }
+
+    /**
+     * 根据文件id查询文件表内对应的数据.
+     *
+     * @param fileId
+     * @return fileList 文件列表
+     * @throws ApplicationException
+     * @throws SQLException
+     */
+    public List<FileResource> queryFilesById(String fileId) throws ApplicationException {
+        FileResourceDao fileResourceDao = new FileResourceDao();
+        List<FileResource> fileList = new ArrayList<>();
+        fileList = fileResourceDao.findByFieldNameAndValue(FileResource.class, "fileId", fileId);
+        return fileList;
+    }
 }
