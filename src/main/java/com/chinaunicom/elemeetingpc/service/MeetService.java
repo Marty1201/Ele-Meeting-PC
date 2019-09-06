@@ -28,6 +28,8 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.lang3.StringUtils;
@@ -151,6 +153,8 @@ public class MeetService {
             this.fileResourceModel = new FileResourceModel();
             FileResource fr = new FileResource();
             Map fileMap = new HashMap();
+            //使用CachedThreadPool管理文件下载线程
+            ExecutorService service = Executors.newCachedThreadPool();
             for (int i = 0; i < fileResourceListMap.size(); i++) {
                 fileMap = fileResourceListMap.get(i);
                 //根据接口返回的文件id，查询数据库中是否已存在此条数据并对已存在的文件进行相应的处理
@@ -165,20 +169,21 @@ public class MeetService {
                     if (!StringUtils.equals(oldFile.get(0).getFilePath(), String.valueOf(fileMap.get("filePath")))) {
                         //先把本地的旧文件删除
                         deleteFile(StringUtils.substringAfterLast(oldFile.get(0).getFilePath(), "/"));
-                        //开启多线程下载新文件
+                        //开启多线程下载新文件，FileDownloader实现Runnable，重写run方法
                         String url = ServeIpConstant.IP + "/" + ServeIpConstant.FILE_FOLDER + "/" + String.valueOf(fileMap.get("filePath"));
-                        doThread(url);
+                        service.execute(new FileDownloader(url));
                     }
                     //更新文件信息
                     this.fileResourceModel.saveOrUpdateFileResource(this.setPropertiesFileResource(fr, fileMap));
                 } else {
-                    //开启多线程下载新文件
+                    //开启多线程下载新文件，FileDownloader实现Runnable，重写run方法
                     String url = ServeIpConstant.IP + "/" + ServeIpConstant.FILE_FOLDER + String.valueOf(fileMap.get("filePath"));
-                    doThread(url);
+                    service.execute(new FileDownloader(url));
                     //新增文件信息
                     this.fileResourceModel.saveOrUpdateFileResource(this.setPropertiesFileResource(fr, fileMap));
                 }
             }
+            service.shutdown();//关闭线程
         }
 
         //处理会议-议题关联信息
@@ -469,18 +474,5 @@ public class MeetService {
         if (deleteFile.exists() && deleteFile.isFile()) {
             deleteFile.delete();
         }
-    }
-
-    /**
-     * 开启一个文件下载线程.
-     *
-     * @param url 服务器端文件下载地址
-     */
-    public void doThread(String url) {
-        Thread downloaderThread = null;
-        //创建线程，FileDownloader实现Runnable，重写run方法
-        downloaderThread = new Thread(new FileDownloader(url));
-        //线程开始
-        downloaderThread.start();
     }
 }

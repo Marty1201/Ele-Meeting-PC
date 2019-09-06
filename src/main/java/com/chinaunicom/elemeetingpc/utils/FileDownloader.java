@@ -11,8 +11,8 @@ import java.net.URL;
 import org.apache.commons.lang3.StringUtils;
 
 /**
- * File downloader, implements Runnable and override run method to achieve donwloading
- * files from the server to client's local disk.
+ * File downloader, implements Runnable and override run method to achieve
+ * donwloading files from the server to client's local disk.
  *
  * @author chenxi 创建时间：2019-9-3 17:01:12
  */
@@ -55,18 +55,16 @@ public class FileDownloader implements Runnable {
             connection.setConnectTimeout(10000);
             //连接
             connection.connect();
-            int resCode = connection.getResponseCode(); //todo: delete
-            if (connection.getResponseCode() != 200 && connection.getResponseCode() != 206) {
-                return;
-            }
-            //获取网络输入流
-            bis = new BufferedInputStream(connection.getInputStream());
-            //指定要写入文件的缓冲输出字节流
-            bos = new BufferedOutputStream(outputStream);
-            byte[] buff = new byte[bufSize];
-            int bytesRead = 0;
-            while ((bytesRead = bis.read(buff)) != -1) {
-                bos.write(buff, 0, bytesRead);//写入到输出流
+            if (connection.getResponseCode() == 200) {
+                //获取网络输入流
+                bis = new BufferedInputStream(connection.getInputStream());
+                //指定要写入文件的缓冲输出字节流
+                bos = new BufferedOutputStream(outputStream);
+                byte[] buff = new byte[bufSize];
+                int bytesRead = 0;
+                while ((bytesRead = bis.read(buff)) != -1) {
+                    bos.write(buff, 0, bytesRead);//写入到输出流
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -107,9 +105,9 @@ public class FileDownloader implements Runnable {
         try {
             URL url = new URL(fileURL);
             String localFileName = GlobalStaticConstant.GLOBAL_FILE_DISK + "/" + GlobalStaticConstant.GLOBAL_FILE_FOLDER + "/" + fileBaseName;
-            long begin = System.currentTimeMillis(); //todo: delete
+            //long begin = System.currentTimeMillis(); //debug
             downloadFile(url, new FileOutputStream(localFileName), 1024);
-            System.out.println("thread spent time: " + (System.currentTimeMillis() - begin)); //todo: delete
+            //System.out.println("thread spent time: " + (System.currentTimeMillis() - begin)); //debug
         } catch (Exception e) {
             e.printStackTrace();
         }
