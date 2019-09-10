@@ -33,6 +33,12 @@ public class ServeIpConstant {
 
     //根据会议ID获取子会议、议题、文件等信息
     public static final String MEETING_OF_ORGAN_INTEGERFACE = "/mMeet.do?action=getMeeting";
+    
+    //会议通知列表接口
+    public static final String MEETING_NOTICE_LIST_INTERFACE = "/mNoti.do";
+    
+    //通知详情接口
+    public static final String MEETING_NOTICE_DETAIL_INTERFACE = "/mNoti.do?action=read";
 
     /**
      * 获取服务接口地址全路径
@@ -78,5 +84,21 @@ public class ServeIpConstant {
      */
     public static String meetingOfOrganServicePath() {
         return getServeInterfaceFullAddress(MEETING_OF_ORGAN_INTEGERFACE);
+    }
+    
+    /**
+     * 会议通知列表接口
+     * @return 
+     */
+    public static String noticeListServicePath(){
+        return getServeInterfaceFullAddress(MEETING_NOTICE_LIST_INTERFACE);
+    }
+    
+    /**
+     * 获取通知详情接口
+     * @return 
+     */
+    public static String noticeDetailServicePath(){
+        return getServeInterfaceFullAddress(MEETING_NOTICE_DETAIL_INTERFACE);
     }
 }

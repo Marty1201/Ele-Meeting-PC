@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -25,16 +26,20 @@ import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
+import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.OverrunStyle;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.TextAlignment;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -52,6 +57,9 @@ public class MeetController {
 
     //文件列表界面
     public static final String FXML_FILE = "/fxml/fxml_file.fxml";
+    
+    //修改密码界面
+    public static final String FXML_RESET_PASSWORD = "/fxml/fxml_resetPassword.fxml";
 
     //左侧会议列表默认收起状态
     private boolean isFolded = true;
@@ -393,5 +401,32 @@ public class MeetController {
                 }
             }
         });
+    }
+    
+    /**
+     * 密码修改
+     */
+    @FXML
+    private void handResetPassword(){
+        FXMLLoader loader = FxmlUtils.getFXMLLoader(FXML_RESET_PASSWORD);
+        AnchorPane resetPasswordDialog=new AnchorPane();
+        try {
+            resetPasswordDialog = loader.load();
+        } catch (IOException ex) {
+            java.util.logging.Logger.getLogger(MeetController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        Stage dialogStage = new Stage();
+        dialogStage.setTitle("密码修改");
+        dialogStage.initModality(Modality.WINDOW_MODAL);
+        dialogStage.initOwner(borderPaneMain.getScene().getWindow());
+        Scene scene = new Scene(resetPasswordDialog);
+        dialogStage.setScene(scene);
+        
+        ResetPasswordController controller = loader.getController();
+        controller.setDialogStage(dialogStage);
+        
+        dialogStage.showAndWait(); 
+
     }
 }

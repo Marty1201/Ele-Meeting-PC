@@ -23,7 +23,7 @@
                         <Image url="/images/home.png" />
                     </image>
                 </ImageView>
-                <ImageView fitHeight="40.0" fitWidth="42.0" layoutX="1250.0" layoutY="19.0" pickOnBounds="true" preserveRatio="true" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0" styleClass="cursor-hand">
+                <ImageView fitHeight="40.0" fitWidth="42.0" layoutX="1250.0" layoutY="19.0" pickOnBounds="true" preserveRatio="true" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0" onMouseClicked="#handResetPassword" styleClass="cursor-hand">
                     <image>
                         <Image url="/images/password.png" />
                     </image>
