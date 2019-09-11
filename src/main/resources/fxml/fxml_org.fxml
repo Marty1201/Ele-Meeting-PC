@@ -9,7 +9,7 @@
 <?import java.lang.*?>
 <?import javafx.scene.control.*?>
 
-<VBox id="mainBackground" alignment="CENTER" BorderPane.alignment="CENTER" fillWidth="false" prefHeight="700.0" prefWidth="1300.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.chinaunicom.elemeetingpc.controllers.OrganInfoController">
+<VBox id="mainBackground" alignment="CENTER" BorderPane.alignment="CENTER" fillWidth="false" prefHeight="768.0" prefWidth="1366.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.chinaunicom.elemeetingpc.controllers.OrganInfoController">
    <children>
       <ImageView fitHeight="222.0" fitWidth="260.0" pickOnBounds="true" preserveRatio="true">
          <image>

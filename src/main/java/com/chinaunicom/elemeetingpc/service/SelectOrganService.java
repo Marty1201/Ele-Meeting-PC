@@ -23,10 +23,10 @@ import com.chinaunicom.elemeetingpc.modelFx.OrganInfoModel;
 import com.chinaunicom.elemeetingpc.modelFx.SyncParamsModel;
 import com.chinaunicom.elemeetingpc.utils.DateUtil;
 import com.chinaunicom.elemeetingpc.utils.FileDownloader;
+import com.chinaunicom.elemeetingpc.utils.FileUtil;
 import com.chinaunicom.elemeetingpc.utils.GsonUtil;
 import com.chinaunicom.elemeetingpc.utils.HttpClientUtil;
 import com.chinaunicom.elemeetingpc.utils.exceptions.ApplicationException;
-import java.io.File;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -158,22 +158,26 @@ public class SelectOrganService {
             this.fileResourceModel = new FileResourceModel();
             FileResource fr = new FileResource();
             Map fileMap = new HashMap();
+            //创建文件下载目录，todo:将来把盘符改成可配置的，目前暂定为D盘
+            FileUtil.createFolder(GlobalStaticConstant.GLOBAL_FILE_DISK + "\\" + GlobalStaticConstant.GLOBAL_FILE_FOLDER);
             //使用CachedThreadPool管理文件下载线程
             ExecutorService service = Executors.newCachedThreadPool();
             for (int i = 0; i < fileResourceListMap.size(); i++) {
                 fileMap = fileResourceListMap.get(i);
                 //根据接口返回的文件id，查询数据库中是否已存在此条数据并对已存在的文件进行相应的处理
                 List<FileResource> oldFile = fileResourceModel.queryFilesById(String.valueOf(fileMap.get("fileId")));
-                if (!oldFile.isEmpty()) {
+                if (!oldFile.isEmpty()) 
+                {
+                    String fileName = StringUtils.substringAfterLast(oldFile.get(0).getFilePath(), "/");
                     //1.根据状态state检查文件是否需要删除
                     if (StringUtils.equals(oldFile.get(0).getState(), "0") && StringUtils.equals(String.valueOf(fileMap.get("state")), "2")) {
                         //在本地磁盘内删除此文件
-                        deleteFile(StringUtils.substringAfterLast(oldFile.get(0).getFilePath(), "/"));
+                        FileUtil.deleteFile(GlobalStaticConstant.GLOBAL_FILE_DISK + "\\" + GlobalStaticConstant.GLOBAL_FILE_FOLDER + "\\" + fileName);
                     }
                     //2.根据filePath（里面最后文件id）来检查文件是否需要更新
                     if (!StringUtils.equals(oldFile.get(0).getFilePath(), String.valueOf(fileMap.get("filePath")))) {
                         //先把本地的旧文件删除
-                        deleteFile(StringUtils.substringAfterLast(oldFile.get(0).getFilePath(), "/"));
+                        FileUtil.deleteFile(GlobalStaticConstant.GLOBAL_FILE_DISK + "\\" + GlobalStaticConstant.GLOBAL_FILE_FOLDER + "\\" + fileName);
                         //开启多线程下载新文件，FileDownloader实现Runnable，重写run方法
                         String url = ServeIpConstant.IP + "/" + ServeIpConstant.FILE_FOLDER + "/" + String.valueOf(fileMap.get("filePath"));
                         service.execute(new FileDownloader(url));
@@ -456,17 +460,5 @@ public class SelectOrganService {
         syncParams.setIp(String.valueOf(syncParamsMap.get("ip")));
         syncParams.setOrganizationId(GlobalStaticConstant.GLOBAL_ORGANINFO_ORGANIZATIONID);
         return syncParams;
-    }
-
-    /**
-     * 删除本地磁盘上的文件.
-     *
-     * @param fileName
-     */
-    public void deleteFile(String fileName) {
-        File deleteFile = new File(GlobalStaticConstant.GLOBAL_FILE_DISK + "\\" + GlobalStaticConstant.GLOBAL_FILE_FOLDER + "\\" + fileName);
-        if (deleteFile.exists() && deleteFile.isFile()) {
-            deleteFile.delete();
-        }
     }
 }

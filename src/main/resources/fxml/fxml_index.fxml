@@ -7,11 +7,11 @@
 <?import javafx.scene.image.*?>
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
-<!-- to do: 如果子会议下没有议题，则顶部格式会乱，以后有时间再调调 -->
-<VBox alignment="CENTER" BorderPane.alignment="CENTER" prefWidth="1300.0" style="-fx-background-color: #f1f1f1;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.chinaunicom.elemeetingpc.controllers.MeetController">
+
+<VBox fx:id="mainIndex" alignment="TOP_LEFT" BorderPane.alignment="TOP_LEFT" maxWidth="Infinity" maxHeight="Infinity" prefWidth="1366.0" prefHeight="768" style="-fx-background-color: #f1f1f1;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.chinaunicom.elemeetingpc.controllers.MeetController">
     <children>
         <!-- 菜单区域 -->
-        <AnchorPane prefHeight="120.0" prefWidth="1300.0" style="-fx-background-color: #ffffff;">
+        <AnchorPane maxWidth="Infinity" maxHeight="Infinity" prefHeight="120.0" prefWidth="1366.0" style="-fx-background-color: #ffffff;">
             <children>
                 <ImageView fitHeight="46.0" fitWidth="38.0" layoutX="28.0" layoutY="19.0" pickOnBounds="true" preserveRatio="true" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="10.0" onMouseClicked="#showFxmlLeftNavigation" styleClass="cursor-hand">
                     <image>
@@ -44,11 +44,15 @@
             </padding>
         </AnchorPane>
         <!-- 父会议标题区域 -->
-        <Label fx:id="indexMeetTitle" minHeight="80.0" prefHeight="80.0" prefWidth="1366.0" styleClass="index-meeting-title" />
-        <!-- 会议信息区域 -->
-        <HBox fillHeight="false" minHeight="50.0" prefHeight="50.0" prefWidth="1300.0" style="-fx-background-color: #ffffff;">
+        <HBox maxWidth="Infinity" minHeight="80.0" prefHeight="80.0" prefWidth="1366.0">
             <children>
-                <ImageView fitHeight="25.0" fitWidth="14.0" preserveRatio="true">
+                <Label fx:id="indexMeetTitle" maxWidth="Infinity" minHeight="80.0" prefHeight="80.0" prefWidth="1366.0" styleClass="index-meeting-title" HBox.hgrow="ALWAYS"/>
+            </children>
+        </HBox>
+        <!-- 会议信息区域 -->
+        <HBox maxWidth="Infinity" prefHeight="50.0" prefWidth="1366.0" style="-fx-background-color: #ffffff;">
+            <children>
+                <ImageView fitHeight="25.0" fitWidth="14.0" preserveRatio="true" HBox.hgrow="ALWAYS">
                     <image>
                         <Image url="/images/title-pic.png" />
                     </image>
@@ -56,7 +60,7 @@
                         <Insets left="10.0" top="10.0" />
                     </HBox.margin>
                 </ImageView>
-                <TextField editable="false" prefHeight="25.0" prefWidth="1000.0" styleClass="index-title" text="%index.meetingInfo">
+                <TextField editable="false" prefHeight="25.0" prefWidth="1000.0" maxWidth="Infinity" styleClass="index-title" text="%index.meetingInfo" HBox.hgrow="ALWAYS">
                     <HBox.margin>
                         <Insets top="5.0" />
                     </HBox.margin>
@@ -66,11 +70,8 @@
                 <Insets top="10.0" />
             </VBox.margin>
         </HBox>
-        <!-- 子会议标题和议题区域 to do：议题区域可以设置一个默认值，这样不至于如果没有议题，所有子会议都挤到一起，非常难看，以后再优化 -->
-        <VBox fx:id="subMeetingSection" fillWidth="true" prefWidth="1300.0">
-            <VBox.margin>
-                <Insets top="10.0" />
-            </VBox.margin>
+        <!-- 子会议标题和议题区域，高度由电脑自己计算合适的值 -->
+        <VBox fx:id="subMeetingSection" fillWidth="true" maxWidth="Infinity" maxHeight="Infinity" prefWidth="1366.0">
             <children>
             </children>
         </VBox>
