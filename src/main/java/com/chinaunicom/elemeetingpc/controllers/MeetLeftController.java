@@ -84,12 +84,14 @@ public class MeetLeftController {
     @FXML
     public void initialize() {
         List<ListView> listViewCollection = new ArrayList<>();//用于存放3个ListView
-        //设置ScrollPane
-        ScrollPane scrollPane = new ScrollPane();
-        scrollPane.setContent(scrollableArea);
-        scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
-        leftMenu.getChildren().addAll(scrollPane);
-
+        //设置Vertical ScrollPane
+        ScrollPane scroll = new ScrollPane(scrollableArea);
+        scroll.setPannable(true);
+        scroll.setFitToWidth(true);
+        scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        scroll.setStyle("-fx-background-insets:0.0px;-fx-border-color:transparent;");
+        leftMenu.getChildren().addAll(scroll);
+        
         textFieldUsername.setText(GlobalStaticConstant.GLOBAL_USERINFO_USERNAME);
         meetInfoModel = new MeetInfoModel();
         MeetService meetService = new MeetService();

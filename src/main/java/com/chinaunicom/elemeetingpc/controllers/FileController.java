@@ -21,6 +21,7 @@ import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.control.OverrunStyle;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
@@ -55,6 +56,9 @@ public class FileController {
 
     @FXML
     private VBox fileSection;
+
+    @FXML
+    private VBox fileIndex;
 
     private BorderPane borderPaneMain;
 
@@ -125,7 +129,7 @@ public class FileController {
         filesFlowPane.setPadding(new Insets(5.0, 3.0, 5.0, 3.0));
         //childMeetingFlowPane.setPrefWrapLength(1300);//内容换行使用默认宽度
         //childMeetingFlowPane.setPrefSize(50.0, 50.0);
-        filesFlowPane.setStyle("-fx-background-color: #ebebeb;");
+        filesFlowPane.setStyle("-fx-background-color: #f4f4f4;");
         //文件区域（单个文件实现方式：StackPane + ImageView + Label）
         Image image = new Image(getClass().getResourceAsStream("/images/icon-book.jpg"));
         int issueFileListSize = issueFileList.size();
@@ -152,6 +156,13 @@ public class FileController {
             filesFlowPane.getChildren().addAll(fileStackPane);
         }
         fileSection.getChildren().addAll(filesFlowPane);
+        //设置Vertical ScrollPane
+        ScrollPane scroll = new ScrollPane(fileSection);
+        scroll.setPannable(true);
+        scroll.setFitToWidth(true);
+        scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        scroll.setStyle("-fx-background-insets:0.0px;-fx-border-color:transparent;");
+        fileIndex.getChildren().addAll(scroll);
     }
 
     /**

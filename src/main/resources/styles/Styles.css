@@ -30,8 +30,9 @@
 }
 /* 机构选择列表控件样式 */
 .organ-list-view{
-    -fx-border-color:#ffffff;
+    -fx-background-color:transparent;
     -fx-background-insets:0.0px;
+    -fx-border-color:transparent;
     -fx-cursor:hand;
 }
 /* 机构选择列表cell样式 */
@@ -45,7 +46,6 @@
     -fx-background-radius:30.0px;
     -fx-border-radius:30.0px;
     -fx-border-color:#ffffff;
-
 }
 /* 机构选择列表cell鼠标选中样式 */
 .organ-list-view .list-cell:hover{

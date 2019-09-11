@@ -46,9 +46,9 @@ public class OrganInfoController {
         int listSize = this.organInfoModel.getOrganInfoNameObservableList().size();
         organListView.setItems(this.organInfoModel.getOrganInfoNameObservableList());
 
-        //ListView的高=list的size X 每条list-cell的size + 5(padding)
+        //ListView的高=list的size X 每条list-cell的size + 4
         organListView.setFixedCellSize(40.0);
-        organListView.setPrefHeight(listSize * 40.0 + 5.0);
+        organListView.setPrefHeight(listSize * 40.0 + 4.0);
         //添加事件监听器
         organListView.getSelectionModel().selectedItemProperty().addListener(
                 (ObservableValue<? extends OrganInfoFx> observable, OrganInfoFx oldValue, OrganInfoFx newValue) -> {

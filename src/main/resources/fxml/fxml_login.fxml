@@ -10,7 +10,7 @@
 
 <BorderPane fx:id="borderPaneMain" prefHeight="768.0" prefWidth="1366.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.chinaunicom.elemeetingpc.controllers.LoginController">
    <center>
-      <VBox id="mainBackground" alignment="CENTER" BorderPane.alignment="CENTER" fillWidth="false" prefHeight="700.0" prefWidth="1300.0">
+      <VBox id="mainBackground" alignment="CENTER" BorderPane.alignment="CENTER" fillWidth="false" prefHeight="768.0" prefWidth="1366.0">
          <children>
             <ImageView fitHeight="213.0" fitWidth="158.0" pickOnBounds="true" preserveRatio="true">
                <image>

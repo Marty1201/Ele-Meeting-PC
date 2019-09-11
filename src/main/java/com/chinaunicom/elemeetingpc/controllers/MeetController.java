@@ -27,11 +27,14 @@ import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.OverrunStyle;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.TextAlignment;
@@ -70,6 +73,9 @@ public class MeetController {
 
     @FXML
     private VBox subMeetingSection;
+
+    @FXML
+    private VBox mainIndex;
 
     @FXML
     private Label indexMeetTitle;
@@ -115,23 +121,17 @@ public class MeetController {
                         int issueSize = issueList.size(); //议题个数
                         //议题区域
                         createMeetingIssues(issueSize, issueList, uiControlsList);
-                        //to do: 增加滚动条或者滚动pane
-//                        //滚动条
-//                        ScrollBar sc = new ScrollBar();
-//                        sc.setOrientation(Orientation.HORIZONTAL);
-//                        sc.setMin(0);
-//                        sc.setMax(100);
-//                        //sc.setPrefHeight(180);
-//                        sc.setValue(50);
-//                        childMeetingFlowPane.getChildren().addAll(sc);
-//                        //滚动pane
-//                        ScrollPane sp = new ScrollPane();
-//                        sp.setContent(childMeetingFlowPane);
-//                        uiControlsList.add(sp);
                     }
                 }
             }
             subMeetingSection.getChildren().addAll(uiControlsList);
+            //设置Vertical ScrollPane
+            ScrollPane scroll = new ScrollPane(subMeetingSection);
+            scroll.setPannable(true);
+            scroll.setFitToWidth(true);
+            scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+            scroll.setStyle("-fx-background-insets:0.0px;-fx-border-color:transparent;");
+            mainIndex.getChildren().addAll(scroll);
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -319,7 +319,7 @@ public class MeetController {
     }
 
     /**
-     * 创建子会议标题.
+     * 创建子会议标题, HBox包裹Label解决宽屏自适应问题.
      *
      * @param meetingName
      * @param uiControlsList
@@ -331,8 +331,16 @@ public class MeetController {
         childMeetingName.setTextOverrun(OverrunStyle.ELLIPSIS);
         childMeetingName.setWrapText(true);
         childMeetingName.setPadding(new Insets(5, 15, 5, 15));
-        childMeetingName.setStyle("-fx-font-size-family:Arial;-fx-font-size:20.0px;-fx-text-fill:#ffffff;-fx-background-color:#4581bf;-fx-pref-height:60.0px;-fx-pref-width:1366.0px;");
-        uiControlsList.add(childMeetingName);
+        childMeetingName.setPrefSize(1366.0, 60);
+        childMeetingName.setMaxWidth(Double.MAX_VALUE);//label+HBox解决屏幕宽度自适应
+        childMeetingName.setStyle("-fx-font-size-family:Arial;-fx-font-size:20.0px;-fx-text-fill:#ffffff;-fx-background-color:#4581bf;");
+        //Label+HBox实现屏幕宽度自适应
+        HBox childMeetingNameWrapper = new HBox(childMeetingName);
+        childMeetingNameWrapper.setMaxWidth(Double.MAX_VALUE);
+        childMeetingNameWrapper.setPrefSize(1366.0, 60.0);
+        HBox.setHgrow(childMeetingName, Priority.ALWAYS);
+        HBox.setMargin(childMeetingName, new Insets(10.0, 0.0, 10.0, 0.0));//上下预留间距，样式好看；）
+        uiControlsList.add(childMeetingNameWrapper);
     }
 
     /**
@@ -344,10 +352,10 @@ public class MeetController {
      */
     public void createMeetingIssues(int issueSize, List<IssueInfo> issueList, List<Node> uiControlsList) {
         //设置FlowPane样式
-        FlowPane childMeetingFlowPane = new FlowPane(Orientation.HORIZONTAL, 10.0, 10.0);
-        childMeetingFlowPane.setPadding(new Insets(5.0, 3.0, 5.0, 3.0));
-        //childMeetingFlowPane.setPrefWrapLength(1300);//内容换行使用默认宽度
-        childMeetingFlowPane.setStyle("-fx-background-color:#ffffff;");
+        FlowPane issueFlowPane = new FlowPane(Orientation.HORIZONTAL, 10.0, 10.0);
+        issueFlowPane.setPadding(new Insets(5.0, 3.0, 5.0, 3.0));
+        //childMeetingFlowPane.setPrefWrapLength(1300);//内容换行使用默认值
+        issueFlowPane.setStyle("-fx-background-color:#ffffff;");
         //议题区域（单个议题实现方式：StackPane + ImageView + Label）
         Image icon = new Image(getClass().getResourceAsStream("/images/icon-book.jpg"));
         ImageView[] imageViews = new ImageView[issueSize];
@@ -370,13 +378,13 @@ public class MeetController {
             issueStackPane.getChildren().addAll(imageViews[k], issueNameLabel);
             issueStackPane.setAlignment(Pos.TOP_LEFT);
             //StackPane.setMargin(issueName, new Insets(15, 25, 50, 25));//或通过外间距margin控制文字内容的位置
-            childMeetingFlowPane.getChildren().addAll(issueStackPane);
+            issueFlowPane.getChildren().addAll(issueStackPane);
         }
-        uiControlsList.add(childMeetingFlowPane);
+        uiControlsList.add(issueFlowPane);
     }
 
     /**
-     * 给Label上添加点击事件.
+     * Label点击事件，跳转到文件界面.
      *
      * @param issueNameLabel
      */

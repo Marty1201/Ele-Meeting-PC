@@ -9,10 +9,10 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox alignment="CENTER" prefHeight="700.0" prefWidth="1300.0" style="-fx-background-color: #f1f1f1;" BorderPane.alignment="CENTER" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.chinaunicom.elemeetingpc.controllers.FileController">
+<VBox fx:id="fileIndex" alignment="TOP_LEFT" BorderPane.alignment="TOP_LEFT" maxWidth="Infinity" maxHeight="Infinity" prefWidth="1366.0" prefHeight="768" style="-fx-background-color: #f1f1f1;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.chinaunicom.elemeetingpc.controllers.FileController">
     <children>
         <!-- 菜单区域 -->
-        <AnchorPane prefHeight="120.0" prefWidth="1300.0" style="-fx-background-color: #ffffff;">
+        <AnchorPane prefHeight="120.0" prefWidth="1366.0" style="-fx-background-color: #ffffff;">
             <children>
                 <ImageView fitHeight="46.0" fitWidth="38.0" layoutX="28.0" layoutY="19.0" onMouseClicked="#showFxmlLeftNavigation" pickOnBounds="true" preserveRatio="true" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="10.0" styleClass="cursor-hand">
                     <image>
@@ -45,9 +45,13 @@
             </padding>
         </AnchorPane>
         <!-- 议题名称区域 -->
-        <Label fx:id="issueTitle" minHeight="50.0" prefHeight="50.0" prefWidth="1366.0" styleClass="file-issueName" />
+        <HBox maxWidth="Infinity" minHeight="50.0" prefHeight="50.0" prefWidth="1366.0">
+            <children>
+                <Label fx:id="issueTitle" maxWidth="Infinity" minHeight="50.0" prefHeight="50.0" prefWidth="1366.0" styleClass="file-issueName" HBox.hgrow="ALWAYS"/>
+            </children>
+        </HBox>
         <!-- 返回区域 -->
-        <HBox fillHeight="false" prefHeight="56.0" prefWidth="1300.0" style="-fx-background-color: #ffffff;">
+        <HBox maxWidth="Infinity" minHeight="56.0" prefHeight="56.0" prefWidth="1366.0" style="-fx-background-color: #ffffff;">
             <children>
                 <ImageView fitHeight="56.0" fitWidth="100.0" onMouseClicked="#showFxmlMeet" pickOnBounds="true" preserveRatio="true" styleClass="cursor-hand">
                     <image>
@@ -59,8 +63,8 @@
                 </ImageView>
             </children>
         </HBox>
-        <!-- 文件区域 -->
-        <VBox fx:id="fileSection" fillWidth="true" prefHeight="500.0" prefWidth="1300.0">
+        <!-- 文件区域，高度由电脑自己计算合适的值 -->
+        <VBox fx:id="fileSection" fillWidth="true" maxWidth="Infinity" maxHeight="Infinity" prefWidth="1366.0">
             <VBox.margin>
                 <Insets top="10.0" />
             </VBox.margin>

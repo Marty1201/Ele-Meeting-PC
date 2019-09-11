@@ -6,12 +6,20 @@
 <?import javafx.scene.control.*?>
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
-
-<VBox fx:id="leftMenu" fillWidth="false" prefWidth="400.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.chinaunicom.elemeetingpc.controllers.MeetLeftController">
+<!-- to do: 这个界面将来还需要抽时间重新优化一下， 涉及到VBox控件高度设定和自适应的问题，主要是竖版自适应 -->
+<VBox fx:id="leftMenu" alignment="TOP_LEFT" BorderPane.alignment="TOP_LEFT" maxWidth="Infinity" maxHeight="Infinity" prefWidth="400.0" prefHeight="768" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.chinaunicom.elemeetingpc.controllers.MeetLeftController">
     <children>
-        <TextField editable="false" prefHeight="70.0" minHeight="70.0" prefWidth="400.0" styleClass="meeting-welcome" text="%left_navigation.welcomePrompt" />
-        <TextField fx:id="textFieldUsername" editable="false" prefHeight="40.0" minHeight="40.0" prefWidth="400.0" styleClass="meeting-user" />
-        <!-- 增加vbox用于放置滚动条 -->
+        <HBox maxWidth="Infinity" minHeight="70.0" prefHeight="70.0" prefWidth="400.0">
+            <children>
+                <TextField editable="false" maxWidth="Infinity" prefHeight="70.0" minHeight="70.0" prefWidth="400.0" styleClass="meeting-welcome" text="%left_navigation.welcomePrompt" HBox.hgrow="ALWAYS"/>
+            </children>
+        </HBox>
+        <HBox maxWidth="Infinity" minHeight="40.0" prefHeight="40.0" prefWidth="400.0">
+            <children>
+                <TextField fx:id="textFieldUsername" editable="false" maxWidth="Infinity" prefHeight="40.0" minHeight="40.0" prefWidth="400.0" styleClass="meeting-user" HBox.hgrow="ALWAYS"/>
+            </children>
+        </HBox>
+        <!-- 增加vbox用于放置滚动条, to do: 以下代码暂时不改了，因为改起来非常麻烦和费时间，如果要把高度订下来，则要算VBOX里面每一个控件的高度并做高度自适应，原理跟index界面一样-->
         <VBox fx:id="scrollableArea" fillWidth="false" prefWidth="400.0">
             <children>
                 <HBox prefHeight="70.0" minHeight="70.0" prefWidth="400.0" style="-fx-background-color: #ffffff;">
@@ -24,7 +32,7 @@
                                 <Insets left="10.0" top="10.0" />
                             </HBox.margin>
                         </ImageView>
-                        <TextField editable="false" prefHeight="48.0" prefWidth="260.0" styleClass="meeting-list-title" text="%left_navigation.currentMeeting">
+                        <TextField editable="false" prefHeight="48.0" prefWidth="220.0" styleClass="meeting-list-title" text="%left_navigation.currentMeeting">
                             <HBox.margin>
                                 <Insets top="10.0" />
                             </HBox.margin>
@@ -42,7 +50,7 @@
                                 <Insets left="10.0" top="10.0" />
                             </HBox.margin>
                         </ImageView>
-                        <TextField editable="false" prefHeight="48.0" prefWidth="260.0" styleClass="meeting-list-title" text="%left_navigation.upcomingMeeting">
+                        <TextField editable="false" prefHeight="48.0" prefWidth="220.0" styleClass="meeting-list-title" text="%left_navigation.upcomingMeeting">
                             <HBox.margin>
                                 <Insets top="10.0" />
                             </HBox.margin>
@@ -60,7 +68,7 @@
                                 <Insets left="10.0" top="10.0" />
                             </HBox.margin>
                         </ImageView>
-                        <TextField editable="false" prefHeight="48.0" prefWidth="260.0" styleClass="meeting-list-title" text="%left_navigation.pastMeeting">
+                        <TextField editable="false" prefHeight="48.0" prefWidth="220.0" styleClass="meeting-list-title" text="%left_navigation.pastMeeting">
                             <HBox.margin>
                                 <Insets top="10.0" />
                             </HBox.margin>
@@ -68,7 +76,7 @@
                     </children>
                 </HBox>
                 <ListView fx:id="meetHistoryListView" prefWidth="400.0" styleClass="meeting-list-view" />
-                <!-- to do: 按钮的位置会根据列表的高度改变，需要把按钮的位置固定下来，可考虑按照vbox整体高的位置 -->
+                <!-- to do: 如果将来把上面的代码高度确定下来，按钮的位置就能确定下来了 -->
                 <Button mnemonicParsing="false" onAction="#handExit" prefHeight="50.0" minHeight="50.0" prefWidth="400.0" styleClass="exit-btn" text="%left_navigation.exit" textAlignment="CENTER" />
             </children>
         </VBox>
