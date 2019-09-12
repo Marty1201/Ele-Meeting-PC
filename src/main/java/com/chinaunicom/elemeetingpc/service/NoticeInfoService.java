@@ -10,11 +10,13 @@ import com.chinaunicom.elemeetingpc.constant.ServeIpConstant;
 import com.chinaunicom.elemeetingpc.constant.StatusConstant;
 import com.chinaunicom.elemeetingpc.modelFx.NoticeInfoFx;
 import com.chinaunicom.elemeetingpc.modelFx.OrganInfoFx;
+import com.chinaunicom.elemeetingpc.utils.DateUtil;
 import com.chinaunicom.elemeetingpc.utils.GsonUtil;
 import com.chinaunicom.elemeetingpc.utils.HashUtil;
 import com.chinaunicom.elemeetingpc.utils.HttpClientUtil;
 import com.chinaunicom.elemeetingpc.utils.exceptions.ApplicationException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -124,6 +126,95 @@ public class NoticeInfoService {
         fx.setNoticeTypeName(noticeTypeName);
         fx.setNoticeTypeEnglishName(noticeTypeEnglishName);
         fx.setSort(Double.valueOf(sort).intValue());
+        return fx;
+    }
+    
+    /**
+     * 根据noticeId获取通知信息详情
+     * @param noticeId
+     * @return 
+     */
+    public NoticeInfoFx getNoticeDeatilFXById(String noticeId){
+        NoticeInfoFx fx = null;
+        Map<String, String> resultMap = new HashMap();
+        try {
+            //封装参数
+            String param = this.fzParamForNoticeDetail(GlobalStaticConstant.GLOBAL_ORGANINFO_OWNER_USERID, noticeId);
+            //访问接口
+            String result = HttpClientUtil.getInstance().getResponseBodyAsString(ServeIpConstant.noticeDetailServicePath(), param);
+            if(StringUtils.isNotBlank(result)){
+                //把json字符串转成map
+                Map temp_map = GsonUtil.getMap(result);
+                String result_code = String.valueOf(temp_map.get("resultCode"));
+                String resultDesc = String.valueOf(temp_map.get("resultDesc"));
+                resultMap.put("code", result_code);
+                resultMap.put("desc", resultDesc);
+                if (StatusConstant.RESULT_CODE_SUCCESS.equals(result_code)) {
+                    String resultData = String.valueOf(temp_map.get("resultData"));
+                    Map dataMap = GsonUtil.getMap(resultData);;
+                    
+                    Map noticeInfoMap = new HashMap();
+                    //通知信息
+                    noticeInfoMap = (Map) dataMap.get("notice");//解析通知信息对象
+                    if(noticeInfoMap!=null){
+                        fx = new NoticeInfoFx();
+                        setNoticeInfoFxProperties_detail(fx,noticeInfoMap);
+                    }
+                    
+                    //附件
+                    List<Map> noticeListMap = (List<Map>) dataMap.get("accessories");//解析附件对象
+                    if (!noticeListMap.isEmpty()) {
+                        
+                    }
+                    
+                }
+            }
+        } catch (Exception ex) {
+            Logger.getLogger(NoticeInfoService.class.getName()).log(Level.SEVERE, null, ex);
+            resultMap.put("code", StatusConstant.RESULT_CODE_FAIL);
+            resultMap.put("desc", "获取通知信息详情异常");
+        }
+        
+        return fx;
+    }
+    
+     /**
+     * 封装参数
+     * @param userId
+     * @param noticeId
+     * @return 
+     */
+    private String fzParamForNoticeDetail(String userId,String noticeId) {
+        String timeString = DateUtil.formatFullDateTime(new Date());
+        String resultString = "{userId:'" + userId + "',noticeId:'" + noticeId + "',readTime:'"+timeString+"'}";
+        return resultString;
+    }
+    
+    /**
+     * 封装NoticeInfoFx
+     * @param fx
+     * @param organInfoMap
+     * @return 
+     */
+    public NoticeInfoFx setNoticeInfoFxProperties_detail(NoticeInfoFx fx,Map noticeInfoMap){
+        String noticeId = String.valueOf(noticeInfoMap.get("noticeId"));
+        String noticeTitle = String.valueOf(noticeInfoMap.get("noticeTitle"));
+        String createTime = String.valueOf(noticeInfoMap.get("createTime"));
+        String noticeTypeName = String.valueOf(noticeInfoMap.get("noticeTypeName"));
+        String noticeTypeEnglishName = String.valueOf(noticeInfoMap.get("noticeTypeEnglishName"));
+        String userName = String.valueOf(noticeInfoMap.get("userName"));
+        String englishName = String.valueOf(noticeInfoMap.get("englishName"));
+        String noticeContent = String.valueOf(noticeInfoMap.get("noticeContent"));
+        String state = String.valueOf(noticeInfoMap.get("state"));
+        fx.setNoticeId(noticeId);
+        fx.setNoticeTitle(noticeTitle);
+        fx.setCreateTime(createTime);
+        fx.setNoticeTypeName(noticeTypeName);
+        fx.setNoticeTypeEnglishName(noticeTypeEnglishName);
+        fx.setUserName(userName);
+        fx.setEnglishName(englishName);
+        fx.setNoticeContent(noticeContent);
+        fx.setState(state);
         return fx;
     }
     
