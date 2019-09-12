@@ -63,7 +63,10 @@ public class MeetController {
     
     //修改密码界面
     public static final String FXML_RESET_PASSWORD = "/fxml/fxml_resetPassword.fxml";
-
+    
+    //通知列表界面
+    public static final String FXML_NOTICE_LIST = "/fxml/fxml_notice_list.fxml";
+    
     //左侧会议列表默认收起状态
     private boolean isFolded = true;
 
@@ -437,4 +440,31 @@ public class MeetController {
         dialogStage.showAndWait(); 
 
     }
+    
+    /**
+     * 通知列表信息
+     */
+    @FXML
+    private void handNoticeList(){
+        FXMLLoader loader = FxmlUtils.getFXMLLoader(FXML_NOTICE_LIST);
+        AnchorPane noticeListDialog=new AnchorPane();
+        try {
+            noticeListDialog = loader.load();
+        } catch (IOException ex) {
+            java.util.logging.Logger.getLogger(MeetController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        Stage dialogStage = new Stage();
+        dialogStage.setTitle("通知信息列表");
+        dialogStage.initModality(Modality.WINDOW_MODAL);
+        dialogStage.initOwner(borderPaneMain.getScene().getWindow());
+        Scene scene = new Scene(noticeListDialog);
+        dialogStage.setScene(scene);
+        
+        NoticeInfoController controller = loader.getController();
+        controller.setDialogStage(dialogStage);
+        
+        dialogStage.showAndWait(); 
+    }
+    
 }

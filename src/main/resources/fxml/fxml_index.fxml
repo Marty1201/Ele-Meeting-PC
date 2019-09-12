@@ -8,32 +8,32 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox fx:id="mainIndex" alignment="TOP_LEFT" BorderPane.alignment="TOP_LEFT" maxWidth="Infinity" maxHeight="Infinity" prefWidth="1366.0" prefHeight="768" style="-fx-background-color: #f1f1f1;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.chinaunicom.elemeetingpc.controllers.MeetController">
+<VBox fx:id="mainIndex" alignment="TOP_LEFT" maxHeight="Infinity" maxWidth="Infinity" prefHeight="768" prefWidth="1366.0" style="-fx-background-color: #f1f1f1;" BorderPane.alignment="TOP_LEFT" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.chinaunicom.elemeetingpc.controllers.MeetController">
     <children>
         <!-- 菜单区域 -->
-        <AnchorPane maxWidth="Infinity" maxHeight="Infinity" prefHeight="120.0" prefWidth="1366.0" style="-fx-background-color: #ffffff;">
+        <AnchorPane maxHeight="Infinity" maxWidth="Infinity" prefHeight="120.0" prefWidth="1366.0" style="-fx-background-color: #ffffff;">
             <children>
-                <ImageView fitHeight="46.0" fitWidth="38.0" layoutX="28.0" layoutY="19.0" pickOnBounds="true" preserveRatio="true" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="10.0" onMouseClicked="#showFxmlLeftNavigation" styleClass="cursor-hand">
+                <ImageView fitHeight="46.0" fitWidth="38.0" layoutX="28.0" layoutY="19.0" onMouseClicked="#showFxmlLeftNavigation" pickOnBounds="true" preserveRatio="true" styleClass="cursor-hand" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="10.0">
                     <image>
                         <Image url="/images/menu.png" />
                     </image>
                 </ImageView>
-                <ImageView fitHeight="46.0" fitWidth="38.0" layoutX="80.0" layoutY="19.0" pickOnBounds="true" preserveRatio="true" AnchorPane.leftAnchor="60.0" AnchorPane.topAnchor="10.0" onMouseClicked="#showFxmlOrg" styleClass="cursor-hand">
+                <ImageView fitHeight="46.0" fitWidth="38.0" layoutX="80.0" layoutY="19.0" onMouseClicked="#showFxmlOrg" pickOnBounds="true" preserveRatio="true" styleClass="cursor-hand" AnchorPane.leftAnchor="60.0" AnchorPane.topAnchor="10.0">
                     <image>
                         <Image url="/images/home.png" />
                     </image>
                 </ImageView>
-                <ImageView fitHeight="40.0" fitWidth="42.0" layoutX="1250.0" layoutY="19.0" pickOnBounds="true" preserveRatio="true" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0" onMouseClicked="#handResetPassword" styleClass="cursor-hand">
+                <ImageView fitHeight="40.0" fitWidth="42.0" layoutX="1250.0" layoutY="19.0" onMouseClicked="#handResetPassword" pickOnBounds="true" preserveRatio="true" styleClass="cursor-hand" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0">
                     <image>
                         <Image url="/images/password.png" />
                     </image>
                 </ImageView>
-                <ImageView fitHeight="40.0" fitWidth="42.0" layoutX="1190.0" layoutY="19.0" pickOnBounds="true" preserveRatio="true" AnchorPane.rightAnchor="70.0" AnchorPane.topAnchor="10.0" styleClass="cursor-hand">
+                <ImageView fitHeight="40.0" fitWidth="42.0" layoutX="1190.0" layoutY="19.0" onMouseClicked="#handNoticeList" pickOnBounds="true" preserveRatio="true" styleClass="cursor-hand" AnchorPane.rightAnchor="70.0" AnchorPane.topAnchor="10.0">
                     <image>
                         <Image url="/images/message.png" />
                     </image>
                 </ImageView>
-                <ImageView fitHeight="40.0" fitWidth="42.0" layoutX="1130.0" layoutY="19.0" pickOnBounds="true" preserveRatio="true" AnchorPane.rightAnchor="130.0" AnchorPane.topAnchor="10.0" styleClass="cursor-hand">
+                <ImageView fitHeight="40.0" fitWidth="42.0" layoutX="1130.0" layoutY="19.0" pickOnBounds="true" preserveRatio="true" styleClass="cursor-hand" AnchorPane.rightAnchor="130.0" AnchorPane.topAnchor="10.0">
                     <image>
                         <Image url="/images/help.png" />
                     </image>
@@ -46,7 +46,7 @@
         <!-- 父会议标题区域 -->
         <HBox maxWidth="Infinity" minHeight="80.0" prefHeight="80.0" prefWidth="1366.0">
             <children>
-                <Label fx:id="indexMeetTitle" maxWidth="Infinity" minHeight="80.0" prefHeight="80.0" prefWidth="1366.0" styleClass="index-meeting-title" HBox.hgrow="ALWAYS"/>
+                <Label fx:id="indexMeetTitle" maxWidth="Infinity" minHeight="80.0" prefHeight="80.0" prefWidth="1366.0" styleClass="index-meeting-title" HBox.hgrow="ALWAYS" />
             </children>
         </HBox>
         <!-- 会议信息区域 -->
@@ -60,7 +60,7 @@
                         <Insets left="10.0" top="10.0" />
                     </HBox.margin>
                 </ImageView>
-                <TextField editable="false" prefHeight="25.0" prefWidth="1000.0" maxWidth="Infinity" styleClass="index-title" text="%index.meetingInfo" HBox.hgrow="ALWAYS">
+                <TextField editable="false" maxWidth="Infinity" prefHeight="25.0" prefWidth="1000.0" styleClass="index-title" text="%index.meetingInfo" HBox.hgrow="ALWAYS">
                     <HBox.margin>
                         <Insets top="5.0" />
                     </HBox.margin>
@@ -71,7 +71,7 @@
             </VBox.margin>
         </HBox>
         <!-- 子会议标题和议题区域，高度由电脑自己计算合适的值 -->
-        <VBox fx:id="subMeetingSection" fillWidth="true" maxWidth="Infinity" maxHeight="Infinity" prefWidth="1366.0">
+        <VBox fx:id="subMeetingSection" fillWidth="true" maxHeight="Infinity" maxWidth="Infinity" prefWidth="1366.0">
             <children>
             </children>
         </VBox>
