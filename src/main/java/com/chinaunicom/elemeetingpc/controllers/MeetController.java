@@ -435,7 +435,7 @@ public class MeetController {
             controller.setDialogStage(dialogStage);//把界面传递到下一个控制器里
             dialogStage.showAndWait();
         } catch (IOException ex) {
-            logger.warn(ex.getCause().getMessage());
+            logger.error(ex.getCause().getMessage());
         }
     }
     
@@ -449,7 +449,7 @@ public class MeetController {
         try {
             noticeListDialog = loader.load();
         } catch (IOException ex) {
-            java.util.logging.Logger.getLogger(MeetController.class.getName()).log(Level.SEVERE, null, ex);
+            logger.error(ex.getCause().getMessage());
         }
         
         Stage dialogStage = new Stage();
