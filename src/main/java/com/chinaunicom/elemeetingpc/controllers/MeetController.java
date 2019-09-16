@@ -415,7 +415,7 @@ public class MeetController {
     }
 
     /**
-     * 密码修改.
+     * 跳转到密码修改界面，创建一个新的Modal window.
      */
     @FXML
     public void handleResetPassword() {
