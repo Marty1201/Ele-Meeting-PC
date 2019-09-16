@@ -1,5 +1,6 @@
 package com.chinaunicom.elemeetingpc.controllers;
 
+import static com.chinaunicom.elemeetingpc.MainApp.STYLES;
 import com.chinaunicom.elemeetingpc.constant.GlobalStaticConstant;
 import com.chinaunicom.elemeetingpc.database.models.IssueInfo;
 import com.chinaunicom.elemeetingpc.database.models.MeetInfo;
@@ -17,7 +18,6 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
 import java.util.stream.Collectors;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -60,7 +60,7 @@ public class MeetController {
 
     //文件列表界面
     public static final String FXML_FILE = "/fxml/fxml_file.fxml";
-    
+
     //修改密码界面
     public static final String FXML_RESET_PASSWORD = "/fxml/fxml_resetPassword.fxml";
     
@@ -413,32 +413,30 @@ public class MeetController {
             }
         });
     }
-    
+
     /**
-     * 密码修改
+     * 密码修改.
      */
     @FXML
-    private void handResetPassword(){
-        FXMLLoader loader = FxmlUtils.getFXMLLoader(FXML_RESET_PASSWORD);
-        AnchorPane resetPasswordDialog=new AnchorPane();
+    public void handleResetPassword() {
         try {
-            resetPasswordDialog = loader.load();
+            FXMLLoader loader = FxmlUtils.getFXMLLoader(FXML_RESET_PASSWORD);
+            AnchorPane resetPasswordDialog = loader.load();
+            //创建一个弹窗
+            Stage dialogStage = new Stage();
+            dialogStage.setTitle("修改密码");
+            dialogStage.initModality(Modality.WINDOW_MODAL);
+            dialogStage.initOwner(borderPaneMain.getScene().getWindow());
+            //or 直接一行就够了dialogStage.initModality(Modality.APPLICATION_MODAL);
+            Scene scene = new Scene(resetPasswordDialog);
+            scene.getStylesheets().add(STYLES);
+            dialogStage.setScene(scene);
+            ResetPasswordController controller = loader.getController();
+            controller.setDialogStage(dialogStage);//把界面传递到下一个控制器里
+            dialogStage.showAndWait();
         } catch (IOException ex) {
-            java.util.logging.Logger.getLogger(MeetController.class.getName()).log(Level.SEVERE, null, ex);
+            logger.warn(ex.getCause().getMessage());
         }
-        
-        Stage dialogStage = new Stage();
-        dialogStage.setTitle("密码修改");
-        dialogStage.initModality(Modality.WINDOW_MODAL);
-        dialogStage.initOwner(borderPaneMain.getScene().getWindow());
-        Scene scene = new Scene(resetPasswordDialog);
-        dialogStage.setScene(scene);
-        
-        ResetPasswordController controller = loader.getController();
-        controller.setDialogStage(dialogStage);
-        
-        dialogStage.showAndWait(); 
-
     }
     
     /**

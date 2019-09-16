@@ -52,6 +52,18 @@ public class DialogsUtils {
     }
     
     /**
+     * Show custom info alert dialog windows.
+     */
+    public static void customInfoAlert(String infoString) {
+        Alert infoAlert = new Alert(Alert.AlertType.INFORMATION);
+        infoAlert.setTitle(bundle.getString("info.title"));
+        infoAlert.setHeaderText(bundle.getString("info.title"));
+        TextArea textArea = new TextArea(infoString);
+        infoAlert.getDialogPane().setContent(textArea);
+        infoAlert.showAndWait();
+    }
+    
+    /**
      * Show confirmation alert dialog windows.
      * @return answer: click ok button return true, otherwise return false.
      */
