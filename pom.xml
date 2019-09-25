@@ -59,6 +59,18 @@
             <version>2.2.4</version>
             <type>jar</type>
         </dependency>
+        <!--PDFBox-->
+        <dependency>
+            <groupId>org.apache.pdfbox</groupId>
+            <artifactId>pdfbox</artifactId>
+            <version>2.0.16</version>
+        </dependency>
+        <!--Fontawesome-->
+        <dependency>
+            <groupId>de.jensd</groupId>
+            <artifactId>fontawesomefx</artifactId>
+            <version>8.9</version>
+        </dependency>
 
     </dependencies>
 
