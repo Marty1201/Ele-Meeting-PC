@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.effect.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.image.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+
+<?import com.chinaunicom.elemeetingpc.utils.OpenPdfViewer?>
+
+<VBox fx:id="mainView" alignment="TOP_LEFT" maxHeight="Infinity" maxWidth="Infinity" prefHeight="768.0" prefWidth="1366.0" style="-fx-background-color: #ffffff;" BorderPane.alignment="TOP_LEFT" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.chinaunicom.elemeetingpc.controllers.FileDetailController">
+    <children>
+        <!-- 顶部菜单区域 -->
+        <AnchorPane minHeight="80.0" prefHeight="80.0" prefWidth="1366.0" style="-fx-background-color: #f1f1f1;">
+            <children>
+                <ImageView fitHeight="54.0" fitWidth="70.0" layoutX="28.0" layoutY="19.0" pickOnBounds="true" preserveRatio="true" styleClass="cursor-hand" AnchorPane.leftAnchor="13.0" AnchorPane.topAnchor="13.0">
+                    <image>
+                        <Image url="/images/back.png" />
+                    </image>
+                </ImageView>
+                <!-- 文件名称区域 -->
+                <Label fx:id="fileTitle" maxWidth="Infinity" minWidth="400.0" prefHeight="53.0" prefWidth="700.0" layoutX="120.0" layoutY="23.0" styleClass="file-detail-name" AnchorPane.leftAnchor="110.0" AnchorPane.rightAnchor="550.0" AnchorPane.topAnchor="13.0" />
+                <ImageView fitHeight="100.0" fitWidth="120.0" layoutX="878.0" layoutY="11.0" pickOnBounds="true" preserveRatio="true" styleClass="cursor-hand" AnchorPane.rightAnchor="380.0" AnchorPane.topAnchor="13.0">
+                    <image>
+                        <Image url="/images/apply5speaker.png" />
+                    </image>
+                </ImageView>
+                <ImageView fitHeight="100.0" fitWidth="120.0" layoutX="1001.0" layoutY="11.0" pickOnBounds="true" preserveRatio="true" styleClass="cursor-hand" AnchorPane.rightAnchor="250.0" AnchorPane.topAnchor="13.0">
+                    <image>
+                        <Image url="/images/follow.png" />
+                    </image>
+                </ImageView>
+                <ImageView fitHeight="100.0" fitWidth="120.0" layoutX="1130.0" layoutY="15.0" pickOnBounds="true" preserveRatio="true" styleClass="cursor-hand" AnchorPane.rightAnchor="120.0" AnchorPane.topAnchor="13.0">
+                    <image>
+                        <Image url="/images/thumb.png" />
+                    </image>
+                </ImageView>
+                <ImageView fitHeight="55.0" fitWidth="120.0" layoutX="1232.0" layoutY="13.0" pickOnBounds="true" preserveRatio="true" styleClass="cursor-hand" AnchorPane.rightAnchor="13.0" AnchorPane.topAnchor="13.0">
+                    <image>
+                        <Image url="/images/tools.png" />
+                    </image>
+                </ImageView>
+                <!-- <ImageView fitHeight="51.0" fitWidth="148.0" pickOnBounds="true" preserveRatio="true">
+                    <image>
+                        <Image url="/images/document.png" />
+                    </image>
+                </ImageView>  -->
+            </children>
+            <padding>
+                <Insets bottom="5.0" left="10.0" right="10.0" top="5.0" />
+            </padding>
+        </AnchorPane>
+        <!-- OpenPdfViewer 插件区域 -->
+        <AnchorPane fx:id="pdfArea" prefWidth="1366.0">
+            <children>
+                <OpenPdfViewer AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0"  zoomType="WIDTH" zoomOptions="true" loadOptions="true"></OpenPdfViewer>
+            </children>
+        </AnchorPane>
+    </children>
+</VBox>

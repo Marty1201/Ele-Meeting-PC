@@ -405,9 +405,7 @@ public class MeetController {
                 try {
                     //System.out.println("issueName is: " + issueNameLabel.getText());
                     showFxmlFile(issue);//跳转到文件列表界面
-                } catch (ApplicationException ex) {
-                    ex.printStackTrace();
-                } catch (SQLException ex) {
+                } catch (ApplicationException | SQLException ex) {
                     ex.printStackTrace();
                 }
             }
