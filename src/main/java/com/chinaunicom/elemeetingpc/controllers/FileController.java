@@ -72,15 +72,18 @@ public class FileController {
     private IssueFileRelationModel issueFileRelationModel;
 
     private FileUserRelationModel fileUserRelationModel;
-    
+
     private FileResourceModel fileResourceModel;
-    
-    public FileController(){
-        
+
+    //文件所属议题，从MeetController里传过来的
+    private IssueInfo issueInfo;
+
+    public FileController() {
+
         this.issueFileRelationModel = new IssueFileRelationModel();
-        
+
         this.fileUserRelationModel = new FileUserRelationModel();
-        
+
         this.fileResourceModel = new FileResourceModel();
     }
 
@@ -90,18 +93,19 @@ public class FileController {
      * @throws ApplicationException
      */
     public void initialize() throws ApplicationException {
-
     }
 
     /**
      * 重写文件页面布局初始化.
      *
-     * @param issueInfo
+     * @param issueInfo 文件所属议题
      * @throws ApplicationException
+     * @throws java.sql.SQLException
      */
     public void initData(IssueInfo issueInfo) throws ApplicationException, SQLException {
         List<String> issueFileIdList = new ArrayList<>();//议题文件关系表文件id列表
         List<String> fileUserFileIdList = new ArrayList<>();//文件人员关系表文件id列表
+        this.issueInfo = issueInfo;
         try {
             //创建议题名称区域
             createIssueTitle(issueInfo);
@@ -109,18 +113,18 @@ public class FileController {
             String issueId = issueInfo.getIssueId();
             List<IssueFileRelation> issueFileRelationList = issueFileRelationModel.queryIssueFileRelationByIssueId(issueId);
             if (!issueFileRelationList.isEmpty()) {
-                for (IssueFileRelation issueFileRelation : issueFileRelationList) {
+                issueFileRelationList.forEach((issueFileRelation) -> {
                     issueFileIdList.add(issueFileRelation.getFileId());
-                }
+                });
             }
             //根据当前登录用户id查询文件人员关系表对应的文件id
             List<FileUserRelation> fileUserRelationList = fileUserRelationModel.queryFileUserRelationByUserId(GlobalStaticConstant.GLOBAL_ORGANINFO_OWNER_USERID);
             if (!fileUserRelationList.isEmpty()) {
-                for (FileUserRelation fileUserRelation : fileUserRelationList) {
+                fileUserRelationList.forEach((fileUserRelation) -> {
                     fileUserFileIdList.add(fileUserRelation.getFileId());
-                }
+                });
             }
-            //比较两个列表并获取两个列表中重合的数据
+            //比较两个列表并获取两个列表中重合的数据,如果没有重合数据则issueFileIdList为空
             issueFileIdList.retainAll(fileUserFileIdList);
             //根据筛选过的文件id列表和议题id获取IssueFileRelation表里的数据
             List<IssueFileRelation> issueFileList = issueFileRelationModel.queryIssueFileRelationByFileIds(issueFileIdList, issueId);
@@ -128,16 +132,32 @@ public class FileController {
                 //创建文件区域，注意：文件名称是从议题文件关系表里获取的，而不是从文件表里获取的，故此处传入的是IssueFileRelation列表
                 createFiles(issueFileList, fileSection);
             }
-        } catch (Exception ex) {
+        } catch (ApplicationException | SQLException ex) {
             ex.printStackTrace();
+            logger.error(ex.getCause().getMessage());
         }
+    }
+    
+    /**
+     * 创建议题名称.
+     *
+     * @param issueInfo 议题信息
+     */
+    public void createIssueTitle(IssueInfo issueInfo) {
+        issueTitle.setText(issueInfo.getIssueName());
+        issueTitle.setTextAlignment(TextAlignment.CENTER);
+        issueTitle.setTextOverrun(OverrunStyle.ELLIPSIS);
+        issueTitle.setWrapText(true);
+        issueTitle.setPadding(new Insets(5, 15, 5, 15));
+        issueTitle.setAlignment(Pos.CENTER);
     }
 
     /**
-     * 创建文件，从低层到顶层所用的UI控件分别是：FlowPane -> StackPane -> ImageView -> Label.
+     * 创建文件并添加事件处理，从低层到顶层所用的UI控件分别是：FlowPane -> StackPane -> ImageView -> Label.
      *
-     * @param issueFileList
-     * @param fileSection
+     * @param issueFileList 议题文件列表
+     * @param fileSection 文件显示区域
+     * @throws com.chinaunicom.elemeetingpc.utils.exceptions.ApplicationException
      */
     public void createFiles(List<IssueFileRelation> issueFileList, VBox fileSection) throws ApplicationException {
         //设置FlowPane样式
@@ -151,25 +171,25 @@ public class FileController {
         int issueFileListSize = issueFileList.size();
         ImageView[] imageList = new ImageView[issueFileListSize];
         for (int k = 0; k < issueFileListSize; k++) {
+            //根据文件id列表查询文件信息
+            FileResource file = fileResourceModel.queryFilesById(issueFileList.get(k).getFileId()).get(0);
             imageList[k] = new ImageView(image);
-            Label issueFileLabel = new Label(issueFileList.get(k).getFileName());
-            StackPane fileStackPane = new StackPane();
             //设置Label样式
+            Label issueFileLabel = new Label(issueFileList.get(k).getFileName());
             issueFileLabel.setStyle("-fx-font-size:16.0px;-fx-font-size-family:Arial;-fx-cursor:hand;");
             issueFileLabel.setPrefSize(161.0, 185.0);
             issueFileLabel.setTextOverrun(OverrunStyle.ELLIPSIS);
             issueFileLabel.setWrapText(true);
             issueFileLabel.setPadding(new Insets(15, 20, 35, 25)); //通过内间距padding控制文字内容的位置
             //fileLabel.setLineSpacing(1.0);
-            //根据文件id列表查询文件信息
-            FileResource file = (FileResource) fileResourceModel.queryFilesById(issueFileList.get(k).getFileId()).get(0);
-            ////给Label添加鼠标点击事件
-            addMouseClickEvent(issueFileLabel, file, issueFileList.get(k).getFileName());
             //设置StackPane样式
+            StackPane fileStackPane = new StackPane();
             fileStackPane.setPrefSize(161.0, 185.0);
             fileStackPane.getChildren().addAll(imageList[k], issueFileLabel);
             fileStackPane.setAlignment(Pos.TOP_LEFT);
             //StackPane.setMargin(issueName, new Insets(15, 25, 50, 25));//或通过外间距margin控制文字内容的位置  
+            fileStackPane.setUserData(file);//文件信息关联对应的StackPane
+            addMouseClickEvent(fileStackPane, issueFileList.get(k).getFileName());//给StackPane添加鼠标点击事件
             filesFlowPane.getChildren().addAll(fileStackPane);
         }
         fileSection.getChildren().addAll(filesFlowPane);
@@ -181,24 +201,51 @@ public class FileController {
         scroll.setStyle("-fx-background-insets:0.0px;-fx-border-color:transparent;");
         fileIndex.getChildren().addAll(scroll);
     }
-    
+
     /**
-     * Label点击事件，跳转到文件详情界面.
+     * StackPane点击事件，跳转到文件详情界面并传入对应的文件信息.
      *
-     * @param issueFileLabel Label
-     * @param file 文件
+     * @param fileStackPane ScrollPane
      * @param fileName 文件名称（文件名称是从议题文件关系表里获取的!）
      */
-    public void addMouseClickEvent(Label issueFileLabel, FileResource file, String fileName) {
-        issueFileLabel.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
+    public void addMouseClickEvent(StackPane fileStackPane, String fileName) {
+        fileStackPane.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
+            @Override
             public void handle(final MouseEvent event) {
                 try {
+                    FileResource file = (FileResource) fileStackPane.getUserData();
                     showFxmlFileDetail(file, fileName);//跳转到文件详情界面
                 } catch (ApplicationException | SQLException ex) {
-                    ex.printStackTrace();
+                    ex.printStackTrace(); //debug
+                    logger.error(ex.getCause().getMessage());
                 }
             }
         });
+    }
+
+    /**
+     * 跳转文件详情界面.
+     *
+     * @param file 文件
+     * @param fileName 文件名称
+     * @throws
+     * com.chinaunicom.elemeetingpc.utils.exceptions.ApplicationException
+     * @throws java.sql.SQLException
+     */
+    @FXML
+    public void showFxmlFileDetail(FileResource file, String fileName) throws ApplicationException, SQLException {
+        try {
+            FXMLLoader loader = FxmlUtils.getFXMLLoader(FXML_FILE_DETAIL);
+            borderPaneMain.getChildren().remove(borderPaneMain.getCenter());//清除当前BorderPane内中间区域的内容
+            borderPaneMain.getChildren().remove(borderPaneMain.getLeft());//清除当前BorderPane内左侧区域的内容
+            borderPaneMain.setCenter(loader.load()); //将当前BorderPane中间区域加载为文件详情界面
+            FileDetailController fileDetailController = loader.getController(); //从loader中获取FileDetailController
+            fileDetailController.setBorderPane(borderPaneMain);//设置传参当前的borderPaneMain，以便在FileDetailController中获取到当前BorderPane
+            fileDetailController.initialize(file, fileName, issueInfo);//把当前选择的文件，文件名和文件所属议题传到FileController里，以便在下个控制器中使用
+        } catch (IOException e) {
+            e.printStackTrace();
+            logger.error(e.getCause().getMessage());
+        }
     }
 
     /**
@@ -256,47 +303,11 @@ public class FileController {
             meetController.setBorderPane(borderPaneMain);//设置传参当前的borderPane，以便在MeetController中获取到当前BorderPane
         } catch (IOException e) {
             logger.error(e.getCause().getMessage());
-        }
-    }
-
-    /**
-     * 跳转文件详情界面.
-     * @param file
-     * @param fileName
-     * @throws com.chinaunicom.elemeetingpc.utils.exceptions.ApplicationException
-     * @throws java.sql.SQLException
-     */
-    @FXML
-    public void showFxmlFileDetail(FileResource file, String fileName) throws ApplicationException, SQLException {
-        try {
-            FXMLLoader loader = FxmlUtils.getFXMLLoader(FXML_FILE_DETAIL);
-            borderPaneMain.getChildren().remove(borderPaneMain.getCenter());//清除当前BorderPane内中间区域的内容
-            borderPaneMain.getChildren().remove(borderPaneMain.getLeft());//清除当前BorderPane内左侧区域的内容
-            borderPaneMain.setCenter(loader.load()); //将当前BorderPane中间区域加载为文件详情界面
-            FileDetailController fileDetailController = loader.getController(); //从loader中获取FileDetailController
-            fileDetailController.setBorderPane(borderPaneMain);//设置传参当前的borderPaneMain，以便在FileDetailController中获取到当前BorderPane
-            fileDetailController.initialize(file, fileName);//把当前选择的议题传到FileController里，以便在下个控制器中使用，注意这里调用的是重写过的初始化方法
-        } catch (IOException e) {
             e.printStackTrace();
-            logger.error(e.getCause().getMessage());
         }
     }
-
+    
     public void setBorderPane(BorderPane borderPaneMain) {
         this.borderPaneMain = borderPaneMain;
-    }
-
-    /**
-     * 创建议题名称.
-     *
-     * @param issueInfo
-     */
-    public void createIssueTitle(IssueInfo issueInfo) {
-        issueTitle.setText(issueInfo.getIssueName());
-        issueTitle.setTextAlignment(TextAlignment.CENTER);
-        issueTitle.setTextOverrun(OverrunStyle.ELLIPSIS);
-        issueTitle.setWrapText(true);
-        issueTitle.setPadding(new Insets(5, 15, 5, 15));
-        issueTitle.setAlignment(Pos.CENTER);
     }
 }

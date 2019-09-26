@@ -14,7 +14,7 @@
            <ToolBar fx:id="toolBar">
                <HBox fx:id="loadOptionsBox"><Button fx:id="loadButton" text="Load File" contentDisplay="LEFT"><graphic><MaterialDesignIconView glyphName="FOLDER_OUTLINE" glyphSize="20" fill="grey"/></graphic></Button></HBox>
                <HBox  fx:id="zoomOptionsBox" alignment="CENTER_RIGHT"  nodeOrientation="LEFT_TO_RIGHT" spacing="8">
-                   <Label text="Zoom Options:"></Label>
+                   <!-- <Label text="Zoom Options:"></Label> -->
                    <Button fx:id="reduceZoomButton"><graphic><MaterialDesignIconView glyphName="MINUS_CIRCLE_OUTLINE" glyphSize="20" fill="grey"/></graphic></Button>
                    <Button fx:id="addZoomButton"><graphic><MaterialDesignIconView glyphName="PLUS_CIRCLE_OUTLINE" glyphSize="20" fill="grey"/></graphic></Button>
                    <Button fx:id="zoomWidthButton"><graphic><FontAwesomeIconView glyphName="ARROWS_H" glyphSize="15" fill="grey"/></graphic></Button>

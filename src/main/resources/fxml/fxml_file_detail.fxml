@@ -15,14 +15,14 @@
         <!-- 顶部菜单区域 -->
         <AnchorPane minHeight="80.0" prefHeight="80.0" prefWidth="1366.0" style="-fx-background-color: #f1f1f1;">
             <children>
-                <ImageView fitHeight="54.0" fitWidth="70.0" layoutX="28.0" layoutY="19.0" pickOnBounds="true" preserveRatio="true" styleClass="cursor-hand" AnchorPane.leftAnchor="13.0" AnchorPane.topAnchor="13.0">
+                <ImageView fitHeight="54.0" fitWidth="70.0" layoutX="28.0" layoutY="19.0" onMouseClicked="#showFxmlFileList" pickOnBounds="true" preserveRatio="true" styleClass="cursor-hand" AnchorPane.leftAnchor="13.0" AnchorPane.topAnchor="13.0">
                     <image>
                         <Image url="/images/back.png" />
                     </image>
                 </ImageView>
-                <!-- 文件名称区域 -->
+                <!-- 文件名称区域，暂时将同步阅读功能屏蔽掉 -->
                 <Label fx:id="fileTitle" maxWidth="Infinity" minWidth="400.0" prefHeight="53.0" prefWidth="700.0" layoutX="120.0" layoutY="23.0" styleClass="file-detail-name" AnchorPane.leftAnchor="110.0" AnchorPane.rightAnchor="550.0" AnchorPane.topAnchor="13.0" />
-                <ImageView fitHeight="100.0" fitWidth="120.0" layoutX="878.0" layoutY="11.0" pickOnBounds="true" preserveRatio="true" styleClass="cursor-hand" AnchorPane.rightAnchor="380.0" AnchorPane.topAnchor="13.0">
+                <!-- <ImageView fitHeight="100.0" fitWidth="120.0" layoutX="878.0" layoutY="11.0" pickOnBounds="true" preserveRatio="true" styleClass="cursor-hand" AnchorPane.rightAnchor="380.0" AnchorPane.topAnchor="13.0">
                     <image>
                         <Image url="/images/apply5speaker.png" />
                     </image>
@@ -41,7 +41,7 @@
                     <image>
                         <Image url="/images/tools.png" />
                     </image>
-                </ImageView>
+                </ImageView> -->
                 <!-- <ImageView fitHeight="51.0" fitWidth="148.0" pickOnBounds="true" preserveRatio="true">
                     <image>
                         <Image url="/images/document.png" />
@@ -55,7 +55,7 @@
         <!-- OpenPdfViewer 插件区域 -->
         <AnchorPane fx:id="pdfArea" prefWidth="1366.0">
             <children>
-                <OpenPdfViewer AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0"  zoomType="WIDTH" zoomOptions="true" loadOptions="true"></OpenPdfViewer>
+                <OpenPdfViewer fx:id="openPdfViewer" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0"  zoomType="WIDTH" zoomOptions="true" loadOptions="false"></OpenPdfViewer>
             </children>
         </AnchorPane>
     </children>

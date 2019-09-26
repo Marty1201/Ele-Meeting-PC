@@ -389,6 +389,18 @@ public class OpenPdfViewer extends BorderPane implements Initializable {
             e.printStackTrace();
         }
     }
+    
+    /**
+     * Close a PDF file.
+     *
+     */
+    public void closePdf() {
+        try {
+            pdf.getDocument().close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
     /**
      * The getZoomType method must be used in combine with setZoomType method in

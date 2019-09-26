@@ -52,6 +52,17 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class MeetController {
 
+    private static final Logger logger = LoggerFactory.getLogger(MeetController.class);
+
+    @FXML
+    private VBox subMeetingSection;
+
+    @FXML
+    private VBox mainIndex;
+
+    @FXML
+    private Label indexMeetTitle;
+
     //左侧会议列表界面
     public static final String FXML_LEFT_NAVIGATION = "/fxml/fxml_left_navigation.fxml";
 
@@ -63,14 +74,12 @@ public class MeetController {
 
     //修改密码界面
     public static final String FXML_RESET_PASSWORD = "/fxml/fxml_resetPassword.fxml";
-    
+
     //通知列表界面
     public static final String FXML_NOTICE_LIST = "/fxml/fxml_notice_list.fxml";
-    
+
     //左侧会议列表默认收起状态
     private boolean isFolded = true;
-
-    private static final Logger logger = LoggerFactory.getLogger(MeetController.class);
 
     private BorderPane borderPaneMain;
 
@@ -82,14 +91,14 @@ public class MeetController {
 
     private MeetUserRelationModel meetUserRelationModel;
 
-    @FXML
-    private VBox subMeetingSection;
+    public MeetController() {
 
-    @FXML
-    private VBox mainIndex;
+        this.meetInfoModel = new MeetInfoModel();
 
-    @FXML
-    private Label indexMeetTitle;
+        this.meetIssueRelationModel = new MeetIssueRelationModel();
+
+        this.issueInfoModel = new IssueInfoModel();
+    }
 
     /**
      * 会议首页面布局初始化.
@@ -97,9 +106,6 @@ public class MeetController {
      * @throws ApplicationException
      */
     public void initialize() throws ApplicationException {
-        this.meetInfoModel = new MeetInfoModel();
-        this.meetIssueRelationModel = new MeetIssueRelationModel();
-        this.issueInfoModel = new IssueInfoModel();
         List<MeetInfo> childMeetList = new ArrayList<>();//子会议列表
         List<String> childMeetIdList = new ArrayList<>();//子会议id列表
         List<MeetIssueRelation> meetIssueRelationList = new ArrayList<>();//子会议与议题关系列表
@@ -145,71 +151,8 @@ public class MeetController {
             mainIndex.getChildren().addAll(scroll);
         } catch (Exception ex) {
             ex.printStackTrace();
+            logger.error(ex.getCause().getMessage());
         }
-    }
-
-    /**
-     * 展开/收起左侧会议列表界面，默认isFolded为收起状态.
-     */
-    @FXML
-    public void showFxmlLeftNavigation() {
-        try {
-            if (isFolded) {
-                FXMLLoader loader = FxmlUtils.getFXMLLoader(FXML_LEFT_NAVIGATION);
-                borderPaneMain.setLeft(loader.load()); //将当前BorderPane左侧区域加载为会议列表界面
-                borderPaneMain.setCenter(borderPaneMain.getCenter());//重新加载中间区域
-                MeetLeftController meetLeftController = loader.getController(); //从loader中获取MeetLeftController
-                meetLeftController.setBorderPane(borderPaneMain);//设置传参当前的borderPane，以便在MeetLeftController中获取到当前BorderPane
-                isFolded = false;//设置为展开状态
-            } else {
-                borderPaneMain.getChildren().remove(borderPaneMain.getLeft());//清除当前BorderPane内左侧区域的内容
-                isFolded = true;//设置为收起状态
-            }
-        } catch (IOException e) {
-            logger.error(e.getCause().getMessage());
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * 跳转机构选择界面.
-     */
-    @FXML
-    public void showFxmlOrg() {
-        try {
-            FXMLLoader loader = FxmlUtils.getFXMLLoader(FXML_ORG_FXML);
-            borderPaneMain.getChildren().remove(borderPaneMain.getCenter());//清除当前BorderPane内中间区域的内容
-            borderPaneMain.getChildren().remove(borderPaneMain.getLeft());//清除当前BorderPane内左侧区域的内容
-            borderPaneMain.setCenter(loader.load()); //将当前BorderPane中间区域加载为机构选择界面
-            OrganInfoController organInfoController = loader.getController(); //从loader中获取OrganInfoController
-            organInfoController.setBorderPane(borderPaneMain);//设置传参当前的borderPaneMain，以便在OrganInfoController中获取到当前BorderPane
-        } catch (IOException e) {
-            e.printStackTrace();
-            logger.error(e.getCause().getMessage());
-        }
-    }
-
-    /**
-     * 跳转文件列表界面.
-     */
-    @FXML
-    public void showFxmlFile(IssueInfo issueInfo) throws ApplicationException, SQLException {
-        try {
-            FXMLLoader loader = FxmlUtils.getFXMLLoader(FXML_FILE);
-            borderPaneMain.getChildren().remove(borderPaneMain.getCenter());//清除当前BorderPane内中间区域的内容
-            borderPaneMain.getChildren().remove(borderPaneMain.getLeft());//清除当前BorderPane内左侧区域的内容
-            borderPaneMain.setCenter(loader.load()); //将当前BorderPane中间区域加载为文件列表界面
-            FileController fileController = loader.getController(); //从loader中获取FileController
-            fileController.setBorderPane(borderPaneMain);//设置传参当前的borderPaneMain，以便在FileController中获取到当前BorderPane
-            fileController.initData(issueInfo);//把当前选择的议题传到FileController里，以便在下个控制器中使用，注意这里调用的是重写过的初始化方法
-        } catch (IOException e) {
-            e.printStackTrace();
-            logger.error(e.getCause().getMessage());
-        }
-    }
-
-    public void setBorderPane(BorderPane borderPaneMain) {
-        this.borderPaneMain = borderPaneMain;
     }
 
     /**
@@ -226,7 +169,6 @@ public class MeetController {
             List<String> parentMeetIdList = new ArrayList<>();
             parentMeetIdList = getParentMeetList(GlobalStaticConstant.GLOBAL_ORGANINFO_OWNER_USERID);
             if (!parentMeetIdList.isEmpty()) {
-                this.meetInfoModel = new MeetInfoModel();
                 List<MeetInfo> currentMeetList = meetInfoModel.getCurrentMeetInfo(parentMeetIdList);
                 List<MeetInfo> futureMeetList = meetInfoModel.getFutureMeetInfo(parentMeetIdList);
                 List<MeetInfo> historyMeetList = meetInfoModel.getHistoryMeetInfo(parentMeetIdList);
@@ -280,7 +222,6 @@ public class MeetController {
      */
     public String getParentMeetIdByChildMeetId(String childMeetId) throws ApplicationException, SQLException {
         String parentMeetId = "";
-        this.meetInfoModel = new MeetInfoModel();
         List<MeetInfo> meetInfoList = meetInfoModel.queryMeetInfoByChildMeetId(childMeetId);
         if (!meetInfoList.isEmpty()) {
             parentMeetId = meetInfoList.get(0).getParentMeetingId();
@@ -314,6 +255,8 @@ public class MeetController {
      * 创建父会议标题.
      *
      * @param parentMeetId
+     * @throws com.chinaunicom.elemeetingpc.utils.exceptions.ApplicationException
+     * @throws java.sql.SQLException
      */
     public void createParentMeetingTitle(String parentMeetId) throws ApplicationException, SQLException {
         //获取父会议名称
@@ -355,7 +298,7 @@ public class MeetController {
     }
 
     /**
-     * 创建议题，从低层到顶层所用的UI控件分别是：FlowPane -> StackPane -> ImageView -> Label.
+     * 创建议题并添加事件处理，从低层到顶层所用的UI控件分别是：FlowPane -> StackPane -> ImageView -> Label.
      *
      * @param issueSize
      * @param issueList
@@ -371,45 +314,115 @@ public class MeetController {
         Image icon = new Image(getClass().getResourceAsStream("/images/icon-book.jpg"));
         ImageView[] imageViews = new ImageView[issueSize];
         for (int k = 0; k < issueSize; k++) {
+            IssueInfo issueInfo = issueList.get(k);
             imageViews[k] = new ImageView(icon);
-            Label issueNameLabel = new Label(issueList.get(k).getIssueName());
-            IssueInfo issue = issueList.get(k);
-            StackPane issueStackPane = new StackPane();
             //设置Label样式
+            Label issueNameLabel = new Label(issueList.get(k).getIssueName());
             issueNameLabel.setStyle("-fx-font-size:16.0px;-fx-font-size-family:Arial;-fx-cursor:hand;");
             issueNameLabel.setPrefSize(161, 185);
             issueNameLabel.setWrapText(true);
             issueNameLabel.setTextOverrun(OverrunStyle.ELLIPSIS);
             issueNameLabel.setPadding(new Insets(15, 20, 35, 25)); //通过内间距padding控制文字内容的位置
             //issueLabel.setLineSpacing(1.0);
-            //给Label添加鼠标点击事件
-            addMouseClickEvent(issueNameLabel, issue);
             //设置StackPane样式
+            StackPane issueStackPane = new StackPane();
             issueStackPane.setPrefSize(161.0, 185.0);
             issueStackPane.getChildren().addAll(imageViews[k], issueNameLabel);
             issueStackPane.setAlignment(Pos.TOP_LEFT);
             //StackPane.setMargin(issueName, new Insets(15, 25, 50, 25));//或通过外间距margin控制文字内容的位置
+            issueStackPane.setUserData(issueInfo);//议题信息关联对应的StackPane
+            addMouseClickEvent(issueStackPane);//给issueStackPane添加鼠标点击事件
             issueFlowPane.getChildren().addAll(issueStackPane);
         }
         uiControlsList.add(issueFlowPane);
     }
 
     /**
-     * Label点击事件，跳转到文件界面.
+     * StackPane点击事件，跳转到文件列表界面并传入对应的议题信息.
      *
-     * @param issueNameLabel
+     * @param issueStackPane 代表议题
      */
-    public void addMouseClickEvent(Label issueNameLabel, IssueInfo issue) {
-        issueNameLabel.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
+    public void addMouseClickEvent(StackPane issueStackPane) {
+        issueStackPane.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
+            @Override
             public void handle(final MouseEvent event) {
                 try {
-                    //System.out.println("issueName is: " + issueNameLabel.getText());
-                    showFxmlFile(issue);//跳转到文件列表界面
+                    showFxmlFileList((IssueInfo) issueStackPane.getUserData());//跳转到文件列表界面，从StackPane获取到对应的议题信息
                 } catch (ApplicationException | SQLException ex) {
                     ex.printStackTrace();
+                    logger.error(ex.getCause().getMessage());
                 }
             }
         });
+    }
+
+    /**
+     * 跳转文件列表界面并传入对应的议题信息.
+     *
+     * @param issueInfo 议题信息
+     * @throws
+     * com.chinaunicom.elemeetingpc.utils.exceptions.ApplicationException
+     * @throws java.sql.SQLException
+     */
+    @FXML
+    public void showFxmlFileList(IssueInfo issueInfo) throws ApplicationException, SQLException {
+        try {
+            FXMLLoader loader = FxmlUtils.getFXMLLoader(FXML_FILE);
+            borderPaneMain.getChildren().remove(borderPaneMain.getCenter());//清除当前BorderPane内中间区域的内容
+            borderPaneMain.getChildren().remove(borderPaneMain.getLeft());//清除当前BorderPane内左侧区域的内容
+            borderPaneMain.setCenter(loader.load()); //将当前BorderPane中间区域加载为文件列表界面
+            FileController fileController = loader.getController(); //从loader中获取FileController
+            fileController.setBorderPane(borderPaneMain);//设置传参当前的borderPaneMain，以便在FileController中使用
+            fileController.initData(issueInfo);//把当前选择的议题传到FileController里，以便在下个控制器中使用，注意这里调用的是重写过的初始化方法
+        } catch (IOException e) {
+            e.printStackTrace();
+            logger.error(e.getCause().getMessage());
+        }
+    }
+
+    /**
+     * 展开/收起左侧会议列表界面，默认isFolded为收起状态.
+     */
+    @FXML
+    public void showFxmlLeftNavigation() {
+        try {
+            if (isFolded) {
+                FXMLLoader loader = FxmlUtils.getFXMLLoader(FXML_LEFT_NAVIGATION);
+                borderPaneMain.setLeft(loader.load()); //将当前BorderPane左侧区域加载为会议列表界面
+                borderPaneMain.setCenter(borderPaneMain.getCenter());//重新加载中间区域
+                MeetLeftController meetLeftController = loader.getController(); //从loader中获取MeetLeftController
+                meetLeftController.setBorderPane(borderPaneMain);//设置传参当前的borderPane，以便在MeetLeftController中获取到当前BorderPane
+                isFolded = false;//设置为展开状态
+            } else {
+                borderPaneMain.getChildren().remove(borderPaneMain.getLeft());//清除当前BorderPane内左侧区域的内容
+                isFolded = true;//设置为收起状态
+            }
+        } catch (IOException e) {
+            logger.error(e.getCause().getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 跳转机构选择界面.
+     */
+    @FXML
+    public void showFxmlOrg() {
+        try {
+            FXMLLoader loader = FxmlUtils.getFXMLLoader(FXML_ORG_FXML);
+            borderPaneMain.getChildren().remove(borderPaneMain.getCenter());//清除当前BorderPane内中间区域的内容
+            borderPaneMain.getChildren().remove(borderPaneMain.getLeft());//清除当前BorderPane内左侧区域的内容
+            borderPaneMain.setCenter(loader.load()); //将当前BorderPane中间区域加载为机构选择界面
+            OrganInfoController organInfoController = loader.getController(); //从loader中获取OrganInfoController
+            organInfoController.setBorderPane(borderPaneMain);//设置传参当前的borderPaneMain，以便在OrganInfoController中获取到当前BorderPane
+        } catch (IOException e) {
+            e.printStackTrace();
+            logger.error(e.getCause().getMessage());
+        }
+    }
+
+    public void setBorderPane(BorderPane borderPaneMain) {
+        this.borderPaneMain = borderPaneMain;
     }
 
     /**
@@ -436,31 +449,30 @@ public class MeetController {
             logger.error(ex.getCause().getMessage());
         }
     }
-    
+
     /**
      * 通知列表信息
      */
     @FXML
-    private void handNoticeList(){
+    private void handNoticeList() {
         FXMLLoader loader = FxmlUtils.getFXMLLoader(FXML_NOTICE_LIST);
-        AnchorPane noticeListDialog=new AnchorPane();
+        AnchorPane noticeListDialog = new AnchorPane();
         try {
             noticeListDialog = loader.load();
         } catch (IOException ex) {
             logger.error(ex.getCause().getMessage());
         }
-        
+
         Stage dialogStage = new Stage();
         dialogStage.setTitle("通知信息列表");
         dialogStage.initModality(Modality.WINDOW_MODAL);
         dialogStage.initOwner(borderPaneMain.getScene().getWindow());
         Scene scene = new Scene(noticeListDialog);
         dialogStage.setScene(scene);
-        
+
         NoticeInfoController controller = loader.getController();
         controller.setDialogStage(dialogStage);
-        
-        dialogStage.showAndWait(); 
+
+        dialogStage.showAndWait();
     }
-    
 }
