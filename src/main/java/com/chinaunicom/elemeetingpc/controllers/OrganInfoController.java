@@ -41,7 +41,7 @@ public class OrganInfoController {
         try {
             organInfoModel.init();
         } catch (ApplicationException e) {
-            DialogsUtils.errorAlert(e.getMessage());
+            DialogsUtils.customErrorAlert(e.getMessage());
         }
         int listSize = this.organInfoModel.getOrganInfoNameObservableList().size();
         organListView.setItems(this.organInfoModel.getOrganInfoNameObservableList());

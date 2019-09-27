@@ -32,10 +32,11 @@ import java.sql.SQLException;
 public class DbManager {
     private static final Logger logger = LoggerFactory.getLogger(DbManager.class);
     //database URL
-    private static final String JDBC_DRIVER_HD = "jdbc:h2:./EleMeetingPCDB";
-    //database accout & password
-//    public static final String USER = "admin";
-//    public static final String PASS = "2w3e$R%T";
+    //private static final String JDBC_DRIVER_HD = "jdbc:h2:~/EleMeetingPCDB";//production enviroment
+    private static final String JDBC_DRIVER_HD = "jdbc:h2:./EleMeetingPCDB";//development enviroment
+    //database accout & password(production enviroment)
+    //public static final String USER = "admin";
+    //public static final String PASS = "#752poi#";
     
     private static ConnectionSource connectionSource;
     
@@ -54,7 +55,8 @@ public class DbManager {
      */
     public static void createConnectionSource(){
         try{
-            connectionSource = new JdbcConnectionSource(JDBC_DRIVER_HD);
+            connectionSource = new JdbcConnectionSource(JDBC_DRIVER_HD);//development enviroment
+            //connectionSource =  new JdbcConnectionSource(JDBC_DRIVER_HD, USER, PASS);//production enviroment
         } catch(SQLException e){
             logger.warn(e.getMessage());
         }

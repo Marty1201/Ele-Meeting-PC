@@ -54,7 +54,7 @@ public class LoginController {
                     try {
                         login();
                     } catch (Exception ex) {
-                        DialogsUtils.errorAlert(ex.getCause().getMessage());
+                        DialogsUtils.customErrorAlert(ex.getCause().getMessage());
                         //ex.printStackTrace();
                     }
                 }
@@ -67,7 +67,7 @@ public class LoginController {
                     try {
                         login();
                     } catch (Exception ex) {
-                        DialogsUtils.errorAlert(ex.getCause().getMessage());
+                        DialogsUtils.customErrorAlert(ex.getCause().getMessage());
                         //ex.printStackTrace();
                     }
                 }
@@ -104,7 +104,7 @@ public class LoginController {
             showFxmlOrg();
         } else {
             //登录失败
-            DialogsUtils.loginAlert(map.get("desc"));
+            DialogsUtils.customErrorAlert(map.get("desc"));
         }
     }
 

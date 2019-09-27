@@ -3,6 +3,7 @@ package com.chinaunicom.elemeetingpc.controllers;
 import com.chinaunicom.elemeetingpc.constant.GlobalStaticConstant;
 import com.chinaunicom.elemeetingpc.database.models.FileResource;
 import com.chinaunicom.elemeetingpc.database.models.IssueInfo;
+import com.chinaunicom.elemeetingpc.utils.DialogsUtils;
 import com.chinaunicom.elemeetingpc.utils.FileUtil;
 import com.chinaunicom.elemeetingpc.utils.FxmlUtils;
 import com.chinaunicom.elemeetingpc.utils.OpenPdfViewer;
@@ -69,9 +70,16 @@ public class FileDetailController {
         filePath = GlobalStaticConstant.GLOBAL_FILE_DISK + "\\" + GlobalStaticConstant.GLOBAL_FILE_FOLDER + "\\" + StringUtils.substringAfterLast(fileInfo.getFilePath(), "/");
         //如果文件存在，打开文件
         if (FileUtil.isFileExist(filePath)) {
-            openPdfViewer.loadPdf(filePath);
+            //支持打开加密的PDF文件
+            if (StringUtils.isNotBlank(fileInfo.getPassword())) {
+                openPdfViewer.loadPdf(filePath, fileInfo.getPassword());
+            } else {
+                openPdfViewer.loadPdf(filePath);
+            }
+        } else {
+            DialogsUtils.infoAlert("FileDetailController.fileNotExist");
         }
-        //todo:增加一个弹窗提示，文件不存在！
+        
     }
 
     /**

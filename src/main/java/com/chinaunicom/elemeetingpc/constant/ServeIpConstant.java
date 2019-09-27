@@ -7,8 +7,11 @@ package com.chinaunicom.elemeetingpc.constant;
  */
 public class ServeIpConstant {
 
-    //服务器ip
+    //服务器ip（开发环境）
     public static final String IP = "http://192.168.1.162";
+    
+    //服务器ip（生产环境）
+    //public static final String IP = "http://10.120.26.141";
 
     //服务器端口
     public static final String PORT = "80";
@@ -19,8 +22,11 @@ public class ServeIpConstant {
     //服务器存放文件的文件夹
     public static final String FILE_FOLDER = "fileInfo";
 
-    //服务器ip地址（完整）
+    //完整服务器ip地址（开发环境）
     public static final String SERVICE_IP = "http://192.168.1.162:80/UnicomGlobalEleMeetingCloud";
+    
+    //完整服务器ip地址（生产环境）
+    //public static final String SERVICE_IP = "http://10.120.26.141:80/UnicomGlobalEleMeetingCloud";
 
     //登录接口
     public static final String LOGIN_INTERFACE = "/mLogin.do";

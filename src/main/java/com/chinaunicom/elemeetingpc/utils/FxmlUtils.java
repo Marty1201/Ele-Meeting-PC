@@ -24,7 +24,7 @@ public class FxmlUtils {
         try{
             return loader.load();
         } catch(Exception e){
-            DialogsUtils.errorAlert(e.getMessage());
+            DialogsUtils.customErrorAlert(e.getMessage());
         }
         return null;
     }

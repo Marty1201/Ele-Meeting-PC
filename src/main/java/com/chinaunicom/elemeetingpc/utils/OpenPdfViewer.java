@@ -391,6 +391,31 @@ public class OpenPdfViewer extends BorderPane implements Initializable {
     }
     
     /**
+     * Open up a render ready encrypted PDF file with zoomfactor and pagination set by the
+     * given file path and password.
+     *
+     * @param path the string value of the path of the file to be opened
+     * @param password the password of the file
+     */
+    public void loadPdf(String path, String password) {
+        try {
+            //close the previously opened document first
+            if (pdf != null) {
+                pdf.getDocument().close();
+            }
+            //open up a new pdf document
+            pdf = new Pdf(Paths.get(path), password);
+            //calculate its' zoom factor
+            updateZoomFactor();
+            //set pagination
+            pagination.setPageCount(pdf.numPages());
+            pagination.setCurrentPageIndex(0);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
+    /**
      * Close a PDF file.
      *
      */
@@ -507,6 +532,16 @@ class Pdf {
     public Pdf(Path path) {
         try {
             document = PDDocument.load(path.toFile());//load a PDF file file
+            renderer = new PDFRenderer(document);//pass the file for BufferedImage rendering
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+    }
+    
+    //construct a render ready PDF file by the given path and password
+    public Pdf(Path path, String password) {
+        try {
+            document = PDDocument.load(path.toFile(), password);//load a PDF file with password
             renderer = new PDFRenderer(document);//pass the file for BufferedImage rendering
         } catch (IOException ex) {
             ex.printStackTrace();
