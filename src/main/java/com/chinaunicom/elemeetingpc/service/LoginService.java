@@ -13,12 +13,12 @@ import com.chinaunicom.elemeetingpc.utils.GsonUtil;
 import com.chinaunicom.elemeetingpc.utils.HashUtil;
 import com.chinaunicom.elemeetingpc.utils.HttpClientUtil;
 import com.chinaunicom.elemeetingpc.utils.exceptions.ApplicationException;
+import com.j256.ormlite.logger.Logger;
+import com.j256.ormlite.logger.LoggerFactory;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -32,6 +32,8 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class LoginService {
 
+    private static final Logger logger = LoggerFactory.getLogger(LoginService.class);
+    
     private UserInfoModel userInfoModel;
 
     private OrganInfoModel organInfoModel;
@@ -41,10 +43,10 @@ public class LoginService {
     /**
      * 调用登录接口逻辑处理.
      *
-     * @param loginName
-     * @param password
-     * @param regiCode
-     * @return
+     * @param loginName 账号
+     * @param password 密码
+     * @param regiCode 注册码
+     * @return resultMap 结果map
      */
     public Map<String, String> login(String loginName, String password, String regiCode) {
         Map<String, String> resultMap = new HashMap();
@@ -67,7 +69,7 @@ public class LoginService {
                 }
             }
         } catch (Exception ex) {
-            Logger.getLogger(LoginService.class.getName()).log(Level.SEVERE, null, ex);
+            logger.error(ex.getCause().getMessage());
             resultMap.put("code", StatusConstant.RESULT_CODE_FAIL);
             resultMap.put("desc", "登录异常");
         }

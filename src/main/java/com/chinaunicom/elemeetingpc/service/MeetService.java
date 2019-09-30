@@ -25,13 +25,13 @@ import com.chinaunicom.elemeetingpc.utils.FileUtil;
 import com.chinaunicom.elemeetingpc.utils.GsonUtil;
 import com.chinaunicom.elemeetingpc.utils.HttpClientUtil;
 import com.chinaunicom.elemeetingpc.utils.exceptions.ApplicationException;
+import com.j256.ormlite.logger.Logger;
+import com.j256.ormlite.logger.LoggerFactory;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -41,6 +41,8 @@ import org.apache.commons.lang3.StringUtils;
  * @author zhaojunfeng, chenxi
  */
 public class MeetService {
+    
+    private static final Logger logger = LoggerFactory.getLogger(MeetService.class);
 
     private MeetInfoModel meetInfoModel;
 
@@ -97,7 +99,7 @@ public class MeetService {
                 }
             }
         } catch (Exception ex) {
-            Logger.getLogger(SelectOrganService.class.getName()).log(Level.SEVERE, null, ex);
+            logger.error(ex.getCause().getMessage());
         }
     }
 

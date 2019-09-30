@@ -6,36 +6,40 @@ import com.chinaunicom.elemeetingpc.modelFx.OrganInfoModel;
 import com.chinaunicom.elemeetingpc.service.SelectOrganService;
 import com.chinaunicom.elemeetingpc.utils.DialogsUtils;
 import com.chinaunicom.elemeetingpc.utils.FxmlUtils;
+import com.chinaunicom.elemeetingpc.utils.LoadingPage;
 import com.chinaunicom.elemeetingpc.utils.exceptions.ApplicationException;
 import com.j256.ormlite.logger.Logger;
 import com.j256.ormlite.logger.LoggerFactory;
 import java.io.IOException;
+import java.util.concurrent.ExecutionException;
 import javafx.beans.value.ObservableValue;
+import javafx.concurrent.Task;
+import javafx.concurrent.WorkerStateEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.ListView;
 import javafx.scene.layout.BorderPane;
 
 /**
- * 组织机构控制器，在界面的列表上加载登陆人所属机构名称，选择机构后进入会议 主界面.
+ * 组织机构控制器，在界面的列表上加载登陆人所属机构名称，选择机构后进入会议主界面.
  *
  * @author chenxi 创建时间：2019-6-27 14:20:17
  */
 public class OrganInfoController {
-
-    @FXML
-    private ListView<OrganInfoFx> organListView;
-
-    private OrganInfoModel organInfoModel;
 
     private static final Logger logger = LoggerFactory.getLogger(OrganInfoController.class);
 
     //会议首界面
     public static final String FXML_INDEX = "/fxml/fxml_index.fxml";
 
+    @FXML
+    private ListView<OrganInfoFx> organListView;
+
+    private OrganInfoModel organInfoModel;
+
     private BorderPane borderPaneMain;
 
-    //初始化
     public void initialize() {
         this.organInfoModel = new OrganInfoModel();
         try {
@@ -50,17 +54,32 @@ public class OrganInfoController {
         organListView.setFixedCellSize(40.0);
         organListView.setPrefHeight(listSize * 40.0 + 4.0);
         //添加事件监听器
-        organListView.getSelectionModel().selectedItemProperty().addListener(
-                (ObservableValue<? extends OrganInfoFx> observable, OrganInfoFx oldValue, OrganInfoFx newValue) -> {
-                    //在全局常量里记录当前选择的机构id和用户id（服务器端的id）
-                    GlobalStaticConstant.GLOBAL_ORGANINFO_ORGANIZATIONID = observable.getValue().getOrganizationId();
-                    GlobalStaticConstant.GLOBAL_ORGANINFO_OWNER_USERID = observable.getValue().getUserId();
+        organListView.getSelectionModel().selectedItemProperty().addListener((ObservableValue<? extends OrganInfoFx> observable, OrganInfoFx oldValue, OrganInfoFx newValue) -> {
+            //在全局常量里记录当前选择的机构id和用户id（服务器端的id）
+            GlobalStaticConstant.GLOBAL_ORGANINFO_ORGANIZATIONID = observable.getValue().getOrganizationId();
+            GlobalStaticConstant.GLOBAL_ORGANINFO_OWNER_USERID = observable.getValue().getUserId();
+            //创建数据加载界面
+            LoadingPage loadingPage = new LoadingPage(borderPaneMain.getScene().getWindow());
+            loadingPage.showLoadingPage();
+            final Task task = new Task<Void>() {
+                @Override
+                protected Void call() throws InterruptedException, ExecutionException {
                     SelectOrganService service = new SelectOrganService();
-                    //解析数据
+                    //调接口解析数据
                     service.getMeetInfosFromRemote();
+                    return null;
+                }
+            };
+            task.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
+                @Override
+                public void handle(WorkerStateEvent event) {
                     //跳转界面
                     showFxmlIndex();
-                });
+                    loadingPage.closeLoadingPage();
+                }
+            });
+            new Thread(task).start();
+        });
     }
 
     /**

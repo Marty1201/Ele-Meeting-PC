@@ -9,6 +9,7 @@ import com.chinaunicom.elemeetingpc.modelFx.MeetUserRelationModel;
 import com.chinaunicom.elemeetingpc.service.MeetService;
 import com.chinaunicom.elemeetingpc.utils.DialogsUtils;
 import com.chinaunicom.elemeetingpc.utils.FxmlUtils;
+import com.chinaunicom.elemeetingpc.utils.LoadingPage;
 import com.chinaunicom.elemeetingpc.utils.exceptions.ApplicationException;
 import com.j256.ormlite.logger.Logger;
 import com.j256.ormlite.logger.LoggerFactory;
@@ -16,10 +17,14 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import javafx.application.Platform;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
+import javafx.concurrent.WorkerStateEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
@@ -51,6 +56,8 @@ import javafx.scene.text.TextAlignment;
  */
 public class MeetLeftController {
 
+    private static final Logger logger = LoggerFactory.getLogger(MeetLeftController.class);
+
     @FXML
     private ListView<MeetInfoFx> meetCurrentListView;
 
@@ -73,15 +80,11 @@ public class MeetLeftController {
 
     private MeetUserRelationModel meetUserRelationModel;
 
-    private static final Logger logger = LoggerFactory.getLogger(MeetLeftController.class);
-
     private BorderPane borderPaneMain;
 
     //会议界面中部数据
     public static final String FXML_INDEX = "/fxml/fxml_index.fxml";
 
-    //初始化
-    @FXML
     public void initialize() {
         List<ListView> listViewCollection = new ArrayList<>();//用于存放3个ListView
         //设置Vertical ScrollPane
@@ -91,7 +94,7 @@ public class MeetLeftController {
         scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         scroll.setStyle("-fx-background-insets:0.0px;-fx-border-color:transparent;");
         leftMenu.getChildren().addAll(scroll);
-        
+
         textFieldUsername.setText(GlobalStaticConstant.GLOBAL_USERINFO_USERNAME);
         meetInfoModel = new MeetInfoModel();
         MeetService meetService = new MeetService();
@@ -115,7 +118,7 @@ public class MeetLeftController {
             listViewCollection.add(meetHistoryListView);
             meetHistoryListView.setPrefHeight(fxlist3.size() * 80.0 + 5.0);
             meetHistoryListView.setMinHeight(fxlist3.size() * 80.0 + 5.0);
-            
+
             //循环并逐个重新自定义每个ListView中cell为Label
             for (int i = 0; i < listViewCollection.size(); i++) {
                 listViewCollection.get(i).setCellFactory(e -> new ListCell<MeetInfoFx>() {
@@ -149,28 +152,80 @@ public class MeetLeftController {
             meetCurrentListView.getSelectionModel().selectedItemProperty().addListener(
                     (ObservableValue<? extends MeetInfoFx> observable, MeetInfoFx oldValue, MeetInfoFx newValue) -> {
                         GlobalStaticConstant.GLOBAL_SELECTED_MEETID = observable.getValue().getMeetingId();
-                        //调用接口，从远程服务器上获取会议相关信息
-                        meetService.getMeetInfosFromRemote();
-                        showFxmlMeet();
+                        //创建数据加载界面
+                        LoadingPage loadingPage = new LoadingPage(borderPaneMain.getScene().getWindow());
+                        loadingPage.showLoadingPage();
+                        final Task task = new Task<Void>() {
+                            @Override
+                            protected Void call() throws InterruptedException, ExecutionException {
+                                //调用接口，从远程服务器上获取会议相关信息
+                                meetService.getMeetInfosFromRemote();
+                                return null;
+                            }
+                        };
+                        task.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
+                            @Override
+                            public void handle(WorkerStateEvent event) {
+                                //跳转界面
+                                showFxmlMeet();
+                                loadingPage.closeLoadingPage();
+                            }
+                        });
+                        new Thread(task).start();
                     }
             );
             meetFutureListView.getSelectionModel().selectedItemProperty().addListener(
                     (ObservableValue<? extends MeetInfoFx> observable, MeetInfoFx oldValue, MeetInfoFx newValue) -> {
                         GlobalStaticConstant.GLOBAL_SELECTED_MEETID = observable.getValue().getMeetingId();
-                        //调用接口，从远程服务器上获取会议相关信息
-                        meetService.getMeetInfosFromRemote();
-                        showFxmlMeet();
+                        //创建数据加载界面
+                        LoadingPage loadingPage = new LoadingPage(borderPaneMain.getScene().getWindow());
+                        loadingPage.showLoadingPage();
+                        final Task task = new Task<Void>() {
+                            @Override
+                            protected Void call() throws InterruptedException, ExecutionException {
+                                //调用接口，从远程服务器上获取会议相关信息
+                                meetService.getMeetInfosFromRemote();
+                                return null;
+                            }
+                        };
+                        task.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
+                            @Override
+                            public void handle(WorkerStateEvent event) {
+                                //跳转界面
+                                showFxmlMeet();
+                                loadingPage.closeLoadingPage();
+                            }
+                        });
+                        new Thread(task).start();
                     }
             );
             meetHistoryListView.getSelectionModel().selectedItemProperty().addListener(
                     (ObservableValue<? extends MeetInfoFx> observable, MeetInfoFx oldValue, MeetInfoFx newValue) -> {
                         GlobalStaticConstant.GLOBAL_SELECTED_MEETID = observable.getValue().getMeetingId();
-                        //调用接口，从远程服务器上获取会议相关信息
-                        meetService.getMeetInfosFromRemote();
-                        showFxmlMeet();
+                        //创建数据加载界面
+                        LoadingPage loadingPage = new LoadingPage(borderPaneMain.getScene().getWindow());
+                        loadingPage.showLoadingPage();
+                        final Task task = new Task<Void>() {
+                            @Override
+                            protected Void call() throws InterruptedException, ExecutionException {
+                                //调用接口，从远程服务器上获取会议相关信息
+                                meetService.getMeetInfosFromRemote();
+                                return null;
+                            }
+                        };
+                        task.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
+                            @Override
+                            public void handle(WorkerStateEvent event) {
+                                //跳转界面
+                                showFxmlMeet();
+                                loadingPage.closeLoadingPage();
+                            }
+                        });
+                        new Thread(task).start();
                     }
             );
         } catch (Exception ex) {
+            logger.error(ex.getCause().getMessage());
             ex.printStackTrace();
         }
     }
