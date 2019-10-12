@@ -46,6 +46,9 @@ public class FileDetailController {
     
     @FXML
     private OpenPdfViewer openPdfViewer;
+    
+    @FXML
+    private AnchorPane topMenu;
 
     private BorderPane borderPaneMain;
     
@@ -79,7 +82,7 @@ public class FileDetailController {
         } else {
             DialogsUtils.infoAlert("FileDetailController.fileNotExist");
         }
-        
+        openPdfViewer.setFileDetaiController(this);//把FileDetailController传到OpenPdfViewer里面使用
     }
 
     /**
@@ -118,5 +121,13 @@ public class FileDetailController {
     
     public void setBorderPane(BorderPane borderPaneMain) {
         this.borderPaneMain = borderPaneMain;
+    }
+    
+    public AnchorPane getTopMenu() {
+        return topMenu;
+    }
+    
+    public VBox getMainView() {
+        return mainView;
     }
 }

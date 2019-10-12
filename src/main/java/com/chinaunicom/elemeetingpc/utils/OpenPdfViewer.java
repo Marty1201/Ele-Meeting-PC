@@ -1,5 +1,6 @@
 package com.chinaunicom.elemeetingpc.utils;
 
+import com.chinaunicom.elemeetingpc.controllers.FileDetailController;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -23,6 +24,7 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.control.ToolBar;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.stage.FileChooser;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -75,6 +77,9 @@ public class OpenPdfViewer extends BorderPane implements Initializable {
 
     //zoom scaling factor
     private float zoomFactor;
+    
+    //FileDetailController
+    private FileDetailController fileDetailController;
 
     /**
      * The ZoomType class define 3 types of zoom: 1, WIDTH: the zoom will fit
@@ -310,6 +315,29 @@ public class OpenPdfViewer extends BorderPane implements Initializable {
                 imageView.setImage(image);
             }
         }
+        //add a double click mouse event to the imageView to achieve full screen effect
+        imageView.setOnMouseClicked(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                //double click to show full screen
+                if (event.getClickCount() == 2) {
+                    VBox mainView = fileDetailController.getMainView();
+                    AnchorPane topMenu = fileDetailController.getTopMenu();
+                    boolean topMenuVisible = topMenu.visibleProperty().getValue();
+                    if (zoomOptions == true && loadOptions == false && topMenuVisible) {
+                        zoomOptions = false;
+                        loadOptions = false;
+                        updateToolbar();
+                        mainView.getChildren().remove(topMenu);
+                    } else {
+                        zoomOptions = true;
+                        loadOptions = false;
+                        updateToolbar();
+                        mainView.getChildren().add(0, topMenu);
+                    }
+                }
+            }
+        });
         stackPane.getChildren().add(imageView);
         currentImage.set(stackPane);
     }
@@ -389,10 +417,10 @@ public class OpenPdfViewer extends BorderPane implements Initializable {
             e.printStackTrace();
         }
     }
-    
+
     /**
-     * Open up a render ready encrypted PDF file with zoomfactor and pagination set by the
-     * given file path and password.
+     * Open up a render ready encrypted PDF file with zoomfactor and pagination
+     * set by the given file path and password.
      *
      * @param path the string value of the path of the file to be opened
      * @param password the password of the file
@@ -414,7 +442,7 @@ public class OpenPdfViewer extends BorderPane implements Initializable {
             e.printStackTrace();
         }
     }
-    
+
     /**
      * Close a PDF file.
      *
@@ -451,8 +479,8 @@ public class OpenPdfViewer extends BorderPane implements Initializable {
     }
 
     /**
-     * The getZoomOptions method must be used in combine with setZoomOptions method in
-     * order to make setZoomOptions work properly
+     * The getZoomOptions method must be used in combine with setZoomOptions
+     * method in order to make setZoomOptions work properly
      *
      * @return zoomOptions
      */
@@ -461,10 +489,10 @@ public class OpenPdfViewer extends BorderPane implements Initializable {
     }
 
     /**
-     * Set the zoom options value, called by the FXMLLoader when first load to pass
-     * the value defined by the element
-     * inside<OpenPdfViewer ...zoomOptions="true"></OpenPdfViewer>, everytime the
-     * new zoom options is set, the toolbar is updated.
+     * Set the zoom options value, called by the FXMLLoader when first load to
+     * pass the value defined by the element
+     * inside<OpenPdfViewer ...zoomOptions="true"></OpenPdfViewer>, everytime
+     * the new zoom options is set, the toolbar is updated.
      *
      * @param zoomOptions
      */
@@ -474,8 +502,8 @@ public class OpenPdfViewer extends BorderPane implements Initializable {
     }
 
     /**
-     * The getLoadOptions method must be used in combine with setLoadOptions method in
-     * order to make setLoadOptions work properly
+     * The getLoadOptions method must be used in combine with setLoadOptions
+     * method in order to make setLoadOptions work properly
      *
      * @return loadOptions
      */
@@ -484,10 +512,10 @@ public class OpenPdfViewer extends BorderPane implements Initializable {
     }
 
     /**
-     * Set the load option value, called by the FXMLLoader when first load to pass
-     * the value defined by the element
-     * inside<OpenPdfViewer ...loadOptions="true"></OpenPdfViewer>, everytime the
-     * new load option is set, the toolbar is updated.
+     * Set the load option value, called by the FXMLLoader when first load to
+     * pass the value defined by the element
+     * inside<OpenPdfViewer ...loadOptions="true"></OpenPdfViewer>, everytime
+     * the new load option is set, the toolbar is updated.
      *
      * @param loadOptions
      */
@@ -513,6 +541,15 @@ public class OpenPdfViewer extends BorderPane implements Initializable {
     public String getFile() {
         return file;
     }
+    
+    /**
+     * Set FileDetailController. 
+     *
+     * @param fileDetailController
+     */
+    public void setFileDetaiController(FileDetailController fileDetailController){
+        this.fileDetailController = fileDetailController;
+    }
 }
 
 /**
@@ -537,7 +574,7 @@ class Pdf {
             ex.printStackTrace();
         }
     }
-    
+
     //construct a render ready PDF file by the given path and password
     public Pdf(Path path, String password) {
         try {
