@@ -28,7 +28,7 @@
                         <Image url="/images/help.png" />
                     </image>
                 </ImageView>
-                <ImageView fitHeight="40.0" fitWidth="42.0" layoutX="1190.0" layoutY="19.0" pickOnBounds="true" preserveRatio="true" AnchorPane.rightAnchor="70.0" AnchorPane.topAnchor="10.0" styleClass="cursor-hand">
+                <ImageView fitHeight="40.0" fitWidth="42.0" layoutX="1190.0" layoutY="19.0" pickOnBounds="true" preserveRatio="true" AnchorPane.rightAnchor="70.0" AnchorPane.topAnchor="10.0" onMouseClicked="#handNoticeList" styleClass="cursor-hand">
                     <image>
                         <Image url="/images/message.png" />
                     </image>

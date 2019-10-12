@@ -31,4 +31,7 @@ public class GlobalStaticConstant {
 
     //本地存放文件的文件夹
     public static String GLOBAL_FILE_FOLDER = "MeetingFiles";
+    
+    //会议通知每页条数
+    public static String GLOBAL_NOTICE_PAGESIZE = "10";
 }

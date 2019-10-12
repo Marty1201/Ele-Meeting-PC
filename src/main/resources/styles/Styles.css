@@ -183,6 +183,27 @@
     -fx-background-color:#f1f1f1; 
 }
 
+/* 通知详情标题样式 */
+.notice-detail-title{
+    -fx-font-size:22.0px;
+    -fx-font-weight:bold;
+    -fx-font-family:"Arial";
+}
+
+/* 通知详情附属信息样式 */
+.notice-detail-sub{
+    -fx-font-size:14.0px;
+    -fx-font-family:"Arial";
+    -fx-text-fill: #808080;
+}
+
+/* 通知详情附件标题样式 */
+.notice-detail-attachment{
+    -fx-font-size:18.0px;
+    -fx-font-family:"Arial";
+    -fx-font-weight:bold;
+}
+
 /* Open PDF Viewer 样式 */
 #zoomOptionsBox > Button{
     -fx-background-color: transparent;

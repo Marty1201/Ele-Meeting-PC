@@ -9,6 +9,7 @@ import com.chinaunicom.elemeetingpc.database.models.UserInfo;
 import com.chinaunicom.elemeetingpc.modelFx.IdentityInfoModel;
 import com.chinaunicom.elemeetingpc.modelFx.OrganInfoModel;
 import com.chinaunicom.elemeetingpc.modelFx.UserInfoModel;
+import com.chinaunicom.elemeetingpc.utils.FxmlUtils;
 import com.chinaunicom.elemeetingpc.utils.GsonUtil;
 import com.chinaunicom.elemeetingpc.utils.HashUtil;
 import com.chinaunicom.elemeetingpc.utils.HttpClientUtil;
@@ -69,9 +70,10 @@ public class LoginService {
                 }
             }
         } catch (Exception ex) {
+            ex.printStackTrace();
             logger.error(ex.getCause().getMessage());
             resultMap.put("code", StatusConstant.RESULT_CODE_FAIL);
-            resultMap.put("desc", "登录异常");
+            resultMap.put("desc", FxmlUtils.getResourceBundle().getString("server.malfunction"));
         }
         return resultMap;
     }

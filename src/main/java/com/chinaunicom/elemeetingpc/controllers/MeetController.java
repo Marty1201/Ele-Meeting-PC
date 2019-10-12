@@ -116,6 +116,7 @@ public class MeetController {
         try {
             //获取默认会议的父会议id
             parentMeetId = getDefaultMeetingId();
+            GlobalStaticConstant.GLOBAL_SELECTED_MEETID = parentMeetId;
             //父会议名称区域
             createParentMeetingTitle(parentMeetId);
             //获取当前登录用户所属子会议信息
@@ -255,7 +256,8 @@ public class MeetController {
      * 创建父会议标题.
      *
      * @param parentMeetId
-     * @throws com.chinaunicom.elemeetingpc.utils.exceptions.ApplicationException
+     * @throws
+     * com.chinaunicom.elemeetingpc.utils.exceptions.ApplicationException
      * @throws java.sql.SQLException
      */
     public void createParentMeetingTitle(String parentMeetId) throws ApplicationException, SQLException {
@@ -435,7 +437,7 @@ public class MeetController {
             AnchorPane resetPasswordDialog = loader.load();
             //创建一个弹窗
             Stage dialogStage = new Stage();
-            dialogStage.setTitle("修改密码");
+            dialogStage.setTitle(FxmlUtils.getResourceBundle().getString("MeetController.resetPassword"));
             dialogStage.initModality(Modality.WINDOW_MODAL);
             dialogStage.initOwner(borderPaneMain.getScene().getWindow());
             //or 直接一行就够了dialogStage.initModality(Modality.APPLICATION_MODAL);
@@ -454,25 +456,28 @@ public class MeetController {
      * 通知列表信息
      */
     @FXML
-    private void handNoticeList() {
+    public void handNoticeList() {
+        //加载通知列表内容
         FXMLLoader loader = FxmlUtils.getFXMLLoader(FXML_NOTICE_LIST);
-        AnchorPane noticeListDialog = new AnchorPane();
+        AnchorPane noticeListContent = new AnchorPane();
         try {
-            noticeListDialog = loader.load();
+            noticeListContent = loader.load();
         } catch (IOException ex) {
+            ex.printStackTrace();
             logger.error(ex.getCause().getMessage());
         }
-
-        Stage dialogStage = new Stage();
-        dialogStage.setTitle("通知信息列表");
-        dialogStage.initModality(Modality.WINDOW_MODAL);
-        dialogStage.initOwner(borderPaneMain.getScene().getWindow());
-        Scene scene = new Scene(noticeListDialog);
-        dialogStage.setScene(scene);
-
+        Scene scene = new Scene(noticeListContent);
+        //创建弹窗
+        Stage noticeListDialogStage = new Stage();
+        noticeListDialogStage.setWidth(1300.0);
+        noticeListDialogStage.setHeight(700.0);
+        noticeListDialogStage.setTitle(FxmlUtils.getResourceBundle().getString("MeetController.noticeTitle"));
+        noticeListDialogStage.initModality(Modality.WINDOW_MODAL);
+        noticeListDialogStage.initOwner(borderPaneMain.getScene().getWindow());
+        noticeListDialogStage.setScene(scene);
+        //把当前stage作为下个界面的父界面使用（通知详情）
         NoticeInfoController controller = loader.getController();
-        controller.setDialogStage(dialogStage);
-
-        dialogStage.showAndWait();
+        controller.setDialogStage(noticeListDialogStage);
+        noticeListDialogStage.showAndWait();
     }
 }

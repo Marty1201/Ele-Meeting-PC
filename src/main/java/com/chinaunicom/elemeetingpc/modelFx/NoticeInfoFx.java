@@ -1,8 +1,4 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package com.chinaunicom.elemeetingpc.modelFx;
 
 import javafx.beans.property.IntegerProperty;
@@ -11,29 +7,30 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
 /**
- *
- * @author zhaojunfeng
+ * 会议通知实体类，会议通知信息并未保存到数据库表中，会议通知非持久化，即只有在项目启动的情况下，通过网络访问
+ * 服务器接口实时获取数据并进行数据展示.
+ * @author zhaojunfeng, chenxi
  */
 public class NoticeInfoFx {
-    //
+
     private final StringProperty noticeId = new SimpleStringProperty();
-    //
+
     private final StringProperty noticeTitle = new SimpleStringProperty();
-    //
+
     private final StringProperty createTime = new SimpleStringProperty();
-    //
+
     private final StringProperty noticeTypeName = new SimpleStringProperty();
-    //
+
     private final StringProperty noticeTypeEnglishName = new SimpleStringProperty();
-    //单位管理员
+
     private final StringProperty userName = new SimpleStringProperty();
-    //单位管理员英文
+
     private final StringProperty englishName = new SimpleStringProperty();
-    //
+
     private final IntegerProperty sort = new SimpleIntegerProperty();
-     //
+
     private final StringProperty noticeContent = new SimpleStringProperty();
-     //
+
     private final StringProperty state = new SimpleStringProperty();
 
     public NoticeInfoFx() {
@@ -138,18 +135,5 @@ public class NoticeInfoFx {
     }
     public void setState(String state){
         this.state.set(state);
-    }
-    
-        /**
-     * 解决当插入ListView中的集合是自定义类时，ListView不能正常显示的问题，
-     * 通过重写自定义类toString方法将内容输出成一个字符串，可使ListView显示
-     * toString方法的返回值。
-     *
-     * @return 要在ListView显示的String
-     */
-    @Override
-    public String toString() {
-        return this.getNoticeTitle();
-    }
-    
+    }  
 }

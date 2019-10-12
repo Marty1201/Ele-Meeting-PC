@@ -34,7 +34,7 @@ public class FileDownloader implements Runnable {
      * @param outputStream 文件输出路径
      * @param bufSize 用来存储每次读取到的字节数组大小
      */
-    private void downloadFile(URL url, OutputStream outputStream, int bufSize) throws IOException {
+    public void downloadFile(URL url, OutputStream outputStream, int bufSize) throws IOException {
         BufferedInputStream bis = null;
         BufferedOutputStream bos = null;
         HttpURLConnection connection = null;

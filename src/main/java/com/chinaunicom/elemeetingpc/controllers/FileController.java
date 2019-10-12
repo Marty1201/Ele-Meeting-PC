@@ -1,5 +1,6 @@
 package com.chinaunicom.elemeetingpc.controllers;
 
+import static com.chinaunicom.elemeetingpc.MainApp.STYLES;
 import com.chinaunicom.elemeetingpc.constant.GlobalStaticConstant;
 import com.chinaunicom.elemeetingpc.database.models.FileResource;
 import com.chinaunicom.elemeetingpc.database.models.FileUserRelation;
@@ -22,17 +23,21 @@ import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
+import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.OverrunStyle;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.TextAlignment;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 
 /**
  * 文件控制器.
@@ -54,6 +59,12 @@ public class FileController {
 
     //会议主界面
     public static final String FXML_INDEX = "/fxml/fxml_index.fxml";
+    
+    //通知列表界面
+    public static final String FXML_NOTICE_LIST = "/fxml/fxml_notice_list.fxml";
+    
+    //修改密码界面
+    public static final String FXML_RESET_PASSWORD = "/fxml/fxml_resetPassword.fxml";
 
     //左侧会议列表默认收起状态
     private boolean isFolded = true;
@@ -304,6 +315,60 @@ public class FileController {
         } catch (IOException e) {
             logger.error(e.getCause().getMessage());
             e.printStackTrace();
+        }
+    }
+
+    /**
+     * 通知列表信息
+     */
+    @FXML
+    public void handNoticeList() {
+        //加载通知列表内容
+        FXMLLoader loader = FxmlUtils.getFXMLLoader(FXML_NOTICE_LIST);
+        AnchorPane noticeListContent = new AnchorPane();
+        try {
+            noticeListContent = loader.load();
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            logger.error(ex.getCause().getMessage());
+        }
+        Scene scene = new Scene(noticeListContent);
+        //创建弹窗
+        Stage noticeListDialogStage = new Stage();
+        noticeListDialogStage.setWidth(1300.0);
+        noticeListDialogStage.setHeight(700.0);
+        noticeListDialogStage.setTitle(FxmlUtils.getResourceBundle().getString("MeetController.noticeTitle"));
+        noticeListDialogStage.initModality(Modality.WINDOW_MODAL);
+        noticeListDialogStage.initOwner(borderPaneMain.getScene().getWindow());
+        noticeListDialogStage.setScene(scene);
+        //把当前stage作为下个界面的父界面使用（通知详情）
+        NoticeInfoController controller = loader.getController();
+        controller.setDialogStage(noticeListDialogStage);
+        noticeListDialogStage.showAndWait();
+    }
+
+    /**
+     * 跳转到密码修改界面，创建一个新的Modal window.
+     */
+    @FXML
+    public void handleResetPassword() {
+        try {
+            FXMLLoader loader = FxmlUtils.getFXMLLoader(FXML_RESET_PASSWORD);
+            AnchorPane resetPasswordDialog = loader.load();
+            //创建一个弹窗
+            Stage dialogStage = new Stage();
+            dialogStage.setTitle(FxmlUtils.getResourceBundle().getString("MeetController.resetPassword"));
+            dialogStage.initModality(Modality.WINDOW_MODAL);
+            dialogStage.initOwner(borderPaneMain.getScene().getWindow());
+            //or 直接一行就够了dialogStage.initModality(Modality.APPLICATION_MODAL);
+            Scene scene = new Scene(resetPasswordDialog);
+            scene.getStylesheets().add(STYLES);
+            dialogStage.setScene(scene);
+            ResetPasswordController controller = loader.getController();
+            controller.setDialogStage(dialogStage);//把界面传递到下一个控制器里
+            dialogStage.showAndWait();
+        } catch (IOException ex) {
+            logger.error(ex.getCause().getMessage());
         }
     }
     
