@@ -10,6 +10,7 @@ import com.chinaunicom.elemeetingpc.modelFx.FileResourceModel;
 import com.chinaunicom.elemeetingpc.modelFx.FileUserRelationModel;
 import com.chinaunicom.elemeetingpc.modelFx.IssueFileRelationModel;
 import com.chinaunicom.elemeetingpc.utils.FxmlUtils;
+import com.chinaunicom.elemeetingpc.utils.MQPlugin;
 import com.chinaunicom.elemeetingpc.utils.exceptions.ApplicationException;
 import com.j256.ormlite.logger.Logger;
 import com.j256.ormlite.logger.LoggerFactory;
@@ -79,6 +80,8 @@ public class FileController {
     private VBox fileIndex;
 
     private BorderPane borderPaneMain;
+    
+    private MQPlugin mQPlugin;
 
     private IssueFileRelationModel issueFileRelationModel;
 
@@ -252,6 +255,7 @@ public class FileController {
             borderPaneMain.setCenter(loader.load()); //将当前BorderPane中间区域加载为文件详情界面
             FileDetailController fileDetailController = loader.getController(); //从loader中获取FileDetailController
             fileDetailController.setBorderPane(borderPaneMain);//设置传参当前的borderPaneMain，以便在FileDetailController中获取到当前BorderPane
+            fileDetailController.setMQPlugin(mQPlugin);//把MQPlugin往下传
             fileDetailController.initialize(file, fileName, issueInfo);//把当前选择的文件，文件名和文件所属议题传到FileController里，以便在下个控制器中使用
         } catch (IOException e) {
             e.printStackTrace();
@@ -374,5 +378,9 @@ public class FileController {
     
     public void setBorderPane(BorderPane borderPaneMain) {
         this.borderPaneMain = borderPaneMain;
+    }
+    
+    public void setMQPlugin(MQPlugin mQPlugin) {
+        this.mQPlugin = mQPlugin;
     }
 }

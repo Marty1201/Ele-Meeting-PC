@@ -11,6 +11,7 @@ import com.chinaunicom.elemeetingpc.modelFx.MeetInfoModel;
 import com.chinaunicom.elemeetingpc.modelFx.MeetIssueRelationModel;
 import com.chinaunicom.elemeetingpc.modelFx.MeetUserRelationModel;
 import com.chinaunicom.elemeetingpc.utils.FxmlUtils;
+import com.chinaunicom.elemeetingpc.utils.MQPlugin;
 import com.chinaunicom.elemeetingpc.utils.exceptions.ApplicationException;
 import com.j256.ormlite.logger.Logger;
 import com.j256.ormlite.logger.LoggerFactory;
@@ -82,6 +83,8 @@ public class MeetController {
     private boolean isFolded = true;
 
     private BorderPane borderPaneMain;
+    
+    private MQPlugin mQPlugin;
 
     private MeetInfoModel meetInfoModel;
 
@@ -376,6 +379,7 @@ public class MeetController {
             FileController fileController = loader.getController(); //从loader中获取FileController
             fileController.setBorderPane(borderPaneMain);//设置传参当前的borderPaneMain，以便在FileController中使用
             fileController.initData(issueInfo);//把当前选择的议题传到FileController里，以便在下个控制器中使用，注意这里调用的是重写过的初始化方法
+            fileController.setMQPlugin(mQPlugin);//把MQPlugin往下传
         } catch (IOException e) {
             e.printStackTrace();
             logger.error(e.getCause().getMessage());
@@ -394,6 +398,7 @@ public class MeetController {
                 borderPaneMain.setCenter(borderPaneMain.getCenter());//重新加载中间区域
                 MeetLeftController meetLeftController = loader.getController(); //从loader中获取MeetLeftController
                 meetLeftController.setBorderPane(borderPaneMain);//设置传参当前的borderPane，以便在MeetLeftController中获取到当前BorderPane
+                meetLeftController.setMQPlugin(mQPlugin);//把MQPlugin往下传
                 isFolded = false;//设置为展开状态
             } else {
                 borderPaneMain.getChildren().remove(borderPaneMain.getLeft());//清除当前BorderPane内左侧区域的内容
@@ -421,10 +426,6 @@ public class MeetController {
             e.printStackTrace();
             logger.error(e.getCause().getMessage());
         }
-    }
-
-    public void setBorderPane(BorderPane borderPaneMain) {
-        this.borderPaneMain = borderPaneMain;
     }
 
     /**
@@ -479,5 +480,13 @@ public class MeetController {
         NoticeInfoController controller = loader.getController();
         controller.setDialogStage(noticeListDialogStage);
         noticeListDialogStage.showAndWait();
+    }
+    
+    public void setBorderPane(BorderPane borderPaneMain) {
+        this.borderPaneMain = borderPaneMain;
+    }
+    
+    public void setMQPlugin(MQPlugin mQPlugin) {
+        this.mQPlugin = mQPlugin;
     }
 }

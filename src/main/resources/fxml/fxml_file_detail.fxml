@@ -22,7 +22,7 @@
                 </ImageView>
                 <!-- 文件名称区域，暂时将同步阅读功能屏蔽掉 -->
                 <Label fx:id="fileTitle" maxWidth="Infinity" minWidth="400.0" prefHeight="53.0" prefWidth="700.0" layoutX="120.0" layoutY="23.0" styleClass="file-detail-name" AnchorPane.leftAnchor="110.0" AnchorPane.rightAnchor="550.0" AnchorPane.topAnchor="13.0" />
-                <!-- <ImageView fitHeight="100.0" fitWidth="120.0" layoutX="878.0" layoutY="11.0" pickOnBounds="true" preserveRatio="true" styleClass="cursor-hand" AnchorPane.rightAnchor="380.0" AnchorPane.topAnchor="13.0">
+                <ImageView fitHeight="100.0" fitWidth="120.0" layoutX="878.0" layoutY="11.0" pickOnBounds="true" preserveRatio="true" styleClass="cursor-hand" AnchorPane.rightAnchor="380.0" AnchorPane.topAnchor="13.0">
                     <image>
                         <Image url="/images/apply5speaker.png" />
                     </image>
@@ -32,7 +32,7 @@
                         <Image url="/images/follow.png" />
                     </image>
                 </ImageView>
-                <ImageView fitHeight="100.0" fitWidth="120.0" layoutX="1130.0" layoutY="15.0" pickOnBounds="true" preserveRatio="true" styleClass="cursor-hand" AnchorPane.rightAnchor="120.0" AnchorPane.topAnchor="13.0">
+                <!-- <ImageView fitHeight="100.0" fitWidth="120.0" layoutX="1130.0" layoutY="15.0" pickOnBounds="true" preserveRatio="true" styleClass="cursor-hand" AnchorPane.rightAnchor="120.0" AnchorPane.topAnchor="13.0">
                     <image>
                         <Image url="/images/thumb.png" />
                     </image>

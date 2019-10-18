@@ -7,11 +7,14 @@ import com.chinaunicom.elemeetingpc.service.SelectOrganService;
 import com.chinaunicom.elemeetingpc.utils.DialogsUtils;
 import com.chinaunicom.elemeetingpc.utils.FxmlUtils;
 import com.chinaunicom.elemeetingpc.utils.LoadingPage;
+import com.chinaunicom.elemeetingpc.utils.MQPlugin;
 import com.chinaunicom.elemeetingpc.utils.exceptions.ApplicationException;
 import com.j256.ormlite.logger.Logger;
 import com.j256.ormlite.logger.LoggerFactory;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
 import javafx.concurrent.WorkerStateEvent;
@@ -87,12 +90,17 @@ public class OrganInfoController {
      */
     public void showFxmlIndex() {
         try {
+            //创建mq连接
+            MQPlugin mQPlugin = new MQPlugin();
+            mQPlugin.consumeMessage();
+            mQPlugin.publishMessage("Hello, world!!");
             FXMLLoader loader = FxmlUtils.getFXMLLoader(FXML_INDEX);
             borderPaneMain.getChildren().remove(borderPaneMain.getCenter());//清除当前BorderPane内中间区域的内容
             borderPaneMain.setCenter(loader.load()); //将当前BorderPane中间区域加载为会议首界面
             MeetController meetController = loader.getController(); //从loader中获取MeetController
             meetController.setBorderPane(borderPaneMain);//把borderPane设置为参数继续往下传，以便在MeetController中获取到当前BorderPane
-        } catch (IOException e) {
+            meetController.setMQPlugin(mQPlugin);//把MQPlugin往下传
+        } catch (IOException | TimeoutException | ApplicationException | SQLException e) {
             e.printStackTrace();
             logger.error(e.getCause().getMessage());
         }

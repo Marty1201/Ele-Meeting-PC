@@ -6,6 +6,7 @@ import com.chinaunicom.elemeetingpc.database.models.IssueInfo;
 import com.chinaunicom.elemeetingpc.utils.DialogsUtils;
 import com.chinaunicom.elemeetingpc.utils.FileUtil;
 import com.chinaunicom.elemeetingpc.utils.FxmlUtils;
+import com.chinaunicom.elemeetingpc.utils.MQPlugin;
 import com.chinaunicom.elemeetingpc.utils.OpenPdfViewer;
 import com.chinaunicom.elemeetingpc.utils.exceptions.ApplicationException;
 import com.j256.ormlite.logger.Logger;
@@ -51,6 +52,8 @@ public class FileDetailController {
     private AnchorPane topMenu;
 
     private BorderPane borderPaneMain;
+    
+    private MQPlugin mQPlugin;
     
     //文件所属议题，从MeetController里传过来的，在“返回”功能里回传给FileController
     private IssueInfo issueInfo;
@@ -119,15 +122,19 @@ public class FileDetailController {
         }
     }
     
-    public void setBorderPane(BorderPane borderPaneMain) {
-        this.borderPaneMain = borderPaneMain;
-    }
-    
     public AnchorPane getTopMenu() {
         return topMenu;
     }
     
     public VBox getMainView() {
         return mainView;
+    }
+    
+    public void setBorderPane(BorderPane borderPaneMain) {
+        this.borderPaneMain = borderPaneMain;
+    }
+    
+    public void setMQPlugin(MQPlugin mQPlugin) {
+        this.mQPlugin = mQPlugin;
     }
 }

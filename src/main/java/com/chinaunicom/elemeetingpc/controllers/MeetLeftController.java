@@ -10,6 +10,7 @@ import com.chinaunicom.elemeetingpc.service.MeetService;
 import com.chinaunicom.elemeetingpc.utils.DialogsUtils;
 import com.chinaunicom.elemeetingpc.utils.FxmlUtils;
 import com.chinaunicom.elemeetingpc.utils.LoadingPage;
+import com.chinaunicom.elemeetingpc.utils.MQPlugin;
 import com.chinaunicom.elemeetingpc.utils.exceptions.ApplicationException;
 import com.j256.ormlite.logger.Logger;
 import com.j256.ormlite.logger.LoggerFactory;
@@ -18,6 +19,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 import javafx.application.Platform;
 import javafx.beans.value.ObservableValue;
@@ -81,6 +83,8 @@ public class MeetLeftController {
     private MeetUserRelationModel meetUserRelationModel;
 
     private BorderPane borderPaneMain;
+    
+    private MQPlugin mQPlugin;
 
     //会议界面中部数据
     public static final String FXML_INDEX = "/fxml/fxml_index.fxml";
@@ -234,9 +238,10 @@ public class MeetLeftController {
      * 退出
      */
     @FXML
-    public void handExit() {
+    public void handExit() throws IOException, TimeoutException {
         boolean result = false;
         if (result = DialogsUtils.confirmationAlert()) {
+            mQPlugin.closeConnection(); //关闭mq
             Platform.exit();
         }
     }
@@ -255,10 +260,6 @@ public class MeetLeftController {
         } catch (IOException e) {
             logger.error(e.getCause().getMessage());
         }
-    }
-
-    public void setBorderPane(BorderPane borderPaneMain) {
-        this.borderPaneMain = borderPaneMain;
     }
 
     /**
@@ -300,5 +301,13 @@ public class MeetLeftController {
             parentMeetId = meetInfoList.get(0).getParentMeetingId();
         }
         return parentMeetId;
+    }
+    
+    public void setBorderPane(BorderPane borderPaneMain) {
+        this.borderPaneMain = borderPaneMain;
+    }
+    
+    public void setMQPlugin(MQPlugin mQPlugin) {
+        this.mQPlugin = mQPlugin;
     }
 }
