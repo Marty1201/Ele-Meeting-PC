@@ -71,7 +71,26 @@
             <artifactId>fontawesomefx</artifactId>
             <version>8.9</version>
         </dependency>
-
+        <!--RabbitMQ-->
+        <dependency>
+            <groupId>com.rabbitmq</groupId>
+            <artifactId>amqp-client</artifactId>
+            <version>5.7.3</version>
+        </dependency>
+        <dependency>
+            <groupId>com.rabbitmq</groupId>
+            <artifactId>amqp-client</artifactId>
+            <version>5.7.3</version>
+            <classifier>sources</classifier>
+            <type>java-source</type>
+        </dependency>
+        <!--RabbitMQ 依赖 slf4j-->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-nop</artifactId>
+            <version>1.7.2</version>
+        </dependency>
+        
     </dependencies>
 
     <build>
