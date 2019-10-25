@@ -17,19 +17,19 @@
     </properties>
     
     <dependencies>
-        <!--常用工具类-->
+        <!--常用工具类maven依赖-->
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
             <version>3.9</version>
         </dependency>
-        <!--客户端与后台接口http协议实现-->
+        <!--客户端与后台接口http协议maven依赖-->
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient-cache</artifactId>
             <version>4.5.7</version>
         </dependency>
-        <!--ormlite对象数据库关系映射包-->
+        <!--ormlite对象数据库关系映射maven依赖-->
         <dependency>
             <groupId>com.j256.ormlite</groupId>
             <artifactId>ormlite-core</artifactId>
@@ -47,7 +47,7 @@
             <artifactId>ormlite-jdbc</artifactId>
             <version>5.1</version>
         </dependency>
-        <!--h2嵌入数据库-->
+        <!--h2嵌入数据库maven依赖-->
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
@@ -59,19 +59,19 @@
             <version>2.2.4</version>
             <type>jar</type>
         </dependency>
-        <!--PDFBox-->
+        <!--PDFBox maven依赖-->
         <dependency>
             <groupId>org.apache.pdfbox</groupId>
             <artifactId>pdfbox</artifactId>
             <version>2.0.16</version>
         </dependency>
-        <!--Fontawesome-->
+        <!--Fontawesome maven依赖-->
         <dependency>
             <groupId>de.jensd</groupId>
             <artifactId>fontawesomefx</artifactId>
             <version>8.9</version>
         </dependency>
-        <!--RabbitMQ-->
+        <!--RabbitMQ maven依赖-->
         <dependency>
             <groupId>com.rabbitmq</groupId>
             <artifactId>amqp-client</artifactId>
@@ -84,11 +84,18 @@
             <classifier>sources</classifier>
             <type>java-source</type>
         </dependency>
-        <!--RabbitMQ 依赖 slf4j-->
+        <!--RabbitMQ依赖slf4j的maven依赖-->
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-nop</artifactId>
             <version>1.7.2</version>
+        </dependency>
+        <!--JSONObject maven依赖-->
+        <dependency>
+            <groupId>net.sf.json-lib</groupId>
+            <artifactId>json-lib</artifactId>
+            <version>2.4</version>
+            <classifier>jdk15</classifier>
         </dependency>
         
     </dependencies>
