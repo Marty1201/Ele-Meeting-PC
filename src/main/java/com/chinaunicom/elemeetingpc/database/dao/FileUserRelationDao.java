@@ -45,5 +45,26 @@ public class FileUserRelationDao extends CommonDao {
         }
         return fileUserList;
     }
-
+    
+    /**
+     * 根据fileId查询文件与人员的关系，增加state=0条件.
+     *
+     * @param fileId
+     * @return fileUserList 会议议题列表
+     */
+    public List<FileUserRelation> findFileUserRelationByFileId(String fileId) throws ApplicationException {
+        List<FileUserRelation> fileUserList = new ArrayList<>();
+        try {
+            Dao<FileUserRelation, Object> dao = getDao(FileUserRelation.class);
+            QueryBuilder<FileUserRelation, Object> queryBuilder = dao.queryBuilder();
+            queryBuilder.where().eq("fileId", fileId).and().eq("state", "0");
+            fileUserList = dao.query(queryBuilder.prepare());
+        } catch (SQLException e) {
+            logger.warn(e.getCause().getMessage());
+            throw new ApplicationException(FxmlUtils.getResourceBundle().getString("error.not.found.all"));
+        } finally {
+            this.closeDbConnection();
+        }
+        return fileUserList;
+    }
 }

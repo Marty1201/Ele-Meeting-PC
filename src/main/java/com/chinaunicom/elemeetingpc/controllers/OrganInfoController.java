@@ -58,8 +58,9 @@ public class OrganInfoController {
         organListView.setPrefHeight(listSize * 40.0 + 4.0);
         //添加事件监听器
         organListView.getSelectionModel().selectedItemProperty().addListener((ObservableValue<? extends OrganInfoFx> observable, OrganInfoFx oldValue, OrganInfoFx newValue) -> {
-            //在全局常量里记录当前选择的机构id和用户id（服务器端的id）
+            //在全局常量里记录当前选择的机构id，机构名称和用户id
             GlobalStaticConstant.GLOBAL_ORGANINFO_ORGANIZATIONID = observable.getValue().getOrganizationId();
+            GlobalStaticConstant.GLOBAL_ORGANINFO_ORGANIZATIONNAME = observable.getValue().getOrganizationName();
             GlobalStaticConstant.GLOBAL_ORGANINFO_OWNER_USERID = observable.getValue().getUserId();
             //创建数据加载界面
             LoadingPage loadingPage = new LoadingPage(borderPaneMain.getScene().getWindow());
@@ -92,8 +93,8 @@ public class OrganInfoController {
         try {
             //创建mq连接
             MQPlugin mQPlugin = new MQPlugin();
-            mQPlugin.consumeMessage();
-            mQPlugin.publishMessage("Hello, world!!");
+            //mQPlugin.consumeMessage();
+            //mQPlugin.publishMessage("Hello, world!!");
             FXMLLoader loader = FxmlUtils.getFXMLLoader(FXML_INDEX);
             borderPaneMain.getChildren().remove(borderPaneMain.getCenter());//清除当前BorderPane内中间区域的内容
             borderPaneMain.setCenter(loader.load()); //将当前BorderPane中间区域加载为会议首界面

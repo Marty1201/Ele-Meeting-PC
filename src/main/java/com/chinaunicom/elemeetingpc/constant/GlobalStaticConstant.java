@@ -20,6 +20,9 @@ public class GlobalStaticConstant {
     //全局更新机构id（服务器端机构的id）
     public static String GLOBAL_ORGANINFO_ORGANIZATIONID = "1";
     
+    //全局更新机构名称（服务器端机构的名称）
+    public static String GLOBAL_ORGANINFO_ORGANIZATIONNAME = "";
+    
     //全局更新机构中对应的用户Id（服务器端用户的id）
     public static String GLOBAL_ORGANINFO_OWNER_USERID = "1";
     

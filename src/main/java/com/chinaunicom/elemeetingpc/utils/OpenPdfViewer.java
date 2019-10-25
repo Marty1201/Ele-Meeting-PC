@@ -77,7 +77,7 @@ public class OpenPdfViewer extends BorderPane implements Initializable {
 
     //zoom scaling factor
     private float zoomFactor;
-    
+
     //FileDetailController
     private FileDetailController fileDetailController;
 
@@ -96,12 +96,11 @@ public class OpenPdfViewer extends BorderPane implements Initializable {
     private ZoomType zoomType;
 
     /**
-     * Constructor of OpenPdfViewer, todo: add filePath as the param which set
-     * the opened file path
+     * Constructor of OpenPdfViewer
      *
      */
     public OpenPdfViewer() {
-        file = ""; //todo: set file path
+        file = "";
         pdf = null;
         zoomType = ZoomType.WIDTH;
         zoomOptions = false;
@@ -201,7 +200,7 @@ public class OpenPdfViewer extends BorderPane implements Initializable {
                     //open up the platform's own file choosing window by FileChooser
                     final File file = fileChooser.showOpenDialog(pagination.getScene().getWindow());
                     if (file != null) {
-                        loadPdf(file.getAbsolutePath());
+                        loadPdf(file.getAbsolutePath(), 0);
                     }
                 } else if (pdf != null) {
                     if (actionEvent.getSource() == addZoomButton) {//define zoom in event
@@ -396,13 +395,17 @@ public class OpenPdfViewer extends BorderPane implements Initializable {
 
     /**
      * Open up a render ready PDF file with zoomfactor and pagination set by the
-     * given file path.
+     * given file path and pageIndex.
      *
      * @param path the string value of the path of the file to be opened
+     * @param pageIndex default pageIndex
      */
-    public void loadPdf(String path) {
+    public void loadPdf(String path, int pageIndex) {
         try {
-            //close the previously opened document first
+            //close the previously opened document first, which will never happen in our app since
+            //each time user changes files in the app, the program destroy the old view
+            //and start up a brand new view, hence the OpenPdfViewer itself also get loaded
+            //and initialize again (pdf = "")
             if (pdf != null) {
                 pdf.getDocument().close();
             }
@@ -412,7 +415,7 @@ public class OpenPdfViewer extends BorderPane implements Initializable {
             updateZoomFactor();
             //set pagination
             pagination.setPageCount(pdf.numPages());
-            pagination.setCurrentPageIndex(0);
+            pagination.setCurrentPageIndex(pageIndex);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -420,14 +423,18 @@ public class OpenPdfViewer extends BorderPane implements Initializable {
 
     /**
      * Open up a render ready encrypted PDF file with zoomfactor and pagination
-     * set by the given file path and password.
+     * set by the given file path， password and pageIndex.
      *
      * @param path the string value of the path of the file to be opened
      * @param password the password of the file
+     * @param pageIndex default pageIndex
      */
-    public void loadPdf(String path, String password) {
+    public void loadPdf(String path, String password, int pageIndex) {
         try {
-            //close the previously opened document first
+            //close the previously opened document first, which will never happen in our app since
+            //each time user changes files in the app, the program destroy the old view
+            //and start up a brand new view, hence the OpenPdfViewer itself also get loaded
+            //and initialize again (pdf = "")
             if (pdf != null) {
                 pdf.getDocument().close();
             }
@@ -437,7 +444,7 @@ public class OpenPdfViewer extends BorderPane implements Initializable {
             updateZoomFactor();
             //set pagination
             pagination.setPageCount(pdf.numPages());
-            pagination.setCurrentPageIndex(0);
+            pagination.setCurrentPageIndex(pageIndex);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -449,7 +456,9 @@ public class OpenPdfViewer extends BorderPane implements Initializable {
      */
     public void closePdf() {
         try {
-            pdf.getDocument().close();
+            if (pdf != null) {
+                pdf.getDocument().close();
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -535,20 +544,44 @@ public class OpenPdfViewer extends BorderPane implements Initializable {
 
     public void setFile(String file) {
         this.file = file;
-        loadPdf(file);
+        loadPdf(file, 0);
     }
 
     public String getFile() {
         return file;
     }
-    
+
     /**
-     * Set FileDetailController. 
+     * Set FileDetailController.
      *
      * @param fileDetailController
      */
-    public void setFileDetaiController(FileDetailController fileDetailController){
+    public void setFileDetaiController(FileDetailController fileDetailController) {
         this.fileDetailController = fileDetailController;
+    }
+
+    /**
+     * Go to the current page index, for external class which need to access
+     * pagination.setCurrentPageIndex method only.
+     *
+     * @param pageIndex
+     */
+    public void goToCurrentPage(int pageIndex) {
+        try {
+            pagination.setCurrentPageIndex(pageIndex);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
+    //to do debug, to be deleted!
+    public PDDocument getPdf() throws IOException {
+        return pdf.getDocument();
+    }
+    
+    //to do debug, to be deleted!
+    public void setPdf(PDDocument pdf) {
+        this.pdf.setDocument(pdf);
     }
 }
 
@@ -570,6 +603,7 @@ class Pdf {
         try {
             document = PDDocument.load(path.toFile());//load a PDF file file
             renderer = new PDFRenderer(document);//pass the file for BufferedImage rendering
+            //document.close();
         } catch (IOException ex) {
             ex.printStackTrace();
         }
@@ -647,5 +681,9 @@ class Pdf {
 
     public PDDocument getDocument() {
         return document;
+    }
+    
+    public void setDocument(PDDocument document) {
+        this.document = document;
     }
 }

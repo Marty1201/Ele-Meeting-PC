@@ -228,7 +228,7 @@ public class FileController {
             public void handle(final MouseEvent event) {
                 try {
                     FileResource file = (FileResource) fileStackPane.getUserData();
-                    showFxmlFileDetail(file, fileName);//跳转到文件详情界面
+                    showFxmlFileDetail(file, fileName, 0);//跳转到文件详情界面
                 } catch (ApplicationException | SQLException ex) {
                     ex.printStackTrace(); //debug
                     logger.error(ex.getCause().getMessage());
@@ -247,7 +247,7 @@ public class FileController {
      * @throws java.sql.SQLException
      */
     @FXML
-    public void showFxmlFileDetail(FileResource file, String fileName) throws ApplicationException, SQLException {
+    public void showFxmlFileDetail(FileResource file, String fileName, int pageIndex) throws ApplicationException, SQLException {
         try {
             FXMLLoader loader = FxmlUtils.getFXMLLoader(FXML_FILE_DETAIL);
             borderPaneMain.getChildren().remove(borderPaneMain.getCenter());//清除当前BorderPane内中间区域的内容
@@ -256,7 +256,9 @@ public class FileController {
             FileDetailController fileDetailController = loader.getController(); //从loader中获取FileDetailController
             fileDetailController.setBorderPane(borderPaneMain);//设置传参当前的borderPaneMain，以便在FileDetailController中获取到当前BorderPane
             fileDetailController.setMQPlugin(mQPlugin);//把MQPlugin往下传
-            fileDetailController.initialize(file, fileName, issueInfo);//把当前选择的文件，文件名和文件所属议题传到FileController里，以便在下个控制器中使用
+            fileDetailController.initialize(file, fileName, issueInfo, this, pageIndex);//把当前选择的文件，文件名，文件所属议题和FileController传到FileDetailController里，以便在下个控制器中使用
+            //同步阅读时，MQPlugin需要知道那个文件被打开了，因此需要把文件详情传入mQPlugin
+            mQPlugin.setFileDetailController(fileDetailController);
         } catch (IOException e) {
             e.printStackTrace();
             logger.error(e.getCause().getMessage());

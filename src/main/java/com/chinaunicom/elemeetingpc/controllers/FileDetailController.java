@@ -23,9 +23,11 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.TextAlignment;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.text.PDFTextStripper;
 
 /**
- * 文件详情控制器.
+ * 文件详情控制器，实现一个文件容器.
  *
  * @author chenxi 创建时间：2019-9-24 17:35:06
  */
@@ -50,16 +52,24 @@ public class FileDetailController {
     
     @FXML
     private AnchorPane topMenu;
-
-    private BorderPane borderPaneMain;
-    
-    private MQPlugin mQPlugin;
     
     //文件所属议题，从MeetController里传过来的，在“返回”功能里回传给FileController
     private IssueInfo issueInfo;
     
+    //同步阅读时主讲切换文件，跟读需返回文件列表然后重新打开主讲浏览的文件
+    private FileController fileController;
+    
     //文件路径
     private String filePath;
+    
+    //加载的文件实体
+    private FileResource fileInfo;
+    
+    private String fileName;
+    
+    private BorderPane borderPaneMain;
+
+    private MQPlugin mQPlugin;
 
     /**
      * 默认文件页面布局初始化.
@@ -67,20 +77,25 @@ public class FileDetailController {
      * @param fileInfo 文件
      * @param fileName 文件名称
      * @param issueInfo 文件所属议题
+     * @param fileController
      */
-    public void initialize(FileResource fileInfo, String fileName, IssueInfo issueInfo) {
+    public void initialize(FileResource fileInfo, String fileName, IssueInfo issueInfo, FileController fileController, int pageIndex) {
+        this.fileInfo = fileInfo;
+        this.fileName = fileName;
         this.issueInfo = issueInfo;
+        this.fileController = fileController;
+        
         pdfArea.prefHeightProperty().bind(mainView.heightProperty());//AnchorPane的高度绑定为VBox高度，让openPdfViewer高度撑满
-        createFileTitle(fileName);
+        createFileTitle(this.fileName);
         //获取文件路径
         filePath = GlobalStaticConstant.GLOBAL_FILE_DISK + "\\" + GlobalStaticConstant.GLOBAL_FILE_FOLDER + "\\" + StringUtils.substringAfterLast(fileInfo.getFilePath(), "/");
         //如果文件存在，打开文件
         if (FileUtil.isFileExist(filePath)) {
             //支持打开加密的PDF文件
             if (StringUtils.isNotBlank(fileInfo.getPassword())) {
-                openPdfViewer.loadPdf(filePath, fileInfo.getPassword());
+                openPdfViewer.loadPdf(filePath, fileInfo.getPassword(), pageIndex);
             } else {
-                openPdfViewer.loadPdf(filePath);
+                openPdfViewer.loadPdf(filePath, pageIndex);
             }
         } else {
             DialogsUtils.infoAlert("FileDetailController.fileNotExist");
@@ -115,11 +130,61 @@ public class FileDetailController {
             FileController fileController = loader.getController(); //从loader中获取FileController
             fileController.setBorderPane(borderPaneMain);//设置传参当前的borderPane，以便在FileController中获取到当前BorderPane
             fileController.initData(issueInfo);//初始化文件列表，回传议题信息
+            //提取pdf内容
+            PDDocument doc = openPdfViewer.getPdf();
+            PDFTextStripper pdfStripper = new PDFTextStripper();
+            String content = pdfStripper.getText(doc);
+            System.out.println("doc is close = " + doc.getDocument().isClosed());
             openPdfViewer.closePdf();//关闭当前打开的pdf文件
+            System.out.println("doc is close = " + doc.getDocument().isClosed());
         } catch (IOException e) {
             e.printStackTrace();
             logger.error(e.getCause().getMessage());
         }
+    }
+    
+     /**
+     * 开始主讲.
+     */
+    @FXML
+    public void startSpeaking() {
+        // to be implemented
+    }
+    
+    /**
+     * 结束主讲.
+     */
+    @FXML
+    public void stopSpeaking() {
+        // to be implemented
+    }
+    
+    /**
+     * 开始跟读.
+     */
+    @FXML
+    public void startFollowing() throws IOException {
+        mQPlugin.consumeMessage();
+    }
+    
+    /**
+     * 取消跟读.
+     */
+    @FXML
+    public void stopFollowing() throws IOException {
+        // to be implemented
+    }
+
+    public FileResource getFileInfo() {
+        return fileInfo;
+    }
+    
+    public OpenPdfViewer getOpenPdfViewer() {
+        return openPdfViewer;
+    }
+    
+    public FileController getFileController() {
+        return fileController;
     }
     
     public AnchorPane getTopMenu() {
@@ -128,6 +193,10 @@ public class FileDetailController {
     
     public VBox getMainView() {
         return mainView;
+    }
+    
+    public PDDocument getPdf() throws IOException {
+        return openPdfViewer.getPdf();
     }
     
     public void setBorderPane(BorderPane borderPaneMain) {

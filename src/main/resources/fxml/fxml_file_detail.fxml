@@ -27,7 +27,7 @@
                         <Image url="/images/apply5speaker.png" />
                     </image>
                 </ImageView>
-                <ImageView fitHeight="100.0" fitWidth="120.0" layoutX="1001.0" layoutY="11.0" pickOnBounds="true" preserveRatio="true" styleClass="cursor-hand" AnchorPane.rightAnchor="250.0" AnchorPane.topAnchor="13.0">
+                <ImageView fitHeight="100.0" fitWidth="120.0" layoutX="1001.0" layoutY="11.0" onMouseClicked="#startFollowing" pickOnBounds="true" preserveRatio="true" styleClass="cursor-hand" AnchorPane.rightAnchor="250.0" AnchorPane.topAnchor="13.0">
                     <image>
                         <Image url="/images/follow.png" />
                     </image>

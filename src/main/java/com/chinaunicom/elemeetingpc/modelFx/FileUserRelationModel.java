@@ -41,4 +41,19 @@ public class FileUserRelationModel {
         fileUserList = fileUserRelationDao.findFileUserRelationByUserId(userId);
         return fileUserList;
     }
+    
+    /**
+     * 在文件人员关系表中根据文件id获取文件与人员的关系（人员id），增加state=0条件.
+     *
+     * @param fileId
+     * @return fileUserList 文件与人员对应关系列表
+     * @throws ApplicationException
+     * @throws SQLException
+     */
+    public List<FileUserRelation> queryFileUserRelationByFileId(String fileId) throws ApplicationException, SQLException{
+        FileUserRelationDao fileUserRelationDao = new FileUserRelationDao();
+        List<FileUserRelation> fileUserList = new ArrayList<>();
+        fileUserList = fileUserRelationDao.findFileUserRelationByFileId(fileId);
+        return fileUserList;
+    }
 }
