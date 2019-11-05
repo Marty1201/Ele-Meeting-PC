@@ -93,8 +93,6 @@ public class OrganInfoController {
         try {
             //创建mq连接
             MQPlugin mQPlugin = new MQPlugin();
-            //mQPlugin.consumeMessage();
-            //mQPlugin.publishMessage("Hello, world!!");
             FXMLLoader loader = FxmlUtils.getFXMLLoader(FXML_INDEX);
             borderPaneMain.getChildren().remove(borderPaneMain.getCenter());//清除当前BorderPane内中间区域的内容
             borderPaneMain.setCenter(loader.load()); //将当前BorderPane中间区域加载为会议首界面

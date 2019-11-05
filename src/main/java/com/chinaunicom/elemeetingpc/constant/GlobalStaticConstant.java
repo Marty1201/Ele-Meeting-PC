@@ -37,4 +37,13 @@ public class GlobalStaticConstant {
     
     //会议通知每页条数
     public static String GLOBAL_NOTICE_PAGESIZE = "10";
+    
+    //判断用户是否点击了跟读按钮并处于跟读/取消跟读状态（aka false=未跟读状态，true=跟读状态）
+    public static boolean GLOBAL_ISFOLLOWINGCLICKED = false;
+    
+    //判断用户是否点击了主讲按钮并处于主讲/取消主讲状态（aka false=未主讲状态，true=主讲状态）
+    public static boolean GLOBAL_ISSPEAKINGCLICKED = false;
+    
+    //判断是否开始消费消息（注意：消费消息在程序里只需要启动一次，然后通过代码逻辑判断是否需要处理消息）
+    public static boolean GLOBAL_ISSTARTCONSUMING = false;
 }

@@ -239,9 +239,10 @@ public class MeetLeftController {
      */
     @FXML
     public void handExit() throws IOException, TimeoutException {
-        boolean result = false;
-        if (result = DialogsUtils.confirmationAlert()) {
-            mQPlugin.closeConnection(); //关闭mq
+        if (DialogsUtils.confirmationAlert()) {
+            if (mQPlugin != null) {
+                mQPlugin.closeConnection(); //关闭mq
+            }
             Platform.exit();
         }
     }
@@ -257,6 +258,7 @@ public class MeetLeftController {
             borderPaneMain.setCenter(loader.load()); //将当前BorderPane中间区域加载为机构选择界面
             MeetController meetController = loader.getController(); //从loader中获取MeetController
             meetController.setBorderPane(borderPaneMain);//设置传参当前的borderPane，以便在MeetController中获取到当前BorderPane
+            meetController.setMQPlugin(mQPlugin);//把MQPlugin往下传
         } catch (IOException e) {
             logger.error(e.getCause().getMessage());
         }
@@ -308,6 +310,8 @@ public class MeetLeftController {
     }
     
     public void setMQPlugin(MQPlugin mQPlugin) {
-        this.mQPlugin = mQPlugin;
+        if (mQPlugin != null) {
+            this.mQPlugin = mQPlugin;
+        }
     }
 }

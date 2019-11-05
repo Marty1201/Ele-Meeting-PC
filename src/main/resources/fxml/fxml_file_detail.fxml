@@ -15,19 +15,19 @@
         <!-- 顶部菜单区域 -->
         <AnchorPane fx:id="topMenu" minHeight="80.0" prefHeight="80.0" prefWidth="1366.0" style="-fx-background-color: #f1f1f1;">
             <children>
-                <ImageView fitHeight="54.0" fitWidth="70.0" layoutX="28.0" layoutY="19.0" onMouseClicked="#showFxmlFileList" pickOnBounds="true" preserveRatio="true" styleClass="cursor-hand" AnchorPane.leftAnchor="13.0" AnchorPane.topAnchor="13.0">
+                <ImageView fx:id="backState" fitHeight="54.0" fitWidth="70.0" layoutX="28.0" layoutY="19.0" onMouseClicked="#showFxmlFileList" pickOnBounds="true" preserveRatio="true" styleClass="cursor-hand" AnchorPane.leftAnchor="13.0" AnchorPane.topAnchor="13.0">
                     <image>
                         <Image url="/images/back.png" />
                     </image>
                 </ImageView>
                 <!-- 文件名称区域，暂时将同步阅读功能屏蔽掉 -->
                 <Label fx:id="fileTitle" maxWidth="Infinity" minWidth="400.0" prefHeight="53.0" prefWidth="700.0" layoutX="120.0" layoutY="23.0" styleClass="file-detail-name" AnchorPane.leftAnchor="110.0" AnchorPane.rightAnchor="550.0" AnchorPane.topAnchor="13.0" />
-                <ImageView fitHeight="100.0" fitWidth="120.0" layoutX="878.0" layoutY="11.0" pickOnBounds="true" preserveRatio="true" styleClass="cursor-hand" AnchorPane.rightAnchor="380.0" AnchorPane.topAnchor="13.0">
+                <ImageView fx:id="speakerState" fitHeight="100.0" fitWidth="120.0" layoutX="878.0" layoutY="11.0" pickOnBounds="true" preserveRatio="true" styleClass="cursor-hand" AnchorPane.rightAnchor="380.0" AnchorPane.topAnchor="13.0">
                     <image>
-                        <Image url="/images/apply5speaker.png" />
+                        <Image url="/images/apply_speaker.png" />
                     </image>
                 </ImageView>
-                <ImageView fitHeight="100.0" fitWidth="120.0" layoutX="1001.0" layoutY="11.0" onMouseClicked="#startFollowing" pickOnBounds="true" preserveRatio="true" styleClass="cursor-hand" AnchorPane.rightAnchor="250.0" AnchorPane.topAnchor="13.0">
+                <ImageView fx:id="followingState" fitHeight="100.0" fitWidth="120.0" layoutX="1001.0" layoutY="11.0" onMouseClicked="#handleFollowing" pickOnBounds="true" preserveRatio="true" styleClass="cursor-hand" AnchorPane.rightAnchor="250.0" AnchorPane.topAnchor="13.0">
                     <image>
                         <Image url="/images/follow.png" />
                     </image>

@@ -487,6 +487,8 @@ public class MeetController {
     }
     
     public void setMQPlugin(MQPlugin mQPlugin) {
-        this.mQPlugin = mQPlugin;
+        if (mQPlugin != null) {
+            this.mQPlugin = mQPlugin;
+        }
     }
 }

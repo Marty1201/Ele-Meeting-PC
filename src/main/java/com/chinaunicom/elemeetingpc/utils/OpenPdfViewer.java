@@ -1,6 +1,9 @@
 package com.chinaunicom.elemeetingpc.utils;
 
+import com.chinaunicom.elemeetingpc.constant.GlobalStaticConstant;
 import com.chinaunicom.elemeetingpc.controllers.FileDetailController;
+import com.j256.ormlite.logger.Logger;
+import com.j256.ormlite.logger.LoggerFactory;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -11,6 +14,7 @@ import java.util.ResourceBundle;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -36,6 +40,8 @@ import org.apache.pdfbox.rendering.PDFRenderer;
  * @author chenxi 创建时间：2019-9-20 19:41:38
  */
 public class OpenPdfViewer extends BorderPane implements Initializable {
+
+    private static final Logger logger = LoggerFactory.getLogger(OpenPdfViewer.class);
 
     @FXML
     private Pagination pagination;
@@ -114,6 +120,7 @@ public class OpenPdfViewer extends BorderPane implements Initializable {
         try {
             fxmlLoader.load();
         } catch (IOException exception) {
+            logger.error(exception.getCause().getMessage());
             throw new RuntimeException(exception);
         }
     }
@@ -318,21 +325,32 @@ public class OpenPdfViewer extends BorderPane implements Initializable {
         imageView.setOnMouseClicked(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event) {
-                //double click to show full screen
                 if (event.getClickCount() == 2) {
                     VBox mainView = fileDetailController.getMainView();
                     AnchorPane topMenu = fileDetailController.getTopMenu();
-                    boolean topMenuVisible = topMenu.visibleProperty().getValue();
-                    if (zoomOptions == true && loadOptions == false && topMenuVisible) {
-                        zoomOptions = false;
-                        loadOptions = false;
-                        updateToolbar();
-                        mainView.getChildren().remove(topMenu);
-                    } else {
-                        zoomOptions = true;
-                        loadOptions = false;
-                        updateToolbar();
-                        mainView.getChildren().add(0, topMenu);
+                    //in the following sync state, the zoomOptions is locked and always set to false, only allow double click full screen effect
+                    if (GlobalStaticConstant.GLOBAL_ISFOLLOWINGCLICKED == true) {
+                        //show full screen
+                        if (topMenu.isVisible() == true) {
+                            mainView.getChildren().remove(topMenu);
+                            topMenu.setVisible(false);
+                        } else if (topMenu.isVisible() == false) { //hide full screen
+                            mainView.getChildren().add(0, topMenu);
+                            topMenu.setVisible(true);
+                        }
+                    } else if (GlobalStaticConstant.GLOBAL_ISFOLLOWINGCLICKED == false) {
+                        //show full screen
+                        if (zoomOptions == true && loadOptions == false) {
+                            zoomOptions = false;
+                            loadOptions = false;
+                            updateToolbar();
+                            mainView.getChildren().remove(topMenu);
+                        } else if (zoomOptions == false && loadOptions == false) { //hide full screen
+                            zoomOptions = true;
+                            loadOptions = false;
+                            updateToolbar();
+                            mainView.getChildren().add(0, topMenu);
+                        }
                     }
                 }
             }
@@ -416,8 +434,8 @@ public class OpenPdfViewer extends BorderPane implements Initializable {
             //set pagination
             pagination.setPageCount(pdf.numPages());
             pagination.setCurrentPageIndex(pageIndex);
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (IOException e) {
+            logger.error(e.getCause().getMessage());
         }
     }
 
@@ -445,8 +463,8 @@ public class OpenPdfViewer extends BorderPane implements Initializable {
             //set pagination
             pagination.setPageCount(pdf.numPages());
             pagination.setCurrentPageIndex(pageIndex);
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (IOException e) {
+            logger.error(e.getCause().getMessage());
         }
     }
 
@@ -459,8 +477,8 @@ public class OpenPdfViewer extends BorderPane implements Initializable {
             if (pdf != null) {
                 pdf.getDocument().close();
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (IOException e) {
+            logger.error(e.getCause().getMessage());
         }
     }
 
@@ -570,18 +588,42 @@ public class OpenPdfViewer extends BorderPane implements Initializable {
         try {
             pagination.setCurrentPageIndex(pageIndex);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error(e.getCause().getMessage());
         }
     }
-    
-    //to do debug, to be deleted!
-    public PDDocument getPdf() throws IOException {
-        return pdf.getDocument();
+
+    /**
+     * Set whether to lock/unlock the pagination navigation area(aka
+     * PaginationSkin) by the given boolean input.
+     *
+     * @param isLock
+     */
+    public void isLockPagination(boolean isLock) {
+        ObservableList<Node> childList = pagination.getChildrenUnmodifiable();
+        if (!childList.isEmpty()) {
+            childList.get(2).setDisable(isLock);
+        }
     }
-    
-    //to do debug, to be deleted!
-    public void setPdf(PDDocument pdf) {
-        this.pdf.setDocument(pdf);
+
+    /**
+     * Set whether to lock/unlock the ScrollPane and the H/Vscroller by the
+     * given boolean input.
+     *
+     * @param isLock
+     */
+    public void isLockScroller(boolean isLock) {
+        ObservableList<Node> childList = scroller.getChildrenUnmodifiable();
+        if (!childList.isEmpty()) {
+            childList.get(0).setDisable(isLock);
+            childList.get(1).setDisable(isLock);
+            childList.get(2).setDisable(isLock);
+        }
+        //lock/unlock pannable
+        if (isLock == true) {
+            scroller.setPannable(false);
+        } else {
+            scroller.setPannable(true);
+        }
     }
 }
 
@@ -592,6 +634,8 @@ public class OpenPdfViewer extends BorderPane implements Initializable {
  * @author chenxi 创建时间：2019-9-21 9:41:38
  */
 class Pdf {
+    
+    private static final Logger logger = LoggerFactory.getLogger(Pdf.class);
 
     //represent a PDF file
     private PDDocument document;
@@ -605,7 +649,7 @@ class Pdf {
             renderer = new PDFRenderer(document);//pass the file for BufferedImage rendering
             //document.close();
         } catch (IOException ex) {
-            ex.printStackTrace();
+            logger.error(ex.getCause().getMessage());
         }
     }
 
@@ -615,7 +659,7 @@ class Pdf {
             document = PDDocument.load(path.toFile(), password);//load a PDF file with password
             renderer = new PDFRenderer(document);//pass the file for BufferedImage rendering
         } catch (IOException ex) {
-            ex.printStackTrace();
+            logger.error(ex.getCause().getMessage());
         }
     }
 
@@ -644,7 +688,7 @@ class Pdf {
                 return null;
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error(e.getCause().getMessage());
             return null;
         }
         //the rendered page is a BufferedImage type, need to convert it to Image
@@ -672,7 +716,7 @@ class Pdf {
                 return null;
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error(e.getCause().getMessage());
             return null;
         }
         //the rendered page is a BufferedImage type, need to convert it to Image
@@ -682,7 +726,7 @@ class Pdf {
     public PDDocument getDocument() {
         return document;
     }
-    
+
     public void setDocument(PDDocument document) {
         this.document = document;
     }
