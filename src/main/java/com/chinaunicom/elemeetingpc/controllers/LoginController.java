@@ -141,6 +141,14 @@ public class LoginController {
                 }
             }
         });
+        task.setOnFailed(new EventHandler<WorkerStateEvent>() {
+            @Override
+            public void handle(WorkerStateEvent event) {
+                //弹窗提示错误
+                DialogsUtils.errorAlert("server.connection.error");
+                loadingPage.closeLoadingPage();
+            }
+        });
         new Thread(task).start();
     }
 

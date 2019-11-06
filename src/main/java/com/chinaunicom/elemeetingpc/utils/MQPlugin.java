@@ -18,6 +18,8 @@ import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.DefaultConsumer;
 import com.rabbitmq.client.Envelope;
+import com.rabbitmq.client.ShutdownListener;
+import com.rabbitmq.client.ShutdownSignalException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
@@ -56,6 +58,8 @@ public class MQPlugin {
         factory = initConnectionFactory();
         //create connection with a given name
         connection = factory.newConnection(GlobalStaticConstant.GLOBAL_USERINFO_USERNAME);
+        //monitoring connection
+        connectionShutdownMonitor();
         //create channel
         channel = connection.createChannel();
         //a fixed routingKey act like fanout exchange
@@ -69,7 +73,8 @@ public class MQPlugin {
     }
 
     /**
-     * This method initialize the connectionFactory.
+     * This method initialize the connectionFactory, note: in java client 5.7.3
+     * the auto recovery is enabled by default.
      *
      * @return factory
      * @throws
@@ -88,11 +93,6 @@ public class MQPlugin {
             factory.setVirtualHost("/");
             factory.setHost(syncParams.getIp());
             factory.setPort(Integer.parseInt(syncParams.getPort()));
-            //there is a whole section on connection recovery. make sure you read them
-            // connection that will recover automatically
-            factory.setAutomaticRecoveryEnabled(true);
-            // attempt recovery every 10 seconds
-            factory.setNetworkRecoveryInterval(10000);
         }
         return factory;
     }
@@ -112,10 +112,11 @@ public class MQPlugin {
     /**
      * This method consume a message from the exchange, note once start
      * consuming, it will continue consuming message only when the the app exit
-     * or close, that is all the incoming message will be auto handled by the
-     * handleDelivery method, therefore two constants are used here to determine
-     * whether the message will be handled or discard, understand this mechanism
-     * is vital to understand how the consuming message works here.
+     * or close(refer to as "Push API"/Receiving Messages by Subscription), that
+     * is all the incoming message will be auto handled by the handleDelivery
+     * method, therefore two constants are used here to determine whether the
+     * message will be handled or discard, understand this mechanism is vital to
+     * understand how the consuming message works here.
      *
      * @throws java.io.IOException
      */
@@ -126,7 +127,6 @@ public class MQPlugin {
             DialogsUtils.infoAlert("MQPlugin.followingStart");
             boolean autoAck = false; //set false to manual ack, set true to auto ack
             GlobalStaticConstant.GLOBAL_ISSTARTCONSUMING = true; //set start consuming flag true to avoid the error of redeploy this method
-            //channel.basicConsume(queueName, autoAck, "consumerTag", new DefaultConsumer(channel) {
             channel.basicConsume(queueName, autoAck, new DefaultConsumer(channel) {
                 @Override
                 public void handleDelivery(String consumerTag,
@@ -134,8 +134,8 @@ public class MQPlugin {
                         AMQP.BasicProperties properties,
                         byte[] body)
                         throws IOException {
-                    String routingKey = envelope.getRoutingKey();
-                    String contentType = properties.getContentType();
+//                    String routingKey = envelope.getRoutingKey();
+//                    String contentType = properties.getContentType();
                     long deliveryTag = envelope.getDeliveryTag();
                     //message content
                     String message = new String(body, "UTF-8");
@@ -233,25 +233,6 @@ public class MQPlugin {
     }
 
     /**
-     * Query fileUserRelationModel with fileId and get the corresponding userId.
-     *
-     * @param fileId
-     * @return userId
-     */
-    public String getUserIdByFileId(String fileId) {
-        String userId = "";
-        try {
-            FileUserRelationModel fileUserRelationModel = new FileUserRelationModel();
-            List<FileUserRelation> fileUserRelationList = fileUserRelationModel.queryFileUserRelationByFileId(fileId);
-            userId = fileUserRelationList.get(0).getUserId();
-            return userId;
-        } catch (ApplicationException | SQLException ex) {
-            logger.error(ex.getCause().getMessage());
-        }
-        return userId;
-    }
-
-    /**
      * Return a Channel.
      *
      * @return channel
@@ -269,6 +250,54 @@ public class MQPlugin {
     public void closeConnection() throws IOException, TimeoutException {
         channel.close();
         connection.close();
+    }
+    
+    /**
+     * This is a debug method which monitor possible connection/channel/application/broker
+     * error which will cause the MQ connectivity failure, note: regardless of the reason 
+     * that caused the closure(network failure/internal failure/explicit local shutdown.)
+     * it will always end up here.
+     */
+    public final void connectionShutdownMonitor() {
+        connection.addShutdownListener(new ShutdownListener() {
+            @Override
+            public void shutdownCompleted(ShutdownSignalException cause) {               
+                String hardError = "";
+                String applInit = "";
+                if (cause.isHardError()) {
+                    hardError = "connection";
+                } else {
+                    hardError = "channel";
+                }
+                if (cause.isInitiatedByApplication()) {
+                    applInit = "application";
+                } else {
+                    applInit = "broker";
+                }
+                System.out.println("Connectivity to MQ has stopped. It was caused by "
+                        + applInit + " at the " + hardError
+                        + " level. Reason received " + cause.getReason());
+            }
+        });
+    }
+    
+    /**
+     * Query fileUserRelationModel with fileId and get the corresponding userId.
+     *
+     * @param fileId
+     * @return userId
+     */
+    public String getUserIdByFileId(String fileId) {
+        String userId = "";
+        try {
+            FileUserRelationModel fileUserRelationModel = new FileUserRelationModel();
+            List<FileUserRelation> fileUserRelationList = fileUserRelationModel.queryFileUserRelationByFileId(fileId);
+            userId = fileUserRelationList.get(0).getUserId();
+            return userId;
+        } catch (ApplicationException | SQLException ex) {
+            logger.error(ex.getCause().getMessage());
+        }
+        return userId;
     }
 
     /**

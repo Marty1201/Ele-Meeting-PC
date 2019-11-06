@@ -28,7 +28,10 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.control.ToolBar;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.*;
 import javafx.stage.FileChooser;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -86,6 +89,12 @@ public class OpenPdfViewer extends BorderPane implements Initializable {
 
     //FileDetailController
     private FileDetailController fileDetailController;
+    
+    //used to disable vertical scrolling in ScrollPane
+    private EventHandler scrollEventHandler;
+    
+    //used to disable left and right arrow key on the keyboard
+    private EventHandler keyEventHandler;
 
     /**
      * The ZoomType class define 3 types of zoom: 1, WIDTH: the zoom will fit
@@ -148,6 +157,24 @@ public class OpenPdfViewer extends BorderPane implements Initializable {
         updateToolbar();
         //Configure platform's default file chooser dialog
         configureFileChooser();
+        //create a scrollEventHandler to prevent vertical scrolling
+        scrollEventHandler = new EventHandler<ScrollEvent>() {
+            @Override
+            public void handle(ScrollEvent event) {
+                if (event.getDeltaY() > 0 || event.getDeltaY() < 0) {
+                    event.consume();
+                }
+            }
+        };
+        //create a keyEventHandler to prevent clicking left or right
+        keyEventHandler = new EventHandler<KeyEvent>() {
+            @Override
+            public void handle(KeyEvent event) {
+                if (event.getCode() == KeyCode.LEFT || event.getCode() == KeyCode.RIGHT) {
+                    event.consume();
+                }
+            }
+        };
     }
 
     /**
@@ -334,9 +361,19 @@ public class OpenPdfViewer extends BorderPane implements Initializable {
                         if (topMenu.isVisible() == true) {
                             mainView.getChildren().remove(topMenu);
                             topMenu.setVisible(false);
+                            //get the navigation area and hide it
+                            ObservableList<Node> childList = pagination.getChildrenUnmodifiable();
+                            if (!childList.isEmpty()) {
+                                childList.get(2).setVisible(false);
+                            }
                         } else if (topMenu.isVisible() == false) { //hide full screen
                             mainView.getChildren().add(0, topMenu);
                             topMenu.setVisible(true);
+                            //get the navigation area and show it
+                            ObservableList<Node> childList = pagination.getChildrenUnmodifiable();
+                            if (!childList.isEmpty()) {
+                                childList.get(2).setVisible(true);
+                            }
                         }
                     } else if (GlobalStaticConstant.GLOBAL_ISFOLLOWINGCLICKED == false) {
                         //show full screen
@@ -345,11 +382,21 @@ public class OpenPdfViewer extends BorderPane implements Initializable {
                             loadOptions = false;
                             updateToolbar();
                             mainView.getChildren().remove(topMenu);
+                            //get the navigation area and hide it
+                            ObservableList<Node> childList = pagination.getChildrenUnmodifiable();
+                            if (!childList.isEmpty()) {
+                                childList.get(2).setVisible(false);
+                            }
                         } else if (zoomOptions == false && loadOptions == false) { //hide full screen
                             zoomOptions = true;
                             loadOptions = false;
                             updateToolbar();
                             mainView.getChildren().add(0, topMenu);
+                            //get the navigation area and show it
+                            ObservableList<Node> childList = pagination.getChildrenUnmodifiable();
+                            if (!childList.isEmpty()) {
+                                childList.get(2).setVisible(true);
+                            }
                         }
                     }
                 }
@@ -594,7 +641,8 @@ public class OpenPdfViewer extends BorderPane implements Initializable {
 
     /**
      * Set whether to lock/unlock the pagination navigation area(aka
-     * PaginationSkin) by the given boolean input.
+     * PaginationSkin) by the given boolean input, also lock/unlock
+     * the left and right key.
      *
      * @param isLock
      */
@@ -603,25 +651,33 @@ public class OpenPdfViewer extends BorderPane implements Initializable {
         if (!childList.isEmpty()) {
             childList.get(2).setDisable(isLock);
         }
+        //lock/unlock left and right arrow key on the keyboard
+        if (isLock == true) {
+            pagination.addEventFilter(KeyEvent.ANY, keyEventHandler);
+        } else {
+            pagination.removeEventFilter(KeyEvent.ANY, keyEventHandler);
+        }
     }
 
     /**
-     * Set whether to lock/unlock the ScrollPane and the H/Vscroller by the
+     * Set whether to lock/unlock the ScrollPane and the vertical scroller by the
      * given boolean input.
      *
      * @param isLock
      */
     public void isLockScroller(boolean isLock) {
+        //lock/unlock the vertical scroll button
         ObservableList<Node> childList = scroller.getChildrenUnmodifiable();
         if (!childList.isEmpty()) {
-            childList.get(0).setDisable(isLock);
             childList.get(1).setDisable(isLock);
             childList.get(2).setDisable(isLock);
         }
-        //lock/unlock pannable
+        //lock/unlock vertical scrolling & pannable
         if (isLock == true) {
+            scroller.addEventFilter(ScrollEvent.ANY, scrollEventHandler);
             scroller.setPannable(false);
         } else {
+            scroller.removeEventFilter(ScrollEvent.ANY, scrollEventHandler);
             scroller.setPannable(true);
         }
     }
@@ -634,7 +690,7 @@ public class OpenPdfViewer extends BorderPane implements Initializable {
  * @author chenxi 创建时间：2019-9-21 9:41:38
  */
 class Pdf {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(Pdf.class);
 
     //represent a PDF file
