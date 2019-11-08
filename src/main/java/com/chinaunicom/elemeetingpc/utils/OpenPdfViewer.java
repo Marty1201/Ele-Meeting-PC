@@ -34,6 +34,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.*;
 import javafx.stage.FileChooser;
+import javafx.util.Callback;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.PDFRenderer;
 
@@ -89,12 +90,14 @@ public class OpenPdfViewer extends BorderPane implements Initializable {
 
     //FileDetailController
     private FileDetailController fileDetailController;
-    
+
     //used to disable vertical scrolling in ScrollPane
     private EventHandler scrollEventHandler;
-    
+
     //used to disable left and right arrow key on the keyboard
     private EventHandler keyEventHandler;
+
+    private MQPlugin mQPlugin;
 
     /**
      * The ZoomType class define 3 types of zoom: 1, WIDTH: the zoom will fit
@@ -147,7 +150,28 @@ public class OpenPdfViewer extends BorderPane implements Initializable {
         if (pdf != null) {
             pagination.setPageCount(pdf.numPages());
         }
-        pagination.setPageFactory(index -> createPdfImage(index));
+        pagination.setPageFactory(new Callback<Integer, Node>() {
+            @Override
+            public Node call(Integer index) {
+                //in the sync state, speaker will send a message to the broker everytime a page is turned or a file is opened, the message contain vital infos about the file
+                //which will help followers to decide which action should be taken upon receiving them.
+                if (GlobalStaticConstant.GLOBAL_ISSPEAKINGCLICKED == true) {
+                    int page = pagination.getCurrentPageIndex();
+                    String fileId = "\",\"bookid\":\"" + fileDetailController.getFileInfo().getFileId();
+                    String fileName = ",\"fileName\":\"" + fileDetailController.getFileName();
+                    String filePassword = "\",\"password\":\"" + fileDetailController.getFileInfo().getPassword();
+                    String organName = "\",\"PAMQOrganizationIDName\":\"" + GlobalStaticConstant.GLOBAL_ORGANINFO_ORGANIZATIONNAME;
+                    String command = "\",\"command\":\"" + GlobalStaticConstant.GLOBAL_TURNPAGE;
+                    String message = "{\"page\":" + page + fileName + fileId + filePassword + organName + command + "\"}";
+                    try {
+                        mQPlugin.publishMessage(message);
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
+                    }
+                }
+                return createPdfImage(index);
+            }
+        });
 
         HBox.setHgrow(zoomOptionsBox, Priority.ALWAYS);
         HBox.setHgrow(loadOptionsBox, Priority.ALWAYS);
@@ -640,9 +664,19 @@ public class OpenPdfViewer extends BorderPane implements Initializable {
     }
 
     /**
+     * Get the current page index, for external class which need to access
+     * pagination.getCurrentPageIndex method only.
+     *
+     * @param pageIndex
+     */
+    public int getCurrentPage() throws Exception {
+        return pagination.getCurrentPageIndex();
+    }
+
+    /**
      * Set whether to lock/unlock the pagination navigation area(aka
-     * PaginationSkin) by the given boolean input, also lock/unlock
-     * the left and right key.
+     * PaginationSkin) by the given boolean input, also lock/unlock the left and
+     * right key.
      *
      * @param isLock
      */
@@ -660,8 +694,8 @@ public class OpenPdfViewer extends BorderPane implements Initializable {
     }
 
     /**
-     * Set whether to lock/unlock the ScrollPane and the vertical scroller by the
-     * given boolean input.
+     * Set whether to lock/unlock the ScrollPane and the vertical scroller by
+     * the given boolean input.
      *
      * @param isLock
      */
@@ -679,6 +713,12 @@ public class OpenPdfViewer extends BorderPane implements Initializable {
         } else {
             scroller.removeEventFilter(ScrollEvent.ANY, scrollEventHandler);
             scroller.setPannable(true);
+        }
+    }
+
+    public void setMQPlugin(MQPlugin mQPlugin) {
+        if (mQPlugin != null) {
+            this.mQPlugin = mQPlugin;
         }
     }
 }

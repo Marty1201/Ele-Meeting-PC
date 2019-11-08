@@ -74,7 +74,8 @@ public class FileDetailController {
 
     //加载的文件实体
     private FileResource fileInfo;
-
+    
+    //文件的真实名称
     private String fileName;
 
     private BorderPane borderPaneMain;
@@ -111,16 +112,25 @@ public class FileDetailController {
         } else {
             DialogsUtils.infoAlert("FileDetailController.fileNotExist");
         }
-        //如果在跟读情况下还需按照正在跟读的状态来重载文件阅读界面
+        //如果在同步阅读情况下还需按照正在跟读/主讲的状态来重载文件阅读界面
         if (GlobalStaticConstant.GLOBAL_ISFOLLOWINGCLICKED == true) {
             try {
                 GlobalStaticConstant.GLOBAL_ISFOLLOWINGCLICKED = false;
-                updateFileDetailView();
+                updateFileDetailView(GlobalStaticConstant.GLOBAL_FOLLOWING);
+            } catch (IOException ex) {
+                logger.error(ex.getCause().getMessage());
+            }
+        }
+        if (GlobalStaticConstant.GLOBAL_ISSPEAKINGCLICKED == true) {
+            try {
+                GlobalStaticConstant.GLOBAL_ISSPEAKINGCLICKED = false;
+                updateFileDetailView(GlobalStaticConstant.GLOBAL_SPEAKING);
             } catch (IOException ex) {
                 logger.error(ex.getCause().getMessage());
             }
         }
         openPdfViewer.setFileDetaiController(this);//把FileDetailController传到OpenPdfViewer里面使用
+        openPdfViewer.setMQPlugin(mQPlugin);//把MQPlugin传到OpenPdfViewer里面使用
     }
 
     /**
@@ -163,8 +173,26 @@ public class FileDetailController {
      * 处理主讲操作.
      */
     @FXML
-    public void handleSpeaking() {
-        // to be implemented
+    public void handleSpeaking() throws IOException, Exception {
+        if (GlobalStaticConstant.GLOBAL_ISSPEAKINGCLICKED == false) {
+            //用户点击主讲按钮，对界面进行更新
+            updateFileDetailView(GlobalStaticConstant.GLOBAL_SPEAKING);
+            //发送申请主讲消息
+            String command = "\"command\":\"" + GlobalStaticConstant.GLOBAL_APPLYFORPRESENTER;
+            String userId = "\",\"userid\":\"" + GlobalStaticConstant.GLOBAL_ORGANINFO_OWNER_USERID;
+            String organName = "\",\"PAMQOrganizationIDName\":\"" + GlobalStaticConstant.GLOBAL_ORGANINFO_ORGANIZATIONNAME;
+            String message = "{" + command + userId + organName + "\"}";
+            mQPlugin.publishMessage(message);
+        } else {
+            //用户点击取消主讲按钮，对界面进行更新
+            updateFileDetailView(GlobalStaticConstant.GLOBAL_SPEAKING);
+            //发送取消主讲消息
+            String command = "\"command\":\"" + GlobalStaticConstant.GLOBAL_GIVEUPPRESENTER;
+            String userId = "\",\"userid\":\"" + GlobalStaticConstant.GLOBAL_ORGANINFO_OWNER_USERID;
+            String organName = "\",\"PAMQOrganizationIDName\":\"" + GlobalStaticConstant.GLOBAL_ORGANINFO_ORGANIZATIONNAME;
+            String message = "{" + command + userId + organName + "\"}";
+            mQPlugin.publishMessage(message);
+        }
     }
 
     /**
@@ -173,106 +201,145 @@ public class FileDetailController {
      * 需要处理消息。系统常量GLOBAL_ISSTARTCONSUMING代表是否开启了消费消息功能（默认是false），也就是说一旦开启
      * 消费消息GLOBAL_ISSTARTCONSUMING=true（程序运行时只开启一次），客户端将一直接收消息，需要通过代码逻辑来判断
      * 是否需要处理消息.
+     *
      * @throws java.io.IOException
      */
     @FXML
     public void handleFollowing() throws IOException {
-        //如果用户点击了跟读按钮（按钮当前状态是false，未开始跟读）
-        if (GlobalStaticConstant.GLOBAL_ISFOLLOWINGCLICKED == false) {
-            updateFileDetailView();
-            //如果第一次点击跟读按钮，开启消费消息，避免重复开启消息而导致报错
-            if (GlobalStaticConstant.GLOBAL_ISSTARTCONSUMING == false) {
-                if (mQPlugin != null) {
-                    mQPlugin.consumeMessage();
-                } else {
-                    //创建mq失败
-                    DialogsUtils.errorAlert("server.connection.error");
-                }
+        //用户选择跟读并对界面进行更新处理
+        updateFileDetailView(GlobalStaticConstant.GLOBAL_FOLLOWING);
+        //如果第一次点击跟读按钮，开启消费消息，避免重复开启消息而导致报错
+        if (GlobalStaticConstant.GLOBAL_ISSTARTCONSUMING == false) {
+            if (mQPlugin != null) {
+                mQPlugin.consumeMessage();
+            } else {
+                //创建mq失败
+                DialogsUtils.errorAlert("server.connection.error");
             }
-        } else { //如果用户点击了取消跟读按钮（按钮当前状态是true，正在跟读）
-            updateFileDetailView();
         }
     }
 
     /**
-     * 根据跟读状态（开始跟读/取消跟读）来更新文件阅读界面.
+     * 根据用户的操作选项（开始/取消-主讲/跟读）来更新文件阅读界面.
+     *
+     * @param action 根据用户操作对界面进行更新
      * @throws java.io.IOException
      */
-    public void updateFileDetailView() throws IOException {
-        //用户开始跟读，更新文件阅读界面
-        if (GlobalStaticConstant.GLOBAL_ISFOLLOWINGCLICKED == false) {
-            //改变跟读图标
-            Image followerIcon = new Image(getClass().getResourceAsStream("/images/stop_following.png"));
-            followingState.setImage(followerIcon);
-            followingState.setFitHeight(100.0);
-            followingState.setFitWidth(120.0);
-            //disable主讲图标
-            Image speakerIcon = new Image(getClass().getResourceAsStream("/images/apply_speaker_disable.png"));
-            speakerState.setImage(speakerIcon);
-            speakerState.setFitHeight(100.0);
-            speakerState.setFitWidth(120.0);
-            speakerState.setDisable(true);
-            //disable返回图标
-            Image backIcon = new Image(getClass().getResourceAsStream("/images/back_disable.png"));
-            backState.setImage(backIcon);
-            backState.setFitHeight(54.0);
-            backState.setFitWidth(70.0);
-            backState.setDisable(true);
-            //主要问题出现在当主讲和跟读不在同一个文件，当updateFileDetailView()被call的时候，OpenPdfViewer里面的createPdfImage还未生成当前页面，
-            //如果此时对pagination和scroller进行操作，得到的对象就是空的，因此需要等当前线程结束后，再延迟执行以下两个任务
-            //另外好的习惯是当一个JavaFX线程尝试去更新另一个FX线程的UI时, 必须要用Platform.runLater，效果是当前线程执行完以后再执行另一个线程
-            Platform.runLater(new Runnable() {
-                @Override
-                public void run() {
-                    //隐藏OpenPdfViewer工具栏
-                    openPdfViewer.setZoomOptions(false);
-                    //disable手动翻页
-                    openPdfViewer.isLockPagination(true);
-                    //disable滚动条
-                    openPdfViewer.isLockScroller(true);
-                }
-            });
-            //用户已经点击了跟读按钮，设置按钮状态为true
-            GlobalStaticConstant.GLOBAL_ISFOLLOWINGCLICKED = true;
-        } else { //用户取消跟读，更新文件阅读界面
-            //改变跟读图标
-            Image followerIcon = new Image(getClass().getResourceAsStream("/images/follow.png"));
-            followingState.setImage(followerIcon);
-            followingState.setFitHeight(100.0);
-            followingState.setFitWidth(120.0);
-            //开启主讲图标
-            Image speakerIcon = new Image(getClass().getResourceAsStream("/images/apply_speaker.png"));
-            speakerState.setImage(speakerIcon);
-            speakerState.setFitHeight(100.0);
-            speakerState.setFitWidth(120.0);
-            speakerState.setDisable(false);
-            //开启返回图标
-            Image backIcon = new Image(getClass().getResourceAsStream("/images/back.png"));
-            backState.setImage(backIcon);
-            backState.setFitHeight(54.0);
-            backState.setFitWidth(70.0);
-            backState.setDisable(false);
-            //主要问题出现在当主讲和跟读不在同一个文件，当updateFileDetailView()被call的时候，OpenPdfViewer里面的createPdfImage还未生成当前页面，
-            //如果此时对pagination和scroller进行操作，得到的对象就是空的，因此需要等当前线程结束后，再延迟执行以下两个任务
-            //另外好的习惯是当一个JavaFX线程尝试去更新另一个FX线程的UI时, 必须要用Platform.runLater，效果是当前线程执行完以后再执行另一个线程
-            Platform.runLater(new Runnable() {
-                @Override
-                public void run() {
-                    //开启OpenPdfViewer工具栏
-                    openPdfViewer.setZoomOptions(true);
-                    //disable手动翻页
-                    openPdfViewer.isLockPagination(false);
-                    //disable滚动条
-                    openPdfViewer.isLockScroller(false);
-                }
-            });
-            //用户已经点击了取消跟读按钮，设置按钮状态为false
-            GlobalStaticConstant.GLOBAL_ISFOLLOWINGCLICKED = false;
+    public void updateFileDetailView(String action) throws IOException {
+        //用户选择跟读
+        if (StringUtils.equalsIgnoreCase(action, GlobalStaticConstant.GLOBAL_FOLLOWING)) {
+            //用户点击了跟读按钮（按钮当前状态是false，未开始跟读），更新文件阅读界面
+            if (GlobalStaticConstant.GLOBAL_ISFOLLOWINGCLICKED == false) {
+                //改变跟读图标
+                Image followerIcon = new Image(getClass().getResourceAsStream("/images/stop_following.png"));
+                followingState.setImage(followerIcon);
+                followingState.setFitHeight(100.0);
+                followingState.setFitWidth(120.0);
+                //disable主讲图标
+                Image speakerIcon = new Image(getClass().getResourceAsStream("/images/apply_speaker_disable.png"));
+                speakerState.setImage(speakerIcon);
+                speakerState.setFitHeight(100.0);
+                speakerState.setFitWidth(120.0);
+                speakerState.setDisable(true);
+                //disable返回图标
+                Image backIcon = new Image(getClass().getResourceAsStream("/images/back_disable.png"));
+                backState.setImage(backIcon);
+                backState.setFitHeight(54.0);
+                backState.setFitWidth(70.0);
+                backState.setDisable(true);
+                //主要问题出现在当主讲和跟读不在同一个文件，当updateFileDetailView()被call的时候，OpenPdfViewer里面的createPdfImage还未生成当前页面，
+                //如果此时对pagination和scroller进行操作，得到的对象就是空的，因此需要等当前线程结束后，再延迟执行以下两个任务
+                //另外好的习惯是当一个JavaFX线程尝试去更新另一个FX线程的UI时, 必须要用Platform.runLater，效果是当前线程执行完以后再执行另一个线程
+                Platform.runLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        //隐藏OpenPdfViewer工具栏
+                        openPdfViewer.setZoomOptions(false);
+                        //disable手动翻页
+                        openPdfViewer.isLockPagination(true);
+                        //disable滚动条
+                        openPdfViewer.isLockScroller(true);
+                    }
+                });
+                //用户已经点击了跟读按钮，设置按钮状态为true
+                GlobalStaticConstant.GLOBAL_ISFOLLOWINGCLICKED = true;
+            } else { //用户点击了取消跟读按钮（按钮当前状态是true，正在跟读），更新文件阅读界面
+                //改变跟读图标
+                Image followerIcon = new Image(getClass().getResourceAsStream("/images/follow.png"));
+                followingState.setImage(followerIcon);
+                followingState.setFitHeight(100.0);
+                followingState.setFitWidth(120.0);
+                //开启主讲图标
+                Image speakerIcon = new Image(getClass().getResourceAsStream("/images/apply_speaker.png"));
+                speakerState.setImage(speakerIcon);
+                speakerState.setFitHeight(100.0);
+                speakerState.setFitWidth(120.0);
+                speakerState.setDisable(false);
+                //开启返回图标
+                Image backIcon = new Image(getClass().getResourceAsStream("/images/back.png"));
+                backState.setImage(backIcon);
+                backState.setFitHeight(54.0);
+                backState.setFitWidth(70.0);
+                backState.setDisable(false);
+                //主要问题出现在当主讲和跟读不在同一个文件，当updateFileDetailView()被call的时候，OpenPdfViewer里面的createPdfImage还未生成当前页面，
+                //如果此时对pagination和scroller进行操作，得到的对象就是空的，因此需要等当前线程结束后，再延迟执行以下两个任务
+                //另外好的习惯是当一个JavaFX线程尝试去更新另一个FX线程的UI时, 必须要用Platform.runLater，效果是当前线程执行完以后再执行另一个线程
+                Platform.runLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        //开启OpenPdfViewer工具栏
+                        openPdfViewer.setZoomOptions(true);
+                        //disable手动翻页
+                        openPdfViewer.isLockPagination(false);
+                        //disable滚动条
+                        openPdfViewer.isLockScroller(false);
+                    }
+                });
+                //用户已经点击了取消跟读按钮，设置按钮状态为false
+                GlobalStaticConstant.GLOBAL_ISFOLLOWINGCLICKED = false;
+            }
+        }
+        //用户选择主讲
+        if (StringUtils.equalsIgnoreCase(action, GlobalStaticConstant.GLOBAL_SPEAKING)) {
+            //用户点击了主讲按钮（按钮当前状态是false，未开始主讲），更新文件阅读界面
+            if (GlobalStaticConstant.GLOBAL_ISSPEAKINGCLICKED == false) {
+                //改变主讲图标
+                Image speakerIcon = new Image(getClass().getResourceAsStream("/images/stop_speaker.png"));
+                speakerState.setImage(speakerIcon);
+                speakerState.setFitHeight(100.0);
+                speakerState.setFitWidth(120.0);
+                //disable跟读图标
+                Image followerIcon = new Image(getClass().getResourceAsStream("/images/follow_disable.png"));
+                followingState.setImage(followerIcon);
+                followingState.setFitHeight(100.0);
+                followingState.setFitWidth(120.0);
+                followingState.setDisable(true);
+                 //用户已经点击了开始主讲按钮，设置按钮状态为true
+                GlobalStaticConstant.GLOBAL_ISSPEAKINGCLICKED = true;
+            } else { //用户点击了取消主讲按钮（按钮当前状态是true，正在主讲），更新文件阅读界面
+                //改变主讲图标
+                Image speakerIcon = new Image(getClass().getResourceAsStream("/images/apply_speaker.png"));
+                speakerState.setImage(speakerIcon);
+                speakerState.setFitHeight(100.0);
+                speakerState.setFitWidth(120.0);
+                //开启跟读图标
+                Image followerIcon = new Image(getClass().getResourceAsStream("/images/follow.png"));
+                followingState.setImage(followerIcon);
+                followingState.setFitHeight(100.0);
+                followingState.setFitWidth(120.0);
+                followingState.setDisable(false);
+                //用户已经点击了取消主讲按钮，设置按钮状态为false
+                GlobalStaticConstant.GLOBAL_ISSPEAKINGCLICKED = false;
+            }
         }
     }
 
     public FileResource getFileInfo() {
         return fileInfo;
+    }
+    
+    public String getFileName() {
+        return fileName;
     }
 
     public OpenPdfViewer getOpenPdfViewer() {

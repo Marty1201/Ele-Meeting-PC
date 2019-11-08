@@ -46,4 +46,19 @@ public class GlobalStaticConstant {
     
     //判断是否开始消费消息（注意：消费消息在程序里只需要启动一次，然后通过代码逻辑判断是否需要处理消息）
     public static boolean GLOBAL_ISSTARTCONSUMING = false;
+    
+    //跟读操作
+    public static String GLOBAL_FOLLOWING = "following";
+    
+    //主讲操作
+    public static String GLOBAL_SPEAKING = "speaking";
+    
+    //翻页操作
+    public static String GLOBAL_TURNPAGE = "turnPage";
+    
+    //发起同步操作
+    public static String GLOBAL_APPLYFORPRESENTER = "applyForPresenter";
+    
+    //结束同步操作
+    public static String GLOBAL_GIVEUPPRESENTER = "giveupPresenter";
 }
