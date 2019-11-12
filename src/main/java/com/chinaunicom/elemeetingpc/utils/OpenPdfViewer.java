@@ -153,7 +153,7 @@ public class OpenPdfViewer extends BorderPane implements Initializable {
         pagination.setPageFactory(new Callback<Integer, Node>() {
             @Override
             public Node call(Integer index) {
-                //in the sync state, speaker will send a message to the broker everytime a page is turned or a file is opened, the message contain vital infos about the file
+                //in the sync state, speaker will send a message to the broker everytime a page is turned/a file is opened, the message contain vital infos about the file
                 //which will help followers to decide which action should be taken upon receiving them.
                 if (GlobalStaticConstant.GLOBAL_ISSPEAKINGCLICKED == true) {
                     int page = pagination.getCurrentPageIndex();

@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ResourceBundle;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
@@ -59,6 +60,8 @@ import javafx.scene.text.TextAlignment;
 public class MeetLeftController {
 
     private static final Logger logger = LoggerFactory.getLogger(MeetLeftController.class);
+    
+    static ResourceBundle bundle = FxmlUtils.getResourceBundle();
 
     @FXML
     private ListView<MeetInfoFx> meetCurrentListView;
@@ -263,7 +266,7 @@ public class MeetLeftController {
      */
     @FXML
     public void handExit() throws IOException, TimeoutException {
-        if (DialogsUtils.confirmationAlert()) {
+        if (DialogsUtils.confirmationAlert(bundle.getString("exitConfirm.header"), bundle.getString("exitConfirm.content"))) {
             if (mQPlugin != null) {
                 mQPlugin.closeConnection(); //关闭mq
             }

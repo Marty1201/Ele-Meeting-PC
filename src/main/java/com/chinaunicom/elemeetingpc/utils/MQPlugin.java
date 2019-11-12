@@ -106,7 +106,7 @@ public class MQPlugin {
      */
     public void publishMessage(String message) throws UnsupportedEncodingException, IOException {
         channel.basicPublish(EXCHANGE_NAME, routingKey, null, message.getBytes("UTF-8"));
-        System.out.println(" [x] Sent '" + message + "'");
+        //System.out.println(" [x] Sent '" + message + "'");
     }
 
     /**
@@ -114,91 +114,112 @@ public class MQPlugin {
      * consuming, it will continue consuming message only when the the app exit
      * or close(refer to as "Push API"/Receiving Messages by Subscription), that
      * is all the incoming message will be auto handled by the handleDelivery
-     * method, therefore two constants are used here to determine whether the
-     * message will be handled or discard, understand this mechanism is vital to
-     * understand how the consuming message works here.
+     * method, understand this mechanism is vital to understand how the
+     * consuming message works here.
      *
      * @throws java.io.IOException
      */
     public void consumeMessage() throws IOException {
-        //only the state of following is true, then we start to handle the message, otherwise do nothing and ignore any message
-        if (GlobalStaticConstant.GLOBAL_ISFOLLOWINGCLICKED) {
-            //System.out.println(" [*] Waiting for messages.");
-            DialogsUtils.infoAlert("MQPlugin.followingStart");
-            boolean autoAck = false; //set false to manual ack, set true to auto ack
-            GlobalStaticConstant.GLOBAL_ISSTARTCONSUMING = true; //set start consuming flag true to avoid the error of redeploy this method
-            channel.basicConsume(queueName, autoAck, new DefaultConsumer(channel) {
-                @Override
-                public void handleDelivery(String consumerTag,
-                        Envelope envelope,
-                        AMQP.BasicProperties properties,
-                        byte[] body)
-                        throws IOException {
+        //System.out.println(" [*] Waiting for messages.");
+        boolean autoAck = false; //set false to manual ack, set true to auto ack
+        channel.basicConsume(queueName, autoAck, new DefaultConsumer(channel) {
+            @Override
+            public void handleDelivery(String consumerTag,
+                    Envelope envelope,
+                    AMQP.BasicProperties properties,
+                    byte[] body)
+                    throws IOException {
 //                    String routingKey = envelope.getRoutingKey();
 //                    String contentType = properties.getContentType();
-                    long deliveryTag = envelope.getDeliveryTag();
-                    //message content
-                    String message = new String(body, "UTF-8");
-                    //System.out.println(" [x] Received '" + routingKey + "':'" + message + "'");
-                    channel.basicAck(deliveryTag, false);
-                    try {
-                        handleMessage(message);
-                    } catch (ApplicationException | SQLException ex) {
-                        logger.error(ex.getCause().getMessage());
-                    }
+                long deliveryTag = envelope.getDeliveryTag();
+                //message content
+                String message = new String(body, "UTF-8");
+                //System.out.println(" [x] Received '" + routingKey + "':'" + message + "'");
+                channel.basicAck(deliveryTag, false);
+                try {
+                    handleMessage(message);
+                } catch (ApplicationException | SQLException ex) {
+                    logger.error(ex.getCause().getMessage());
                 }
-            });
-        }
+            }
+        });
     }
 
     /**
      * This method handles the particular message content, it's done by first
-     * checking if user indeed choose to start following and the consumer had
-     * really started consuming message, then it comparing organization name,
-     * command, userId, fileId from the message content with the login user info
-     * in a orderly fashion to determine what action should be taken to respond
-     * the message.
+     * checking if the consumer had really started consuming message, then it
+     * comparing organization name, scale，command, userId, fileId from the
+     * message content with the login user info in a orderly fashion to
+     * determine what action should be taken to respond the message.
      *
      * @param message
      * @throws
      * com.chinaunicom.elemeetingpc.utils.exceptions.ApplicationException
      * @throws java.sql.SQLException
+     * @throw IOException
      */
-    public void handleMessage(String message) throws ApplicationException, SQLException {
-        //only when user choosed start following and the consumer started to consume, then we start to handle the message, otherwise do nothing and ignore any message
-        if (GlobalStaticConstant.GLOBAL_ISFOLLOWINGCLICKED && GlobalStaticConstant.GLOBAL_ISSTARTCONSUMING) {
+    public void handleMessage(String message) throws ApplicationException, SQLException, IOException {
+        //only when the consumer started to consume, then we start to handle the message, otherwise do nothing and ignore any message
+        if (GlobalStaticConstant.GLOBAL_ISSTARTCONSUMING) {
             //handle JSONObject
             JSONObject jSONObject = JSONObject.fromObject(message);
-            //1st check whether the user should handle the message by comparing organization names
-            if (StringUtils.equalsIgnoreCase(jSONObject.getString("PAMQOrganizationIDName"), GlobalStaticConstant.GLOBAL_ORGANINFO_ORGANIZATIONNAME)) {
-                //2nd check if the message contain the key word "scale", if it does, discard this message(sync zooming ability won't be implemented)
-                if (!jSONObject.containsKey("scale")) {
-                    //3rd check what the user should do with the message by checking the command field
-                    if (StringUtils.equalsIgnoreCase(jSONObject.getString("command"), "turnPage")) {
-                        //4th check whether the user has the right to act on the file by querying FileUserRelationModel using fileId and
-                        //comparing userIds
-                        if (StringUtils.equalsIgnoreCase(getUserIdByFileId(jSONObject.getString("bookid")), GlobalStaticConstant.GLOBAL_ORGANINFO_OWNER_USERID)) {
-                            //5th check if same file, turn page straight away
-                            if (StringUtils.equalsIgnoreCase(jSONObject.getString("bookid"), fileDetailController.getFileInfo().getFileId())) {
-                                //Important note：in javafx, when a FX thread try to modify UI component other than the application thread, must alway use Platform.runLater
-                                //eg. here the RabbitMQ thread try to modify the application UI, need to wait for RabbitMQ thread finish, than start application's thread
-                                Platform.runLater(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        fileDetailController.getOpenPdfViewer().goToCurrentPage(jSONObject.getInt("page"));
-                                    }
-                                });
-                            } else { //method handles speaker and follower are reading different files
-                                handleDiffFile(jSONObject);
+            //if in the following state
+            if (GlobalStaticConstant.GLOBAL_ISFOLLOWINGCLICKED == true) {
+                //1st check whether the user should handle the message by comparing organization names
+                if (StringUtils.equalsIgnoreCase(jSONObject.getString("PAMQOrganizationIDName"), GlobalStaticConstant.GLOBAL_ORGANINFO_ORGANIZATIONNAME)) {
+                    //2nd check if the message contain the key word "scale", if it does, discard this message(sync zooming ability won't be implemented)
+                    if (!jSONObject.containsKey("scale")) {
+                        //3rd check what the user should do with the message by checking the command field
+                        if (StringUtils.equalsIgnoreCase(jSONObject.getString("command"), "turnPage")) {
+                            //4th check whether the user has the right to act on the file by querying FileUserRelationModel using fileId and
+                            //comparing userIds
+                            if (StringUtils.equalsIgnoreCase(getUserIdByFileId(jSONObject.getString("bookid")), GlobalStaticConstant.GLOBAL_ORGANINFO_OWNER_USERID)) {
+                                //5th check if same file, turn page straight away
+                                if (StringUtils.equalsIgnoreCase(jSONObject.getString("bookid"), fileDetailController.getFileInfo().getFileId())) {
+                                    //Important note：in javafx, when a FX thread try to modify UI component other than the application thread, must alway use Platform.runLater
+                                    //eg. here the RabbitMQ thread(handleDelivery method) try to modify the application UI, need to wait for RabbitMQ thread finish, than start application's thread
+                                    Platform.runLater(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            fileDetailController.getOpenPdfViewer().goToCurrentPage(jSONObject.getInt("page"));
+                                        }
+                                    });
+                                } else { //method handles speaker and follower are reading different files
+                                    handleDiffFile(jSONObject);
+                                }
+                                //System.out.println("Receive turnPage command and turn page successfully!");
                             }
-                            //System.out.println("Receive turnPage command and turn page successfully!");
+                        }
+                        if (StringUtils.equalsIgnoreCase(jSONObject.getString("command"), "giveupPresenter")) {
+                            Platform.runLater(new Runnable() {
+                                @Override
+                                public void run() {
+                                    DialogsUtils.infoAlert("MQPlugin.giveupSpeaker");
+                                }
+                            });
                         }
                     }
-                    if (StringUtils.equalsIgnoreCase(jSONObject.getString("command"), "applyForPresenter")) {
-                        //do nothing
-                        //System.out.println("Receive applyForPresenter command!");
+                }
+            }
+            //if in the speaking state
+            if (GlobalStaticConstant.GLOBAL_ISSPEAKINGCLICKED == true) {
+                //if receive applyForPresenter message
+                if (StringUtils.equalsIgnoreCase(jSONObject.getString("command"), "applyForPresenter")) {
+                    //first check if self is indeed a speaker and applyForPresenter message is send by another user(not by itself!), if true then give up speaking
+                    if (GlobalStaticConstant.GLOBAL_ISSPEAKINGCLICKED == true && !StringUtils.equals(jSONObject.getString("userid"), GlobalStaticConstant.GLOBAL_ORGANINFO_OWNER_USERID)) {
+                        Platform.runLater(new Runnable() {
+                            @Override
+                            public void run() {
+                                DialogsUtils.infoAlert("MQPlugin.replaceSpeaker");
+                                try {
+                                    fileDetailController.updateFileDetailView(GlobalStaticConstant.GLOBAL_SPEAKING);
+                                } catch (IOException ex) {
+                                    logger.error(ex.getCause().getMessage());
+                                }
+                            }
+                        });
                     }
-                    //and so on, eg vote, sign etc...
+                    //System.out.println("Receive applyForPresenter command!");
                 }
             }
         }
@@ -251,17 +272,18 @@ public class MQPlugin {
         channel.close();
         connection.close();
     }
-    
+
     /**
-     * This is a debug method which monitor possible connection/channel/application/broker
-     * error which will cause the MQ connectivity failure, note: regardless of the reason 
-     * that caused the closure(network failure/internal failure/explicit local shutdown.)
-     * it will always end up here.
+     * This is a debug method which monitor possible
+     * connection/channel/application/broker error which will cause the MQ
+     * connectivity failure, note: regardless of the reason that caused the
+     * closure(network failure/internal failure/explicit local shutdown.) it
+     * will always end up here.
      */
     public final void connectionShutdownMonitor() {
         connection.addShutdownListener(new ShutdownListener() {
             @Override
-            public void shutdownCompleted(ShutdownSignalException cause) {               
+            public void shutdownCompleted(ShutdownSignalException cause) {
                 String hardError = "";
                 String applInit = "";
                 if (cause.isHardError()) {
@@ -280,7 +302,7 @@ public class MQPlugin {
             }
         });
     }
-    
+
     /**
      * Query fileUserRelationModel with fileId and get the corresponding userId.
      *

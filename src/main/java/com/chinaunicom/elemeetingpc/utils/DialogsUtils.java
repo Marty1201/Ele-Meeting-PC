@@ -112,15 +112,17 @@ public class DialogsUtils {
 
     /**
      * Show confirmation alert dialog windows.
+     * @param header
+     * @param content
      *
      * @return answer: click ok button return true, otherwise return false.
      */
-    public static Boolean confirmationAlert() {
+    public static Boolean confirmationAlert(String header, String content) {
         boolean answer = false;
         Alert confirmationAlert = new Alert(Alert.AlertType.CONFIRMATION);
         confirmationAlert.setTitle(bundle.getString("info.title"));
-        confirmationAlert.setHeaderText(bundle.getString("confirm.header"));
-        confirmationAlert.setContentText(bundle.getString("confirm.content"));
+        confirmationAlert.setHeaderText(header);
+        confirmationAlert.setContentText(content);
         Optional<ButtonType> result = confirmationAlert.showAndWait();
         if (result.get() == ButtonType.OK) {
             answer = true;

@@ -13,6 +13,7 @@ import com.j256.ormlite.logger.Logger;
 import com.j256.ormlite.logger.LoggerFactory;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.ResourceBundle;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -28,13 +29,17 @@ import javafx.scene.text.TextAlignment;
 import org.apache.commons.lang3.StringUtils;
 
 /**
- * 文件详情控制器，实现一个文件容器.
+ * 文件详情控制器，实现一个文件容器，FileDetailController，MQPlugin和OpenPdfViewer共同实现了
+ * 文件的展示和同步阅读，FileDetailController面对的对象是用户，MQPlugin负责消息的发送与接收，
+ * OpenPdfViewer面对的对象是文件本身.
  *
  * @author chenxi 创建时间：2019-9-24 17:35:06
  */
 public class FileDetailController {
 
     private static final Logger logger = LoggerFactory.getLogger(FileDetailController.class);
+
+    static ResourceBundle bundle = FxmlUtils.getResourceBundle();
 
     //文件列表界面
     public static final String FXML_FILE = "/fxml/fxml_file.fxml";
@@ -74,7 +79,7 @@ public class FileDetailController {
 
     //加载的文件实体
     private FileResource fileInfo;
-    
+
     //文件的真实名称
     private String fileName;
 
@@ -110,7 +115,7 @@ public class FileDetailController {
                 openPdfViewer.loadPdf(filePath, pageIndex);
             }
         } else {
-            DialogsUtils.infoAlert("FileDetailController.fileNotExist");
+            DialogsUtils.infoWarning("FileDetailController.fileNotExist");
         }
         //如果在同步阅读情况下还需按照正在跟读/主讲的状态来重载文件阅读界面
         if (GlobalStaticConstant.GLOBAL_ISFOLLOWINGCLICKED == true) {
@@ -170,22 +175,32 @@ public class FileDetailController {
     }
 
     /**
-     * 处理主讲操作.
+     * 处理主讲操作，主讲分为两种状态：1、申请主讲，2、取消主讲，系统常量GLOBAL_ISSPEAKINGCLICKED=false代表还未主讲并准备申请主讲
+     * GLOBAL_ISSPEAKINGCLICKED=true代表已经主讲并准备取消主讲，申请主讲前需要先开启consumer.
+     *
+     * @throws IOException
+     * @throws Exception
      */
     @FXML
     public void handleSpeaking() throws IOException, Exception {
+        ////如果consumer未开启，先开启consumer（只开一次 & 避免出现如果主讲人已存在，当前主讲人无法接收到新申请主讲人发出的applyForPresenter的消息）
+        initConsumer();
+        //用户点击申请主讲按钮
         if (GlobalStaticConstant.GLOBAL_ISSPEAKINGCLICKED == false) {
-            //用户点击主讲按钮，对界面进行更新
-            updateFileDetailView(GlobalStaticConstant.GLOBAL_SPEAKING);
-            //发送申请主讲消息
-            String command = "\"command\":\"" + GlobalStaticConstant.GLOBAL_APPLYFORPRESENTER;
-            String userId = "\",\"userid\":\"" + GlobalStaticConstant.GLOBAL_ORGANINFO_OWNER_USERID;
-            String organName = "\",\"PAMQOrganizationIDName\":\"" + GlobalStaticConstant.GLOBAL_ORGANINFO_ORGANIZATIONNAME;
-            String message = "{" + command + userId + organName + "\"}";
-            mQPlugin.publishMessage(message);
+            if (DialogsUtils.confirmationAlert(bundle.getString("MQPlugin.applySpeaker.header"), bundle.getString("MQPlugin.applySpeaker.content"))) {
+                //用户点击确认主讲按钮，对界面进行更新
+                updateFileDetailView(GlobalStaticConstant.GLOBAL_SPEAKING);
+                //发送申请主讲消息
+                String command = "\"command\":\"" + GlobalStaticConstant.GLOBAL_APPLYFORPRESENTER;
+                String userId = "\",\"userid\":\"" + GlobalStaticConstant.GLOBAL_ORGANINFO_OWNER_USERID;
+                String organName = "\",\"PAMQOrganizationIDName\":\"" + GlobalStaticConstant.GLOBAL_ORGANINFO_ORGANIZATIONNAME;
+                String message = "{" + command + userId + organName + "\"}";
+                mQPlugin.publishMessage(message);
+            }
         } else {
             //用户点击取消主讲按钮，对界面进行更新
             updateFileDetailView(GlobalStaticConstant.GLOBAL_SPEAKING);
+            DialogsUtils.infoAlert("MQPlugin.speakingStop");
             //发送取消主讲消息
             String command = "\"command\":\"" + GlobalStaticConstant.GLOBAL_GIVEUPPRESENTER;
             String userId = "\",\"userid\":\"" + GlobalStaticConstant.GLOBAL_ORGANINFO_OWNER_USERID;
@@ -198,20 +213,36 @@ public class FileDetailController {
     /**
      * 处理跟读操作, 跟读分为两种状态：1、未跟读，2、跟读，系统常量GLOBAL_ISFOLLOWINGCLICKED=false代表未跟读
      * GLOBAL_ISFOLLOWINGCLICKED=true代表跟读，使用GLOBAL_ISFOLLOWINGCLICKED来对文件详情界面进行更新并判断是否
-     * 需要处理消息。系统常量GLOBAL_ISSTARTCONSUMING代表是否开启了消费消息功能（默认是false），也就是说一旦开启
-     * 消费消息GLOBAL_ISSTARTCONSUMING=true（程序运行时只开启一次），客户端将一直接收消息，需要通过代码逻辑来判断
-     * 是否需要处理消息.
+     * 需要处理消息，跟读前需要先开启consumer.
      *
      * @throws java.io.IOException
      */
     @FXML
     public void handleFollowing() throws IOException {
+        //如果consumer未开启，先开启consumer（只开一次）
+        initConsumer();
         //用户选择跟读并对界面进行更新处理
+        if (GlobalStaticConstant.GLOBAL_ISFOLLOWINGCLICKED == false) {
+            DialogsUtils.infoAlert("MQPlugin.followingStart");
+        } else {
+            DialogsUtils.infoAlert("MQPlugin.followingStop");
+        }
         updateFileDetailView(GlobalStaticConstant.GLOBAL_FOLLOWING);
-        //如果第一次点击跟读按钮，开启消费消息，避免重复开启消息而导致报错
+    }
+
+    /**
+     * 启动consumer，开启消费消息，系统常量GLOBAL_ISSTARTCONSUMING代表是否开启了消费消息功能（默认是false），也就是说一旦开启
+     * 消费消息GLOBAL_ISSTARTCONSUMING=true（程序运行时只开启一次），客户端将一直接收消息，需要通过代码逻辑来判断是否需要处理消息.
+     */
+    public void initConsumer() {
         if (GlobalStaticConstant.GLOBAL_ISSTARTCONSUMING == false) {
             if (mQPlugin != null) {
-                mQPlugin.consumeMessage();
+                try {
+                    mQPlugin.consumeMessage();
+                    GlobalStaticConstant.GLOBAL_ISSTARTCONSUMING = true; //set start consuming flag true to avoid the error of redeploy consumeMessage method
+                } catch (IOException ex) {
+                    logger.error(ex.getCause().getMessage());
+                }
             } else {
                 //创建mq失败
                 DialogsUtils.errorAlert("server.connection.error");
@@ -220,7 +251,7 @@ public class FileDetailController {
     }
 
     /**
-     * 根据用户的操作选项（开始/取消-主讲/跟读）来更新文件阅读界面.
+     * 根据用户的操作GLOBAL_FOLLOWING/GLOBAL_SPEAKING（跟读/主讲）和GLOBAL_ISFOLLOWINGCLICKED/GLOBAL_ISSPEAKINGCLICKED（跟读/主讲按钮状态）来更新文件阅读界面.
      *
      * @param action 根据用户操作对界面进行更新
      * @throws java.io.IOException
@@ -314,7 +345,7 @@ public class FileDetailController {
                 followingState.setFitHeight(100.0);
                 followingState.setFitWidth(120.0);
                 followingState.setDisable(true);
-                 //用户已经点击了开始主讲按钮，设置按钮状态为true
+                //用户已经点击了开始主讲按钮，设置按钮状态为true
                 GlobalStaticConstant.GLOBAL_ISSPEAKINGCLICKED = true;
             } else { //用户点击了取消主讲按钮（按钮当前状态是true，正在主讲），更新文件阅读界面
                 //改变主讲图标
@@ -337,7 +368,7 @@ public class FileDetailController {
     public FileResource getFileInfo() {
         return fileInfo;
     }
-    
+
     public String getFileName() {
         return fileName;
     }

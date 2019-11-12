@@ -5,10 +5,8 @@ import com.chinaunicom.elemeetingpc.modelFx.ResetPasswordModel;
 import com.chinaunicom.elemeetingpc.modelFx.UserInfoModel;
 import com.chinaunicom.elemeetingpc.service.UserInfoService;
 import com.chinaunicom.elemeetingpc.utils.DialogsUtils;
-import com.chinaunicom.elemeetingpc.utils.FxmlUtils;
 import com.chinaunicom.elemeetingpc.utils.HashUtil;
 import com.chinaunicom.elemeetingpc.utils.exceptions.ApplicationException;
-import java.util.ResourceBundle;
 import javafx.fxml.FXML;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
@@ -29,8 +27,6 @@ public class ResetPasswordController {
 
     @FXML
     private TextField reNewPasswordField;
-
-    static ResourceBundle bundle = FxmlUtils.getResourceBundle();
 
     private Stage dialogStage;
 
