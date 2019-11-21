@@ -106,7 +106,6 @@ public class MQPlugin {
      */
     public void publishMessage(String message) throws UnsupportedEncodingException, IOException {
         channel.basicPublish(EXCHANGE_NAME, routingKey, null, message.getBytes("UTF-8"));
-        //System.out.println(" [x] Sent '" + message + "'");
     }
 
     /**
@@ -120,7 +119,6 @@ public class MQPlugin {
      * @throws java.io.IOException
      */
     public void consumeMessage() throws IOException {
-        //System.out.println(" [*] Waiting for messages.");
         boolean autoAck = false; //set false to manual ack, set true to auto ack
         channel.basicConsume(queueName, autoAck, new DefaultConsumer(channel) {
             @Override
@@ -134,11 +132,10 @@ public class MQPlugin {
                 long deliveryTag = envelope.getDeliveryTag();
                 //message content
                 String message = new String(body, "UTF-8");
-                //System.out.println(" [x] Received '" + routingKey + "':'" + message + "'");
                 channel.basicAck(deliveryTag, false);
                 try {
                     handleMessage(message);
-                } catch (ApplicationException | SQLException ex) {
+                } catch (ApplicationException | SQLException | IOException ex) {
                     logger.error(ex.getCause().getMessage());
                 }
             }
@@ -146,11 +143,11 @@ public class MQPlugin {
     }
 
     /**
-     * This method handles the particular message content, it's done by first
-     * checking if the consumer had really started consuming message, then it
-     * comparing organization name, scale，command, userId, fileId from the
-     * message content with the login user info in a orderly fashion to
-     * determine what action should be taken to respond the message.
+     * This method handles the particular message content,
+     * it's done by first checking if the consumer had really started consuming
+     * message, then it comparing organization name, command, platformType
+     * from the message content to determine what action should be taken to respond
+     * the message.
      *
      * @param message
      * @throws
@@ -165,38 +162,45 @@ public class MQPlugin {
             JSONObject jSONObject = JSONObject.fromObject(message);
             //if in the following state
             if (GlobalStaticConstant.GLOBAL_ISFOLLOWINGCLICKED == true) {
-                //1st check whether the user should handle the message by comparing organization names
+                //check whether the user should handle the message by comparing organization names
                 if (StringUtils.equalsIgnoreCase(jSONObject.getString("PAMQOrganizationIDName"), GlobalStaticConstant.GLOBAL_ORGANINFO_ORGANIZATIONNAME)) {
-                    //2nd check if the message contain the key word "scale", if it does, discard this message(sync zooming ability won't be implemented)
-                    if (!jSONObject.containsKey("scale")) {
-                        //3rd check what the user should do with the message by checking the command field
-                        if (StringUtils.equalsIgnoreCase(jSONObject.getString("command"), "turnPage")) {
-                            //4th check whether the user has the right to act on the file by querying FileUserRelationModel using fileId and
-                            //comparing userIds
-                            if (StringUtils.equalsIgnoreCase(getUserIdByFileId(jSONObject.getString("bookid")), GlobalStaticConstant.GLOBAL_ORGANINFO_OWNER_USERID)) {
-                                //5th check if same file, turn page straight away
-                                if (StringUtils.equalsIgnoreCase(jSONObject.getString("bookid"), fileDetailController.getFileInfo().getFileId())) {
-                                    //Important note：in javafx, when a FX thread try to modify UI component other than the application thread, must alway use Platform.runLater
-                                    //eg. here the RabbitMQ thread(handleDelivery method) try to modify the application UI, need to wait for RabbitMQ thread finish, than start application's thread
-                                    Platform.runLater(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            fileDetailController.getOpenPdfViewer().goToCurrentPage(jSONObject.getInt("page"));
-                                        }
-                                    });
-                                } else { //method handles speaker and follower are reading different files
-                                    handleDiffFile(jSONObject);
-                                }
-                                //System.out.println("Receive turnPage command and turn page successfully!");
+                    //here handle all the messages which contain "command" key
+                    if (jSONObject.containsKey("command")) {
+                        //check what the user should do with the message by checking the command field(Universal)
+                        if (StringUtils.equalsIgnoreCase(jSONObject.getString("command"), GlobalStaticConstant.GLOBAL_TURNPAGE)) {
+                            //check if the user own this file
+                            if (isOwnedByLoginUser(jSONObject.getString("bookid"))) {
+                                handleTurnPage(jSONObject);
                             }
                         }
-                        if (StringUtils.equalsIgnoreCase(jSONObject.getString("command"), "giveupPresenter")) {
-                            Platform.runLater(new Runnable() {
-                                @Override
-                                public void run() {
-                                    DialogsUtils.infoAlert("MQPlugin.giveupSpeaker");
-                                }
-                            });
+                        //if receiving command is giveupPresenter, then popup a dialog window to inform followers(Universal)
+                        if (StringUtils.equalsIgnoreCase(jSONObject.getString("command"), GlobalStaticConstant.GLOBAL_GIVEUPPRESENTER)) {
+                            handleGiveupSpeaker();
+                        }
+                        //if receiving command is zoomIn/Out, then sync with the speaker by zooming in/out(PC client only)
+                        if (StringUtils.equalsIgnoreCase(jSONObject.getString("command"), GlobalStaticConstant.GLOBAL_ZOOMIN) || StringUtils.equalsIgnoreCase(jSONObject.getString("command"), GlobalStaticConstant.GLOBAL_ZOOMOUT)) {
+                            //check if the user own this file
+                            if (isOwnedByLoginUser(jSONObject.getString("bookid"))) {
+                                handleZoom(jSONObject);
+                            }
+                        }
+                        //if receiving command is fitHeight/Width, then sync with the speaker by fit height/width(PC client only)
+                        if (StringUtils.equalsIgnoreCase(jSONObject.getString("command"), GlobalStaticConstant.GLOBAL_FITHEIGHT) || StringUtils.equalsIgnoreCase(jSONObject.getString("command"), GlobalStaticConstant.GLOBAL_FITWIDTH)) {
+                            //check if the user own this file
+                            if (isOwnedByLoginUser(jSONObject.getString("bookid"))) {
+                                handleFitSize(jSONObject);
+                            }
+                        }
+                    }
+                    //the full blown version of other sync abilities include: zoom in/out. vertical/horizontal scroll, but at the moment only we implemented vertical scrolling sync
+                    //here handle all the messages which contain "platformType" key(Universal)
+                    if (jSONObject.containsKey("platformType")) {
+                        //if the message is from ios/PC client， todo: handle android
+                        if (StringUtils.equalsIgnoreCase(jSONObject.getString("platformType"), GlobalStaticConstant.GLOBAL_IOSSYNCFLAG) || StringUtils.equalsIgnoreCase(jSONObject.getString("platformType"), GlobalStaticConstant.GLOBAL_PCSYNCFLAG)) {
+                            //check if the user own this file
+                            if (isOwnedByLoginUser(jSONObject.getString("bookid"))) {
+                                handleVerticalScroll(jSONObject);
+                            }
                         }
                     }
                 }
@@ -204,9 +208,9 @@ public class MQPlugin {
             //if in the speaking state
             if (GlobalStaticConstant.GLOBAL_ISSPEAKINGCLICKED == true) {
                 //if receive applyForPresenter message
-                if (StringUtils.equalsIgnoreCase(jSONObject.getString("command"), "applyForPresenter")) {
-                    //first check if self is indeed a speaker and applyForPresenter message is send by another user(not by itself!), if true then give up speaking
-                    if (GlobalStaticConstant.GLOBAL_ISSPEAKINGCLICKED == true && !StringUtils.equals(jSONObject.getString("userid"), GlobalStaticConstant.GLOBAL_ORGANINFO_OWNER_USERID)) {
+                if (StringUtils.equalsIgnoreCase(jSONObject.getString("command"), GlobalStaticConstant.GLOBAL_APPLYFORPRESENTER)) {
+                    //check if applyForPresenter message is send by another user(not by itself!), if true then give up speaking
+                    if (!StringUtils.equals(jSONObject.getString("userid"), GlobalStaticConstant.GLOBAL_ORGANINFO_OWNER_USERID)) {
                         Platform.runLater(new Runnable() {
                             @Override
                             public void run() {
@@ -219,9 +223,31 @@ public class MQPlugin {
                             }
                         });
                     }
-                    //System.out.println("Receive applyForPresenter command!");
                 }
             }
+        }
+    }
+
+    /**
+     * Handle turn page command.
+     *
+     * @param jSONObject
+     * @throws
+     * com.chinaunicom.elemeetingpc.utils.exceptions.ApplicationException
+     */
+    public void handleTurnPage(JSONObject jSONObject) throws ApplicationException {
+        //check if it's same file, if true then turn page straight away
+        if (StringUtils.equalsIgnoreCase(jSONObject.getString("bookid"), fileDetailController.getFileInfo().getFileId())) {
+            //Important note：in javafx, when a FX thread try to modify UI component other than the application thread, must alway use Platform.runLater
+            //eg. here the RabbitMQ thread(handleDelivery method) try to modify the application UI, need to wait for RabbitMQ thread finish, than start application's thread
+            Platform.runLater(new Runnable() {
+                @Override
+                public void run() {
+                    fileDetailController.getOpenPdfViewer().goToCurrentPage(jSONObject.getInt("page"));
+                }
+            });
+        } else { //go to the method handles speaker and follower are reading different files
+            handleDiffFile(jSONObject);
         }
     }
 
@@ -236,8 +262,6 @@ public class MQPlugin {
         //query the speaker's file
         FileResourceModel fileResourceModel = new FileResourceModel();
         FileResource fileInfo = fileResourceModel.queryFilesById(jSONObject.getString("bookid")).get(0);
-        //Important note：in javafx, when a FX thread try to modify UI component other than the application thread, must alway use Platform.runLater
-        //eg. here the RabbitMQ thread try to modify the application UI, need to wait for RabbitMQ thread finish, than start application's thread
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
@@ -251,6 +275,258 @@ public class MQPlugin {
                 }
             }
         });
+    }
+
+    /**
+     * Handle Giveup speaker command.
+     *
+     */
+    public void handleGiveupSpeaker() {
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                DialogsUtils.infoAlert("MQPlugin.giveupSpeaker");
+            }
+        });
+    }
+
+    /**
+     * Handle vertical scrolling, there 3 cases which needed to be handled :
+     * 1.same file and same page, 
+     * 2.same file but diff page, 
+     * 3.diff files.
+     *
+     * @param jSONObject
+     */
+    public void handleVerticalScroll(JSONObject jSONObject) {
+        try {
+            //handle ios vertical scrolling
+            if (StringUtils.equalsIgnoreCase(jSONObject.getString("platformType"), GlobalStaticConstant.GLOBAL_IOSSYNCFLAG)) {
+                double offsetY = jSONObject.getDouble("offsetY");
+                double error = jSONObject.getDouble("error");
+                double height = jSONObject.getDouble("height");
+                //if it's same file and on the same page, if true then set the vValue straight away
+                if (StringUtils.equalsIgnoreCase(jSONObject.getString("bookid"), fileDetailController.getFileInfo().getFileId()) && jSONObject.getInt("page") == fileDetailController.getOpenPdfViewer().getCurrentPage()) {
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            calculateVValue(offsetY, height);
+                        }
+                    });
+                }
+                //if it's same file but diff page, go to that page and set the vValue
+                if (StringUtils.equalsIgnoreCase(jSONObject.getString("bookid"), fileDetailController.getFileInfo().getFileId()) && jSONObject.getInt("page") != fileDetailController.getOpenPdfViewer().getCurrentPage()) {
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            fileDetailController.getOpenPdfViewer().goToCurrentPage(jSONObject.getInt("page"));
+                            calculateVValue(offsetY, height);
+                        }
+                    });
+                }
+                //diff files need to close currently opened file, go back to file list, open new file, go to the page and finally set the vValue
+                if (!StringUtils.equalsIgnoreCase(jSONObject.getString("bookid"), fileDetailController.getFileInfo().getFileId())) {
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                //query the speaker's file
+                                FileResourceModel fileResourceModel = new FileResourceModel();
+                                FileResource fileInfo = fileResourceModel.queryFilesById(jSONObject.getString("bookid")).get(0);
+                                //close the currently opened view and go back to file list view(close the currently opened file)
+                                fileDetailController.showFxmlFileList();
+                                //open the same file detail view as the speaker(open the speaker's file) and go to the right page
+                                fileDetailController.getFileController().showFxmlFileDetail(fileInfo, jSONObject.getString("fileName"), jSONObject.getInt("page"));
+                                //set vertical value
+                                calculateVValue(offsetY, height);
+                            } catch (ApplicationException | SQLException ex) {
+                                logger.error(ex.getCause().getMessage());
+                            }
+                        }
+                    });
+                }
+            }
+            //handle pc client vertical scrolling
+            if (StringUtils.equalsIgnoreCase(jSONObject.getString("platformType"), GlobalStaticConstant.GLOBAL_PCSYNCFLAG)) {
+                double vValue = jSONObject.getDouble("vValue");
+                //if it's same file and on the same page, if true then set the vValue straight away
+                if (StringUtils.equalsIgnoreCase(jSONObject.getString("bookid"), fileDetailController.getFileInfo().getFileId()) && jSONObject.getInt("page") == fileDetailController.getOpenPdfViewer().getCurrentPage()) {
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            fileDetailController.getOpenPdfViewer().setVvalue(vValue);
+                        }
+                    });
+                }
+                //if it's same file but diff page, go to that page and set the vValue
+                if (StringUtils.equalsIgnoreCase(jSONObject.getString("bookid"), fileDetailController.getFileInfo().getFileId()) && jSONObject.getInt("page") != fileDetailController.getOpenPdfViewer().getCurrentPage()) {
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            fileDetailController.getOpenPdfViewer().goToCurrentPage(jSONObject.getInt("page"));
+                            fileDetailController.getOpenPdfViewer().setVvalue(vValue);
+                        }
+                    });
+                }
+                //diff files need to close currently opened file, go back to file list, open new file, go to the page and finally set the vValue
+                if (!StringUtils.equalsIgnoreCase(jSONObject.getString("bookid"), fileDetailController.getFileInfo().getFileId())) {
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                //query the speaker's file
+                                FileResourceModel fileResourceModel = new FileResourceModel();
+                                FileResource fileInfo = fileResourceModel.queryFilesById(jSONObject.getString("bookid")).get(0);
+                                //close the currently opened view and go back to file list view(close the currently opened file)
+                                fileDetailController.showFxmlFileList();
+                                //open the same file detail view as the speaker(open the speaker's file) and go to the right page
+                                fileDetailController.getFileController().showFxmlFileDetail(fileInfo, jSONObject.getString("fileName"), jSONObject.getInt("page"));
+                                //set vValue
+                                fileDetailController.getOpenPdfViewer().setVvalue(vValue);
+                            } catch (ApplicationException | SQLException ex) {
+                                logger.error(ex.getCause().getMessage());
+                            }
+                        }
+                    });
+                }
+            }
+        } catch (Exception ex) {
+            logger.error(ex.getCause().getMessage());
+        }
+    }
+
+    /**
+     * Calculate and Set the vertical value for the scrollPane of the OpenPdfViewer(handle ios vertical scrolling).
+     *
+     * @param offsetY
+     * @param height
+     */
+    public void calculateVValue(double offsetY, double height) {
+        double vValue = offsetY / (height - 70);
+        fileDetailController.getOpenPdfViewer().setVvalue(vValue);
+    }
+
+    /**
+     * Handle zoom in/out, 2 cases which needed to be handled: 
+     * 1.same file same page/diff page, 
+     * 2.diff files.
+     *
+     * @param jSONObject
+     */
+    public void handleZoom(JSONObject jSONObject) {
+        //if it's same file and on the same page/diff page, if true then set the zoomType, zoomFactor and updateImage with the pageIndex
+        if (StringUtils.equalsIgnoreCase(jSONObject.getString("bookid"), fileDetailController.getFileInfo().getFileId())) {
+            Platform.runLater(new Runnable() {
+                @Override
+                public void run() {
+                    fileDetailController.getOpenPdfViewer().setZoomType(OpenPdfViewer.ZoomType.CUSTOM);
+                    fileDetailController.getOpenPdfViewer().setZoomFactor(Float.valueOf(jSONObject.get("zoomFactor").toString()));
+                    fileDetailController.getOpenPdfViewer().updateImage(jSONObject.getInt("page"));
+                }
+            });
+        }
+        //diff files need to close currently opened file, go back to file list, open new file, go to the page and finally set the zoomType, zoomFactor and updateImage with the pageIndex
+        if (!StringUtils.equalsIgnoreCase(jSONObject.getString("bookid"), fileDetailController.getFileInfo().getFileId())) {
+            Platform.runLater(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        //query the speaker's file
+                        FileResourceModel fileResourceModel = new FileResourceModel();
+                        FileResource fileInfo = fileResourceModel.queryFilesById(jSONObject.getString("bookid")).get(0);
+                        //close the currently opened view and go back to file list view(close the currently opened file)
+                        fileDetailController.showFxmlFileList();
+                        //open the same file detail view as the speaker(open the speaker's file) and go to the right page
+                        fileDetailController.getFileController().showFxmlFileDetail(fileInfo, jSONObject.getString("fileName"), jSONObject.getInt("page"));
+                        //set zoomType
+                        fileDetailController.getOpenPdfViewer().setZoomType(OpenPdfViewer.ZoomType.CUSTOM);
+                        //set zoomFactor
+                        fileDetailController.getOpenPdfViewer().setZoomFactor(Float.valueOf(jSONObject.get("zoomFactor").toString()));
+                        //update page image
+                        fileDetailController.getOpenPdfViewer().updateImage(jSONObject.getInt("page"));
+                    } catch (ApplicationException | SQLException ex) {
+                        logger.error(ex.getCause().getMessage());
+                    }
+                }
+            });
+        }
+    }
+
+    /**
+     * Handle fit height/width, 2 cases which needed to be handled: 1.same file
+     * same page/diff page, 2.diff files.
+     *
+     * @param jSONObject
+     */
+    public void handleFitSize(JSONObject jSONObject) {
+        //if it's same file and on the same page/diff page, if true then set the zoomType, zoomFactor and updateImage with the pageIndex
+        if (StringUtils.equalsIgnoreCase(jSONObject.getString("bookid"), fileDetailController.getFileInfo().getFileId())) {
+            if (StringUtils.equalsIgnoreCase(jSONObject.getString("command"), GlobalStaticConstant.GLOBAL_FITHEIGHT)) {
+                Platform.runLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        fileDetailController.getOpenPdfViewer().setZoomType(OpenPdfViewer.ZoomType.HEIGHT);
+                        fileDetailController.getOpenPdfViewer().updateImage(jSONObject.getInt("page"));
+                    }
+                });
+            }
+            if (StringUtils.equalsIgnoreCase(jSONObject.getString("command"), GlobalStaticConstant.GLOBAL_FITWIDTH)) {
+                Platform.runLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        fileDetailController.getOpenPdfViewer().setZoomType(OpenPdfViewer.ZoomType.WIDTH);
+                        fileDetailController.getOpenPdfViewer().updateImage(jSONObject.getInt("page"));
+                    }
+                });
+            }
+        }
+        //diff files need to close currently opened file, go back to file list, open new file, go to the page and finally set the zoomType, zoomFactor and updateImage with the pageIndex
+        if (!StringUtils.equalsIgnoreCase(jSONObject.getString("bookid"), fileDetailController.getFileInfo().getFileId())) {
+            if (StringUtils.equalsIgnoreCase(jSONObject.getString("command"), GlobalStaticConstant.GLOBAL_FITHEIGHT)) {
+                Platform.runLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            //query the speaker's file
+                            FileResourceModel fileResourceModel = new FileResourceModel();
+                            FileResource fileInfo = fileResourceModel.queryFilesById(jSONObject.getString("bookid")).get(0);
+                            //close the currently opened view and go back to file list view(close the currently opened file)
+                            fileDetailController.showFxmlFileList();
+                            //open the same file detail view as the speaker(open the speaker's file) and go to the right page
+                            fileDetailController.getFileController().showFxmlFileDetail(fileInfo, jSONObject.getString("fileName"), jSONObject.getInt("page"));
+                            //set zoomType
+                            fileDetailController.getOpenPdfViewer().setZoomType(OpenPdfViewer.ZoomType.HEIGHT);
+                            //update page image
+                            fileDetailController.getOpenPdfViewer().updateImage(jSONObject.getInt("page"));
+                        } catch (ApplicationException | SQLException ex) {
+                            logger.error(ex.getCause().getMessage());
+                        }
+                    }
+                });
+            }
+            if (StringUtils.equalsIgnoreCase(jSONObject.getString("command"), GlobalStaticConstant.GLOBAL_FITWIDTH)) {
+                Platform.runLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            //query the speaker's file
+                            FileResourceModel fileResourceModel = new FileResourceModel();
+                            FileResource fileInfo = fileResourceModel.queryFilesById(jSONObject.getString("bookid")).get(0);
+                            //close the currently opened view and go back to file list view(close the currently opened file)
+                            fileDetailController.showFxmlFileList();
+                            //open the same file detail view as the speaker(open the speaker's file) and go to the right page
+                            fileDetailController.getFileController().showFxmlFileDetail(fileInfo, jSONObject.getString("fileName"), jSONObject.getInt("page"));
+                            //set zoomType
+                            fileDetailController.getOpenPdfViewer().setZoomType(OpenPdfViewer.ZoomType.WIDTH);
+                            //update page image
+                            fileDetailController.getOpenPdfViewer().updateImage(jSONObject.getInt("page"));
+                        } catch (ApplicationException | SQLException ex) {
+                            logger.error(ex.getCause().getMessage());
+                        }
+                    }
+                });
+            }
+        }
     }
 
     /**
@@ -269,8 +545,15 @@ public class MQPlugin {
      * @throws java.util.concurrent.TimeoutException
      */
     public void closeConnection() throws IOException, TimeoutException {
-        channel.close();
-        connection.close();
+        try {
+            if (connection.isOpen() && channel.isOpen()) {
+                channel.close();
+                connection.close();
+            }
+        } catch (ShutdownSignalException | IOException  ex) {
+            ex.printStackTrace();
+            logger.error(ex.getCause().getMessage());
+        }
     }
 
     /**
@@ -304,22 +587,29 @@ public class MQPlugin {
     }
 
     /**
-     * Query fileUserRelationModel with fileId and get the corresponding userId.
+     * Check whether the login user own this file and hence has the right to
+     * operate the file, it's done by querying FileUserRelationModel using
+     * fileId, find the corresponding userIds, then comparing userIds with the
+     * currently login user's id.
      *
-     * @param fileId
-     * @return userId
+     * @param fileId file id
+     * @return hasRight whether the user own the file or not
      */
-    public String getUserIdByFileId(String fileId) {
-        String userId = "";
+    public boolean isOwnedByLoginUser(String fileId) {
+        boolean hasRight = false;
         try {
             FileUserRelationModel fileUserRelationModel = new FileUserRelationModel();
             List<FileUserRelation> fileUserRelationList = fileUserRelationModel.queryFileUserRelationByFileId(fileId);
-            userId = fileUserRelationList.get(0).getUserId();
-            return userId;
+            for (int i = 0; i < fileUserRelationList.size(); i++) {
+                if (StringUtils.equals(fileUserRelationList.get(i).getUserId(), GlobalStaticConstant.GLOBAL_ORGANINFO_OWNER_USERID)) {
+                    hasRight = true;
+                    return hasRight;
+                }
+            }
         } catch (ApplicationException | SQLException ex) {
             logger.error(ex.getCause().getMessage());
         }
-        return userId;
+        return hasRight;
     }
 
     /**

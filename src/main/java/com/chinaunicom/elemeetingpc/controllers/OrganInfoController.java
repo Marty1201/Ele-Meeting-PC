@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
+import javafx.application.Platform;
 import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
 import javafx.concurrent.WorkerStateEvent;
@@ -23,6 +24,8 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.ListView;
 import javafx.scene.layout.BorderPane;
+import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 
 /**
  * 组织机构控制器，在界面的列表上加载登陆人所属机构名称，选择机构后进入会议主界面.
@@ -101,6 +104,8 @@ public class OrganInfoController {
         try {
             //创建mq连接
             MQPlugin mQPlugin = new MQPlugin();
+            //添加窗口关闭事件监听器，因为此时mq已经创建，需要在关闭程序前关闭mq线程
+            handleWindowCloseEvent(mQPlugin);
             FXMLLoader loader = FxmlUtils.getFXMLLoader(FXML_INDEX);
             borderPaneMain.getChildren().remove(borderPaneMain.getCenter());//清除当前BorderPane内中间区域的内容
             borderPaneMain.setCenter(loader.load()); //将当前BorderPane中间区域加载为会议首界面
@@ -108,9 +113,30 @@ public class OrganInfoController {
             meetController.setBorderPane(borderPaneMain);//把borderPane设置为参数继续往下传，以便在MeetController中获取到当前BorderPane
             meetController.setMQPlugin(mQPlugin);//把MQPlugin往下传
         } catch (IOException | TimeoutException | ApplicationException | SQLException e) {
-            e.printStackTrace();
             logger.error(e.getCause().getMessage());
         }
+    }
+    
+    /**
+     * Windows 窗口关闭监听器，用于监听窗口右上角小红叉关闭按钮，之所以在此添加监听是因为此时mq对象已经创建，必须在程序
+     * 退出前正确关闭mq线程，否则会造因mq线程没有正确关闭而导致程序hang.
+     */
+    public void handleWindowCloseEvent(MQPlugin mQPlugin) {
+        Stage stage = (Stage) borderPaneMain.getScene().getWindow();
+        //monitor stage close event, close RabbitMQ connection
+        stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+            @Override
+            public void handle(WindowEvent event) {
+                if (mQPlugin != null) {
+                    try {
+                        mQPlugin.closeConnection(); //关闭mq
+                    } catch (IOException | TimeoutException ex) {
+                        logger.error(ex.getCause().getMessage());
+                    }
+            }
+            Platform.exit();
+            }
+        });
     }
 
     public void setBorderPane(BorderPane borderPaneMain) {

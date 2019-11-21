@@ -61,4 +61,31 @@ public class GlobalStaticConstant {
     
     //结束同步操作
     public static String GLOBAL_GIVEUPPRESENTER = "giveupPresenter";
+    
+    //同步阅读文件垂直滑动
+    public static String GLOBAL_VSCROLL = "verticalScroll";
+    
+    //同步阅读文件水平滑动
+    public static String GLOBAL_HSCROLL = "horizontalScroll";
+    
+    //同步阅读文件放大
+    public static String GLOBAL_ZOOMIN = "zoomIn";
+
+    //同步阅读文件缩小
+    public static String GLOBAL_ZOOMOUT = "zoomOut";
+    
+    //同步阅读文件适应竖屏
+    public static String GLOBAL_FITHEIGHT = "fitHeight";
+    
+    //同步阅读文件适应横屏
+    public static String GLOBAL_FITWIDTH = "fitWidth";
+    
+    //同步阅读PC标识(for ios and android)
+    public static String GLOBAL_PCSYNCFLAG = "pcPlatform";
+    
+    //同步阅读ios标识
+    public static String GLOBAL_IOSSYNCFLAG = "iosPlatform";
+    
+    //同步阅读android标识
+    public static String GLOBAL_ANDROIDSYNCFLAG = "androidPlatform";
 }
