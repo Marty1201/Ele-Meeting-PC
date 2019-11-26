@@ -28,6 +28,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.OverrunStyle;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
@@ -190,6 +191,8 @@ public class FileController {
             imageList[k] = new ImageView(image);
             //设置Label样式
             Label issueFileLabel = new Label(issueFileList.get(k).getFileName());
+            //添加tooltip
+            issueFileLabel.setTooltip(new Tooltip(issueFileList.get(k).getFileName()));
             issueFileLabel.setStyle("-fx-font-size:16.0px;-fx-font-size-family:Arial;-fx-cursor:hand;");
             issueFileLabel.setPrefSize(161.0, 185.0);
             issueFileLabel.setTextOverrun(OverrunStyle.ELLIPSIS);

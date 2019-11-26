@@ -141,47 +141,48 @@ public class OpenPdfViewer extends BorderPane implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        //if filePath isn't empty, create a new pdf file
-        if (!file.isEmpty()) {
-            pdf = new Pdf(Paths.get(file));
-        }
-        //initialize scrollbar
-        initScroller();
-        //initialize mainPane's height and width property change listener
-        initPropertyChangeListener();
-        if (pdf != null) {
-            pagination.setPageCount(pdf.numPages());
-        }
-        pagination.setPageFactory(new Callback<Integer, Node>() {
-            @Override
-            public Node call(Integer index) {
-                //in the sync state, speaker will send a message to the broker everytime a page is turned/a file is opened, the message contain vital infos about the file
-                //which will help followers to decide which action should be taken upon receiving them.
-                if (GlobalStaticConstant.GLOBAL_ISSPEAKINGCLICKED == true) {
-                    int page = pagination.getCurrentPageIndex();
-                    String fileId = "\",\"bookid\":\"" + fileDetailController.getFileInfo().getFileId();
-                    String fileName = ",\"fileName\":\"" + fileDetailController.getFileName();
-                    String filePassword = "\",\"password\":\"" + fileDetailController.getFileInfo().getPassword();
-                    String organName = "\",\"PAMQOrganizationIDName\":\"" + GlobalStaticConstant.GLOBAL_ORGANINFO_ORGANIZATIONNAME;
-                    String command = "\",\"command\":\"" + GlobalStaticConstant.GLOBAL_TURNPAGE;
-                    String message = "{\"page\":" + page + fileName + fileId + filePassword + organName + command + "\"}";
-                    try {
-                        mQPlugin.publishMessage(message);
-                    } catch (IOException ex) {
-                        logger.error(ex.getCause().getMessage());
-                    }
-                }
-                return createPdfImage(index);
+        try {
+            //if filePath isn't empty, create a new pdf file
+            if (!file.isEmpty()) {
+                pdf = new Pdf(Paths.get(file));
             }
-        });
-        HBox.setHgrow(zoomOptionsBox, Priority.ALWAYS);
-        HBox.setHgrow(loadOptionsBox, Priority.ALWAYS);
-        //Initialize top toolbar events
-        initEventHandler();
-        //Configure the top toolbar status
-        updateToolbar();
-        //Configure platform's default file chooser dialog
-        configureFileChooser();
+            //initialize scrollbar
+            initScroller();
+            //initialize mainPane's height and width property change listener
+            initPropertyChangeListener();
+            if (pdf != null) {
+                pagination.setPageCount(pdf.numPages());
+            }
+            pagination.setPageFactory(new Callback<Integer, Node>() {
+                @Override
+                public Node call(Integer index) {
+                    //in the sync state, speaker will send a message to the broker everytime a page is turned/a file is opened, the message contain vital infos about the file
+                    //which will help followers to decide which action should be taken upon receiving them.
+                    if (GlobalStaticConstant.GLOBAL_ISSPEAKINGCLICKED == true) {
+                        int page = pagination.getCurrentPageIndex();
+                        String fileId = "\",\"bookid\":\"" + fileDetailController.getFileInfo().getFileId();
+                        String fileName = ",\"fileName\":\"" + fileDetailController.getFileName();
+                        String filePassword = "\",\"password\":\"" + fileDetailController.getFileInfo().getPassword();
+                        String organName = "\",\"PAMQOrganizationIDName\":\"" + GlobalStaticConstant.GLOBAL_ORGANINFO_ORGANIZATIONNAME;
+                        String command = "\",\"command\":\"" + GlobalStaticConstant.GLOBAL_TURNPAGE;
+                        String message = "{\"page\":" + page + fileName + fileId + filePassword + organName + command + "\"}";
+                        mQPlugin.publishMessage(message);
+                    }
+                    return createPdfImage(index);
+                }
+            });
+            HBox.setHgrow(zoomOptionsBox, Priority.ALWAYS);
+            HBox.setHgrow(loadOptionsBox, Priority.ALWAYS);
+            //Initialize top toolbar events
+            initEventHandler();
+            //Configure the top toolbar status
+            updateToolbar();
+            //Configure platform's default file chooser dialog
+            configureFileChooser();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            logger.error(ex.getCause().getMessage());
+        }
     }
 
     /**
@@ -190,19 +191,24 @@ public class OpenPdfViewer extends BorderPane implements Initializable {
      *
      */
     private void initScroller() {
-        currentImage = new SimpleObjectProperty<StackPane>();
-        updateImage(0);
-        //set the new scroller on the AnchorPane
-        scroller = new ScrollPane();
-        AnchorPane.setTopAnchor(scroller, 0.0);
-        AnchorPane.setRightAnchor(scroller, 0.0);
-        AnchorPane.setLeftAnchor(scroller, 0.0);
-        AnchorPane.setBottomAnchor(scroller, 70.0);
-        scroller.setPannable(true);
-        //one way bind the scroller to currentImage, when currentImage changes, the srcoller changes too
-        //here is the crazy part, the scroller.contentProperty() is actually null because the content of the scroller is
-        //never set! but somehow this binding works, amazing!
-        scroller.contentProperty().bind(currentImage);
+        try {
+            currentImage = new SimpleObjectProperty<StackPane>();
+            updateImage(0);
+            //set the new scroller on the AnchorPane
+            scroller = new ScrollPane();
+            AnchorPane.setTopAnchor(scroller, 0.0);
+            AnchorPane.setRightAnchor(scroller, 0.0);
+            AnchorPane.setLeftAnchor(scroller, 0.0);
+            AnchorPane.setBottomAnchor(scroller, 70.0);
+            scroller.setPannable(true);
+            //one way bind the scroller to currentImage, when currentImage changes, the srcoller changes too
+            //here is the crazy part, the scroller.contentProperty() is actually null because the content of the scroller is
+            //never set! but somehow this binding works, amazing!
+            scroller.contentProperty().bind(currentImage);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            logger.error(ex.getCause().getMessage());
+        }
     }
 
     /**
@@ -213,84 +219,81 @@ public class OpenPdfViewer extends BorderPane implements Initializable {
      *
      */
     private void initPropertyChangeListener() {
-        //add height property change listener, when the height of the AnchorPane changes, call the resize() method
-        mainPane.heightProperty().addListener(new ChangeListener<Number>() {
-            @Override
-            public void changed(ObservableValue<? extends Number> observableValue, Number number, Number t1) {
-                resize();
-            }
-        });
-        //add width property change listener, when the width of the AnchorPane changes, call the resize() method
-        mainPane.widthProperty().addListener(new ChangeListener<Number>() {
-            @Override
-            public void changed(ObservableValue<? extends Number> observableValue, Number number, Number t1) {
-                resize();
-            }
-        });
-        //add vvalue property change listener for scrollpane, provide vertical scrolling sync ability
-        //note: since the mouse scrolling event has no way to tell when user will stop scrolling(unlike guesture events
-        //such as setOnScrollFinish/setOnScrollStart), we simply can't get the last scrolling position, instead we send
-        //out every mouse scrolling position to consumers. eg, scroll from A to E will cause this Listener send all the
-        //letters from A to E inclusive. there is a known issue as if the network is unstable, there will be a huge delay
-        //for the consumer to receive the message and it will become very slow for each position to load on the page :(
-        //solution: make sure your network is stable and fast!
-        scroller.vvalueProperty().addListener(new ChangeListener<Number>() {
-            @Override
-            public void changed(ObservableValue<? extends Number> observableValue, Number number, Number t1) {
-                if (GlobalStaticConstant.GLOBAL_ISSPEAKINGCLICKED == true) {
-                    double vValue = scroller.getVvalue();
-                    String fileId = ",\"bookid\":\"" + fileDetailController.getFileInfo().getFileId();
-                    String organName = "\",\"PAMQOrganizationIDName\":\"" + GlobalStaticConstant.GLOBAL_ORGANINFO_ORGANIZATIONNAME;
-                    String command = "\",\"command\":\"" + GlobalStaticConstant.GLOBAL_VSCROLL;
-                    //values below are needed for ios app in vertical scrolling sync
-                    Dimension resolution = Toolkit.getDefaultToolkit().getScreenSize();
-                    double height = resolution.getHeight();
-                    double width = resolution.getWidth();
-                    String type = "\",\"platformType\":\"" + GlobalStaticConstant.GLOBAL_PCSYNCFLAG;
-                    String fileName = "\",\"fileName\":\"" + fileDetailController.getFileName();
-                    String filePassword = "\",\"password\":\"" + fileDetailController.getFileInfo().getPassword();
-                    int page = pagination.getCurrentPageIndex();
-                    String message = "{\"vValue\":" + vValue + ",\"height\":" + height + ",\"width\":" + width + ",\"zoomFactor\":" + zoomFactor + ",\"page\":" + page + fileId + fileName + filePassword + type + organName + command + "\"}";
-                    try {
+        try {
+            //add height property change listener, when the height of the AnchorPane changes, call the resize() method
+            mainPane.heightProperty().addListener(new ChangeListener<Number>() {
+                @Override
+                public void changed(ObservableValue<? extends Number> observableValue, Number number, Number t1) {
+                    resize();
+                }
+            });
+            //add width property change listener, when the width of the AnchorPane changes, call the resize() method
+            mainPane.widthProperty().addListener(new ChangeListener<Number>() {
+                @Override
+                public void changed(ObservableValue<? extends Number> observableValue, Number number, Number t1) {
+                    resize();
+                }
+            });
+            //add vvalue property change listener for scrollpane, provide vertical scrolling sync ability
+            //note: since the mouse scrolling event has no way to tell when user will stop scrolling(unlike guesture events
+            //such as setOnScrollFinish/setOnScrollStart), we simply can't get the last scrolling position, instead we send
+            //out every mouse scrolling position to consumers. eg, scroll from A to E will cause this Listener send all the
+            //letters from A to E inclusive. there is a known issue as if the network is unstable, there will be a huge delay
+            //for the consumer to receive the message and it will become very slow for each position to load on the page :(
+            //solution: make sure your network is stable and fast!
+            scroller.vvalueProperty().addListener(new ChangeListener<Number>() {
+                @Override
+                public void changed(ObservableValue<? extends Number> observableValue, Number number, Number t1) {
+                    if (GlobalStaticConstant.GLOBAL_ISSPEAKINGCLICKED == true) {
+                        double vValue = scroller.getVvalue();
+                        String fileId = ",\"bookid\":\"" + fileDetailController.getFileInfo().getFileId();
+                        String organName = "\",\"PAMQOrganizationIDName\":\"" + GlobalStaticConstant.GLOBAL_ORGANINFO_ORGANIZATIONNAME;
+                        String command = "\",\"command\":\"" + GlobalStaticConstant.GLOBAL_VSCROLL;
+                        //values below are needed for ios app in vertical scrolling sync
+                        Dimension resolution = Toolkit.getDefaultToolkit().getScreenSize();
+                        double height = resolution.getHeight();
+                        double width = resolution.getWidth();
+                        String type = "\",\"platformType\":\"" + GlobalStaticConstant.GLOBAL_PCSYNCFLAG;
+                        String fileName = "\",\"fileName\":\"" + fileDetailController.getFileName();
+                        String filePassword = "\",\"password\":\"" + fileDetailController.getFileInfo().getPassword();
+                        int page = pagination.getCurrentPageIndex();
+                        String message = "{\"vValue\":" + vValue + ",\"height\":" + height + ",\"width\":" + width + ",\"zoomFactor\":" + zoomFactor + ",\"page\":" + page + fileId + fileName + filePassword + type + organName + command + "\"}";
                         mQPlugin.publishMessage(message);
-                    } catch (IOException ex) {
-                        logger.error(ex.getCause().getMessage());
                     }
                 }
-            }
-        });
-        //add hvalue property change listener for scrollpane, provide horizontal scrolling sync ability
-        //note: since the mouse scrolling event has no way to tell when user will stop scrolling(unlike guesture events
-        //such as setOnScrollFinish/setOnScrollStart), we simply can't get the last scrolling position, instead we send
-        //out every mouse scrolling position to consumers. eg, scroll from A to E will cause this Listener send all the
-        //letters from A to E inclusive. there is a known issue as if the network is unstable, there will be a huge delay
-        //for the consumer to receive the message and it will become very slow for each position to load on the page :(
-        //solution: make sure your network is stable and fast!
-        scroller.hvalueProperty().addListener(new ChangeListener<Number>() {
-            @Override
-            public void changed(ObservableValue<? extends Number> observableValue, Number number, Number t1) {
-                if (GlobalStaticConstant.GLOBAL_ISSPEAKINGCLICKED == true) {
-                    double hValue = scroller.getHvalue();
-                    String fileId = ",\"bookid\":\"" + fileDetailController.getFileInfo().getFileId();
-                    String organName = "\",\"PAMQOrganizationIDName\":\"" + GlobalStaticConstant.GLOBAL_ORGANINFO_ORGANIZATIONNAME;
-                    String command = "\",\"command\":\"" + GlobalStaticConstant.GLOBAL_HSCROLL;
-                    //values below are needed for ios app in vertical scrolling sync
-                    Dimension resolution = Toolkit.getDefaultToolkit().getScreenSize();
-                    double height = resolution.getHeight();
-                    double width = resolution.getWidth();
-                    String type = "\",\"platformType\":\"" + GlobalStaticConstant.GLOBAL_PCSYNCFLAG;
-                    String fileName = "\",\"fileName\":\"" + fileDetailController.getFileName();
-                    String filePassword = "\",\"password\":\"" + fileDetailController.getFileInfo().getPassword();
-                    int page = pagination.getCurrentPageIndex();
-                    String message = "{\"hValue\":" + hValue + ",\"height\":" + height + ",\"width\":" + width + ",\"zoomFactor\":" + zoomFactor + ",\"page\":" + page + fileId + fileName + filePassword + type + organName + command + "\"}";
-                    try {
+            });
+            //add hvalue property change listener for scrollpane, provide horizontal scrolling sync ability
+            //note: since the mouse scrolling event has no way to tell when user will stop scrolling(unlike guesture events
+            //such as setOnScrollFinish/setOnScrollStart), we simply can't get the last scrolling position, instead we send
+            //out every mouse scrolling position to consumers. eg, scroll from A to E will cause this Listener send all the
+            //letters from A to E inclusive. there is a known issue as if the network is unstable, there will be a huge delay
+            //for the consumer to receive the message and it will become very slow for each position to load on the page :(
+            //solution: make sure your network is stable and fast!
+            scroller.hvalueProperty().addListener(new ChangeListener<Number>() {
+                @Override
+                public void changed(ObservableValue<? extends Number> observableValue, Number number, Number t1) {
+                    if (GlobalStaticConstant.GLOBAL_ISSPEAKINGCLICKED == true) {
+                        double hValue = scroller.getHvalue();
+                        String fileId = ",\"bookid\":\"" + fileDetailController.getFileInfo().getFileId();
+                        String organName = "\",\"PAMQOrganizationIDName\":\"" + GlobalStaticConstant.GLOBAL_ORGANINFO_ORGANIZATIONNAME;
+                        String command = "\",\"command\":\"" + GlobalStaticConstant.GLOBAL_HSCROLL;
+                        //values below are needed for ios app in vertical scrolling sync
+                        Dimension resolution = Toolkit.getDefaultToolkit().getScreenSize();
+                        double height = resolution.getHeight();
+                        double width = resolution.getWidth();
+                        String type = "\",\"platformType\":\"" + GlobalStaticConstant.GLOBAL_PCSYNCFLAG;
+                        String fileName = "\",\"fileName\":\"" + fileDetailController.getFileName();
+                        String filePassword = "\",\"password\":\"" + fileDetailController.getFileInfo().getPassword();
+                        int page = pagination.getCurrentPageIndex();
+                        String message = "{\"hValue\":" + hValue + ",\"height\":" + height + ",\"width\":" + width + ",\"zoomFactor\":" + zoomFactor + ",\"page\":" + page + fileId + fileName + filePassword + type + organName + command + "\"}";
                         mQPlugin.publishMessage(message);
-                    } catch (IOException ex) {
-                        logger.error(ex.getCause().getMessage());
                     }
                 }
-            }
-        });
+            });
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            logger.error(ex.getCause().getMessage());
+        }
     }
 
     /**
@@ -298,113 +301,102 @@ public class OpenPdfViewer extends BorderPane implements Initializable {
      *
      */
     private void initEventHandler() {
-        //create a scrollEventHandler to prevent vertical scrolling when sync
-        scrollEventHandler = new EventHandler<ScrollEvent>() {
-            @Override
-            public void handle(ScrollEvent event) {
-                if (event.getDeltaY() > 0 || event.getDeltaY() < 0) {
-                    event.consume();
-                }
-            }
-        };
-        //create a keyEventHandler to prevent clicking left or right when sync
-        keyEventHandler = new EventHandler<KeyEvent>() {
-            @Override
-            public void handle(KeyEvent event) {
-                if (event.getCode() == KeyCode.LEFT || event.getCode() == KeyCode.RIGHT) {
-                    event.consume();
-                }
-            }
-        };
-        //tool bar button events
-        EventHandler<ActionEvent> eventEventHandler = new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent actionEvent) {
-                if (actionEvent.getSource() == loadButton) {//define load file event
-                    //open up the platform's own file choosing window by FileChooser
-                    final File file = fileChooser.showOpenDialog(pagination.getScene().getWindow());
-                    if (file != null) {
-                        loadPdf(file.getAbsolutePath(), 0);
+        try {
+            //create a scrollEventHandler to prevent vertical scrolling when sync
+            scrollEventHandler = new EventHandler<ScrollEvent>() {
+                @Override
+                public void handle(ScrollEvent event) {
+                    if (event.getDeltaY() > 0 || event.getDeltaY() < 0) {
+                        event.consume();
                     }
-                } else if (pdf != null) {
-                    if (actionEvent.getSource() == addZoomButton) {//define zoom in event
-                        //here set the zoomType straight to CUSTOM and zoomFactor to a multiple of 1.05
-                        setZoomType(ZoomType.CUSTOM);
-                        zoomFactor *= 1.05;
-                        updateImage(pagination.getCurrentPageIndex());//update the image with new zoomFactor
-                        //zoom in when sync
-                        if (GlobalStaticConstant.GLOBAL_ISSPEAKINGCLICKED == true) {
-                            String fileId = ",\"bookid\":\"" + fileDetailController.getFileInfo().getFileId();
-                            String fileName = "\",\"fileName\":\"" + fileDetailController.getFileName();
-                            String organName = "\",\"PAMQOrganizationIDName\":\"" + GlobalStaticConstant.GLOBAL_ORGANINFO_ORGANIZATIONNAME;
-                            String command = "\",\"command\":\"" + GlobalStaticConstant.GLOBAL_ZOOMIN;
-                            String message = "{\"page\":" + pagination.getCurrentPageIndex() + ",\"zoomFactor\":" + zoomFactor + fileId + fileName + organName + command + "\"}";
-                            try {
-                                mQPlugin.publishMessage(message);
-                            } catch (IOException ex) {
-                                logger.error(ex.getCause().getMessage());
-                            }
+                }
+            };
+            //create a keyEventHandler to prevent clicking left or right when sync
+            keyEventHandler = new EventHandler<KeyEvent>() {
+                @Override
+                public void handle(KeyEvent event) {
+                    if (event.getCode() == KeyCode.LEFT || event.getCode() == KeyCode.RIGHT) {
+                        event.consume();
+                    }
+                }
+            };
+            //tool bar button events
+            EventHandler<ActionEvent> eventEventHandler = new EventHandler<ActionEvent>() {
+                @Override
+                public void handle(ActionEvent actionEvent) {
+                    if (actionEvent.getSource() == loadButton) {//define load file event
+                        //open up the platform's own file choosing window by FileChooser
+                        final File file = fileChooser.showOpenDialog(pagination.getScene().getWindow());
+                        if (file != null) {
+                            loadPdf(file.getAbsolutePath(), 0);
                         }
-                    } else if (actionEvent.getSource() == reduceZoomButton) {//define zoom out event
-                        //here set the zoomType straight to CUSTOM and zoomFactor to a multiple of .95
-                        setZoomType(ZoomType.CUSTOM);
-                        zoomFactor *= .95;
-                        updateImage(pagination.getCurrentPageIndex());//update the image with new zoomFactor
-                        //zoom out when sync
-                        if (GlobalStaticConstant.GLOBAL_ISSPEAKINGCLICKED == true) {
-                            String fileId = ",\"bookid\":\"" + fileDetailController.getFileInfo().getFileId();
-                            String fileName = "\",\"fileName\":\"" + fileDetailController.getFileName();
-                            String organName = "\",\"PAMQOrganizationIDName\":\"" + GlobalStaticConstant.GLOBAL_ORGANINFO_ORGANIZATIONNAME;
-                            String command = "\",\"command\":\"" + GlobalStaticConstant.GLOBAL_ZOOMOUT;
-                            String message = "{\"page\":" + pagination.getCurrentPageIndex() + ",\"zoomFactor\":" + zoomFactor + fileId + fileName + organName + command + "\"}";
-                            try {
+                    } else if (pdf != null) {
+                        if (actionEvent.getSource() == addZoomButton) {//define zoom in event
+                            //here set the zoomType straight to CUSTOM and zoomFactor to a multiple of 1.05
+                            setZoomType(ZoomType.CUSTOM);
+                            zoomFactor *= 1.05;
+                            updateImage(pagination.getCurrentPageIndex());//update the image with new zoomFactor
+                            //zoom in when sync
+                            if (GlobalStaticConstant.GLOBAL_ISSPEAKINGCLICKED == true) {
+                                String fileId = ",\"bookid\":\"" + fileDetailController.getFileInfo().getFileId();
+                                String fileName = "\",\"fileName\":\"" + fileDetailController.getFileName();
+                                String organName = "\",\"PAMQOrganizationIDName\":\"" + GlobalStaticConstant.GLOBAL_ORGANINFO_ORGANIZATIONNAME;
+                                String command = "\",\"command\":\"" + GlobalStaticConstant.GLOBAL_ZOOMIN;
+                                String message = "{\"page\":" + pagination.getCurrentPageIndex() + ",\"zoomFactor\":" + zoomFactor + fileId + fileName + organName + command + "\"}";
                                 mQPlugin.publishMessage(message);
-                            } catch (IOException ex) {
-                                logger.error(ex.getCause().getMessage());
                             }
-                        }
-                    } else if (actionEvent.getSource() == zoomHeightButton) {//define fit height event
-                        setZoomType(ZoomType.HEIGHT);
-                        updateImage(pagination.getCurrentPageIndex());
-                        //fit height when sync
-                        if (GlobalStaticConstant.GLOBAL_ISSPEAKINGCLICKED == true) {
-                            String fileId = ",\"bookid\":\"" + fileDetailController.getFileInfo().getFileId();
-                            String fileName = "\",\"fileName\":\"" + fileDetailController.getFileName();
-                            String organName = "\",\"PAMQOrganizationIDName\":\"" + GlobalStaticConstant.GLOBAL_ORGANINFO_ORGANIZATIONNAME;
-                            String command = "\",\"command\":\"" + GlobalStaticConstant.GLOBAL_FITHEIGHT;
-                            String message = "{\"page\":" + pagination.getCurrentPageIndex() + fileId + fileName + organName + command + "\"}";
-                            try {
+                        } else if (actionEvent.getSource() == reduceZoomButton) {//define zoom out event
+                            //here set the zoomType straight to CUSTOM and zoomFactor to a multiple of .95
+                            setZoomType(ZoomType.CUSTOM);
+                            zoomFactor *= .95;
+                            updateImage(pagination.getCurrentPageIndex());//update the image with new zoomFactor
+                            //zoom out when sync
+                            if (GlobalStaticConstant.GLOBAL_ISSPEAKINGCLICKED == true) {
+                                String fileId = ",\"bookid\":\"" + fileDetailController.getFileInfo().getFileId();
+                                String fileName = "\",\"fileName\":\"" + fileDetailController.getFileName();
+                                String organName = "\",\"PAMQOrganizationIDName\":\"" + GlobalStaticConstant.GLOBAL_ORGANINFO_ORGANIZATIONNAME;
+                                String command = "\",\"command\":\"" + GlobalStaticConstant.GLOBAL_ZOOMOUT;
+                                String message = "{\"page\":" + pagination.getCurrentPageIndex() + ",\"zoomFactor\":" + zoomFactor + fileId + fileName + organName + command + "\"}";
                                 mQPlugin.publishMessage(message);
-                            } catch (IOException ex) {
-                                logger.error(ex.getCause().getMessage());
                             }
-                        }
-                    } else if (actionEvent.getSource() == zoomWidthButton) {//define fit width event
-                        setZoomType(ZoomType.WIDTH);
-                        updateImage(pagination.getCurrentPageIndex());
-                        //fit width when sync
-                        if (GlobalStaticConstant.GLOBAL_ISSPEAKINGCLICKED == true) {
-                            String fileId = ",\"bookid\":\"" + fileDetailController.getFileInfo().getFileId();
-                            String fileName = "\",\"fileName\":\"" + fileDetailController.getFileName();
-                            String organName = "\",\"PAMQOrganizationIDName\":\"" + GlobalStaticConstant.GLOBAL_ORGANINFO_ORGANIZATIONNAME;
-                            String command = "\",\"command\":\"" + GlobalStaticConstant.GLOBAL_FITWIDTH;
-                            String message = "{\"page\":" + pagination.getCurrentPageIndex() + fileId + fileName + organName + command + "\"}";
-                            try {
+                        } else if (actionEvent.getSource() == zoomHeightButton) {//define fit height event
+                            setZoomType(ZoomType.HEIGHT);
+                            updateImage(pagination.getCurrentPageIndex());
+                            //fit height when sync
+                            if (GlobalStaticConstant.GLOBAL_ISSPEAKINGCLICKED == true) {
+                                String fileId = ",\"bookid\":\"" + fileDetailController.getFileInfo().getFileId();
+                                String fileName = "\",\"fileName\":\"" + fileDetailController.getFileName();
+                                String organName = "\",\"PAMQOrganizationIDName\":\"" + GlobalStaticConstant.GLOBAL_ORGANINFO_ORGANIZATIONNAME;
+                                String command = "\",\"command\":\"" + GlobalStaticConstant.GLOBAL_FITHEIGHT;
+                                String message = "{\"page\":" + pagination.getCurrentPageIndex() + fileId + fileName + organName + command + "\"}";
                                 mQPlugin.publishMessage(message);
-                            } catch (IOException ex) {
-                                logger.error(ex.getCause().getMessage());
+                            }
+                        } else if (actionEvent.getSource() == zoomWidthButton) {//define fit width event
+                            setZoomType(ZoomType.WIDTH);
+                            updateImage(pagination.getCurrentPageIndex());
+                            //fit width when sync
+                            if (GlobalStaticConstant.GLOBAL_ISSPEAKINGCLICKED == true) {
+                                String fileId = ",\"bookid\":\"" + fileDetailController.getFileInfo().getFileId();
+                                String fileName = "\",\"fileName\":\"" + fileDetailController.getFileName();
+                                String organName = "\",\"PAMQOrganizationIDName\":\"" + GlobalStaticConstant.GLOBAL_ORGANINFO_ORGANIZATIONNAME;
+                                String command = "\",\"command\":\"" + GlobalStaticConstant.GLOBAL_FITWIDTH;
+                                String message = "{\"page\":" + pagination.getCurrentPageIndex() + fileId + fileName + organName + command + "\"}";
+                                mQPlugin.publishMessage(message);
                             }
                         }
                     }
                 }
-            }
-        };
-        //add event handlers to the buttons
-        loadButton.setOnAction(eventEventHandler);
-        addZoomButton.setOnAction(eventEventHandler);
-        reduceZoomButton.setOnAction(eventEventHandler);
-        zoomHeightButton.setOnAction(eventEventHandler);
-        zoomWidthButton.setOnAction(eventEventHandler);
+            };
+            //add event handlers to the buttons
+            loadButton.setOnAction(eventEventHandler);
+            addZoomButton.setOnAction(eventEventHandler);
+            reduceZoomButton.setOnAction(eventEventHandler);
+            zoomHeightButton.setOnAction(eventEventHandler);
+            zoomWidthButton.setOnAction(eventEventHandler);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            logger.error(ex.getCause().getMessage());
+        }
     }
 
     /**
@@ -412,39 +404,45 @@ public class OpenPdfViewer extends BorderPane implements Initializable {
      *
      */
     private void updateToolbar() {
-        //if zoomOptions or loadOptions is true, set toolbar to be visible
-        if (zoomOptions || loadOptions) {
-            if (borderPane.getTop() == null) {
-                borderPane.setTop(toolBar);
+        try {
+            //if zoomOptions or loadOptions is true, set toolbar to be visible
+            if (zoomOptions || loadOptions) {
+                if (borderPane.getTop() == null) {
+                    borderPane.setTop(toolBar);
+                }
             }
-        }
-        //if loadOptions is false, hide loadOptionsBox
-        if (!loadOptions) {
-            toolBar.getItems().remove(loadOptionsBox);
-        } else {
-            if (!toolBar.getItems().contains(loadOptionsBox)) {
-                toolBar.getItems().add(loadOptionsBox);
+            //if loadOptions is false, hide loadOptionsBox
+            if (!loadOptions) {
+                toolBar.getItems().remove(loadOptionsBox);
+            } else {
+                if (!toolBar.getItems().contains(loadOptionsBox)) {
+                    toolBar.getItems().add(loadOptionsBox);
+                }
             }
-        }
-        //if zoomOptions is false, hide zoomOptionsBox
-        if (!zoomOptions) {
-            toolBar.getItems().remove(zoomOptionsBox);
-        } else {
-            if (!toolBar.getItems().contains(zoomOptionsBox)) {
-                toolBar.getItems().add(zoomOptionsBox);
+            //if zoomOptions is false, hide zoomOptionsBox
+            if (!zoomOptions) {
+                toolBar.getItems().remove(zoomOptionsBox);
+            } else {
+                if (!toolBar.getItems().contains(zoomOptionsBox)) {
+                    toolBar.getItems().add(zoomOptionsBox);
+                }
             }
-        }
-        //if both zoomOptions and loadOptions are true, 
-        if (zoomOptions && loadOptions) {
-            if (toolBar.getItems().get(0).equals(zoomOptionsBox)) {
-                toolBar.getItems().clear();
-                toolBar.getItems().add(loadOptionsBox);
-                toolBar.getItems().add(zoomOptionsBox);
+            //if both zoomOptions and loadOptions are true, 
+            if (zoomOptions && loadOptions) {
+                if (toolBar.getItems().get(0).equals(zoomOptionsBox)) {
+                    toolBar.getItems().clear();
+                    toolBar.getItems().add(loadOptionsBox);
+                    toolBar.getItems().add(zoomOptionsBox);
+                }
             }
-        }
-        //if zoomOptions and loadOptions is false, hide toolbar
-        if (!zoomOptions && !loadOptions) {
-            borderPane.setTop(null);
+            //if zoomOptions and loadOptions is false, hide toolbar
+            if (!zoomOptions && !loadOptions) {
+                borderPane.setTop(null);
+            }
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            logger.error(ex.getCause().getMessage());
         }
     }
 
@@ -454,10 +452,15 @@ public class OpenPdfViewer extends BorderPane implements Initializable {
      *
      */
     private void configureFileChooser() {
-        initialDirectory = Paths.get(System.getProperty("user.home")).toFile().toString();
-        fileChooser = new FileChooser();
-        fileChooser.setInitialDirectory(Paths.get(initialDirectory).toFile());
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("PDF Files", "*.pdf", "*.PDF"));
+        try {
+            initialDirectory = Paths.get(System.getProperty("user.home")).toFile().toString();
+            fileChooser = new FileChooser();
+            fileChooser.setInitialDirectory(Paths.get(initialDirectory).toFile());
+            fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("PDF Files", "*.pdf", "*.PDF"));
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            logger.error(ex.getCause().getMessage());
+        }
     }
 
     /**
@@ -469,26 +472,41 @@ public class OpenPdfViewer extends BorderPane implements Initializable {
      * @param index the page index
      */
     public void updateImage(int index) {
-        //recalculate the zoom factor
-        updateZoomFactor();
-        //reset the vertical position for the scrollpane so everytime a page is turned(aka a new image is loaded)
-        //the vertical scroller will always stay at the top right 
-        if (scroller != null) {
-            scroller.setVvalue(0);
-        }
-        //create a stackpane to put the imageView on
-        StackPane stackPane = new StackPane();
-        stackPane.setMinWidth(borderPane.getWidth() - 20);
-        stackPane.setStyle("-fx-background-color:#ffffff;");
-        //create a imageView to put the image on
-        ImageView imageView = new ImageView();
-        if (pdf != null) {
-            Image image = pdf.getImage(index, zoomFactor);
-            if (image != null) {
-                imageView.setImage(image);
+        try {
+            //recalculate the zoom factor
+            updateZoomFactor();
+            //reset the vertical position for the scrollpane so everytime a page is turned(aka a new image is loaded)
+            //the vertical scroller will always stay at the top right 
+            if (scroller != null) {
+                scroller.setVvalue(0);
             }
+            //create a stackpane to put the imageView on
+            StackPane stackPane = new StackPane();
+            stackPane.setMinWidth(borderPane.getWidth() - 20);
+            stackPane.setStyle("-fx-background-color:#ffffff;");
+            //create a imageView to put the image on
+            ImageView imageView = new ImageView();
+            if (pdf != null) {
+                Image image = pdf.getImage(index, zoomFactor);
+                if (image != null) {
+                    imageView.setImage(image);
+                }
+            }
+            //add a double click mouse event to the imageView to achieve full screen effect
+            addDoubleClickEffect(imageView);
+            stackPane.getChildren().add(imageView);
+            currentImage.set(stackPane);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            logger.error(ex.getCause().getMessage());
         }
-        //add a double click mouse event to the imageView to achieve full screen effect
+    }
+    
+    /**
+     * Add a double click mouse event to the imageView to achieve full screen effect.
+     * @param imageView 
+     */
+    public void addDoubleClickEffect(ImageView imageView) {
         imageView.setOnMouseClicked(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event) {
@@ -542,8 +560,6 @@ public class OpenPdfViewer extends BorderPane implements Initializable {
                 }
             }
         });
-        stackPane.getChildren().add(imageView);
-        currentImage.set(stackPane);
     }
 
     /**
@@ -555,33 +571,38 @@ public class OpenPdfViewer extends BorderPane implements Initializable {
      *
      */
     private void updateZoomFactor() {
-        if (zoomType == ZoomType.WIDTH) {
-            if (pdf != null && pdf.getImage(pagination.getCurrentPageIndex()) != null) {
-                double mainPaneWidth = mainPane.getWidth();//the container's width
-                double imageWidth = pdf.getImage(pagination.getCurrentPageIndex()).getWidth();
-                //note: here I add some codes to handle 16:9 ratio ppt, user wants to view the ppt content on a single page
-                //rather than scrolling it down/up bit by bit(fit width) therefore I mark the height as the zooming
-                //factor(mainPaneHeight/imageHeight) to make sure it will always fit the height of the view, but this
-                //will leave two blanket vertical gap on both side of the view, the reason is that the app is not design
-                //and build by the way that it can adjust 16:9 ppt ratio, plus the height of app will also changes when double
-                //click to max/mini the file viewing screen, this problem is difficult to solve at the moment and require a further
-                //improvement ;)
-                //note: the 16:9 ratio is calculated by the width/height, when the result(zoomfacto) is close to over 1.77, we can be
-                //sure it's 16:9 ratio, as a fact most ppt use this ratio as default
-                double mainPaneHeight = mainPane.getHeight();
-                double imageHeight = pdf.getImage(pagination.getCurrentPageIndex()).getHeight();
-                if (imageWidth > imageHeight) {
-                    zoomFactor = (float) (mainPaneHeight / imageHeight);//this is the best solution at the moment
-                } else {
-                    zoomFactor = (float) ((mainPaneWidth - 20) / imageWidth);//other doc other than ppt
+        try {
+            if (zoomType == ZoomType.WIDTH) {
+                if (pdf != null && pdf.getImage(pagination.getCurrentPageIndex()) != null) {
+                    double mainPaneWidth = mainPane.getWidth();//the container's width
+                    double imageWidth = pdf.getImage(pagination.getCurrentPageIndex()).getWidth();
+                    //note: here I add some codes to handle 16:9 ratio ppt, user wants to view the ppt content on a single page
+                    //rather than scrolling it down/up bit by bit(fit width) therefore I mark the height as the zooming
+                    //factor(mainPaneHeight/imageHeight) to make sure it will always fit the height of the view, but this
+                    //will leave two blanket vertical gap on both side of the view, the reason is that the app is not design
+                    //and build by the way that it can adjust 16:9 ppt ratio, plus the height of app will also changes when double
+                    //click to max/mini the file viewing screen, this problem is difficult to solve at the moment and require a further
+                    //improvement ;)
+                    //note: the 16:9 ratio is calculated by the width/height, when the result(zoomfacto) is close to over 1.77, we can be
+                    //sure it's 16:9 ratio, as a fact most ppt use this ratio as default
+                    double mainPaneHeight = mainPane.getHeight();
+                    double imageHeight = pdf.getImage(pagination.getCurrentPageIndex()).getHeight();
+                    if (imageWidth > imageHeight) {
+                        zoomFactor = (float) (mainPaneHeight / imageHeight);//this is the best solution at the moment
+                    } else {
+                        zoomFactor = (float) ((mainPaneWidth - 20) / imageWidth);//other doc other than ppt
+                    }
+                }
+            } else if (zoomType == ZoomType.HEIGHT) {
+                if (pdf != null && pdf.getImage(pagination.getCurrentPageIndex()) != null) {
+                    double mainPaneHeight = mainPane.getHeight();//the desirable height
+                    double imageHeight = pdf.getImage(pagination.getCurrentPageIndex()).getHeight();//the image's height
+                    zoomFactor = (float) ((mainPaneHeight - 70) / imageHeight);//the desirable zooming scaling
                 }
             }
-        } else if (zoomType == ZoomType.HEIGHT) {
-            if (pdf != null && pdf.getImage(pagination.getCurrentPageIndex()) != null) {
-                double mainPaneHeight = mainPane.getHeight();//the desirable height
-                double imageHeight = pdf.getImage(pagination.getCurrentPageIndex()).getHeight();//the image's height
-                zoomFactor = (float) ((mainPaneHeight - 70) / imageHeight);//the desirable zooming scaling
-            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            logger.error(ex.getCause().getMessage());
         }
     }
 
@@ -636,6 +657,7 @@ public class OpenPdfViewer extends BorderPane implements Initializable {
             pagination.setPageCount(pdf.numPages());
             pagination.setCurrentPageIndex(pageIndex);
         } catch (IOException e) {
+            e.printStackTrace();
             logger.error(e.getCause().getMessage());
         }
     }
@@ -665,6 +687,7 @@ public class OpenPdfViewer extends BorderPane implements Initializable {
             pagination.setPageCount(pdf.numPages());
             pagination.setCurrentPageIndex(pageIndex);
         } catch (IOException e) {
+            e.printStackTrace();
             logger.error(e.getCause().getMessage());
         }
     }
@@ -679,6 +702,7 @@ public class OpenPdfViewer extends BorderPane implements Initializable {
                 pdf.getDocument().close();
             }
         } catch (IOException e) {
+            e.printStackTrace();
             logger.error(e.getCause().getMessage());
         }
     }
@@ -816,6 +840,7 @@ public class OpenPdfViewer extends BorderPane implements Initializable {
         try {
             pagination.setCurrentPageIndex(pageIndex);
         } catch (Exception e) {
+            e.printStackTrace();
             logger.error(e.getCause().getMessage());
         }
     }
@@ -826,7 +851,7 @@ public class OpenPdfViewer extends BorderPane implements Initializable {
      *
      * @param pageIndex
      */
-    public int getCurrentPage() throws Exception {
+    public int getCurrentPage() {
         return pagination.getCurrentPageIndex();
     }
 
@@ -838,15 +863,20 @@ public class OpenPdfViewer extends BorderPane implements Initializable {
      * @param isLock
      */
     public void isLockPagination(boolean isLock) {
-        ObservableList<Node> childList = pagination.getChildrenUnmodifiable();
-        if (!childList.isEmpty()) {
-            childList.get(2).setDisable(isLock);
-        }
-        //lock/unlock left and right arrow key on the keyboard
-        if (isLock == true) {
-            pagination.addEventFilter(KeyEvent.ANY, keyEventHandler);
-        } else {
-            pagination.removeEventFilter(KeyEvent.ANY, keyEventHandler);
+        try {
+            ObservableList<Node> childList = pagination.getChildrenUnmodifiable();
+            if (!childList.isEmpty()) {
+                childList.get(2).setDisable(isLock);
+            }
+            //lock/unlock left and right arrow key on the keyboard
+            if (isLock == true) {
+                pagination.addEventFilter(KeyEvent.ANY, keyEventHandler);
+            } else {
+                pagination.removeEventFilter(KeyEvent.ANY, keyEventHandler);
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            logger.error(ex.getCause().getMessage());
         }
     }
 
@@ -857,25 +887,35 @@ public class OpenPdfViewer extends BorderPane implements Initializable {
      * @param isLock
      */
     public void isLockScroller(boolean isLock) {
-        //lock/unlock the vertical scroll button
-        ObservableList<Node> childList = scroller.getChildrenUnmodifiable();
-        if (!childList.isEmpty()) {
-            childList.get(1).setDisable(isLock);
-            childList.get(2).setDisable(isLock);
-        }
-        //lock/unlock vertical scrolling & pannable
-        if (isLock == true) {
-            scroller.addEventFilter(ScrollEvent.ANY, scrollEventHandler);
-            scroller.setPannable(false);
-        } else {
-            scroller.removeEventFilter(ScrollEvent.ANY, scrollEventHandler);
-            scroller.setPannable(true);
+        try {
+            //lock/unlock the vertical scroll button
+            ObservableList<Node> childList = scroller.getChildrenUnmodifiable();
+            if (!childList.isEmpty()) {
+                childList.get(1).setDisable(isLock);
+                childList.get(2).setDisable(isLock);
+            }
+            //lock/unlock vertical scrolling & pannable
+            if (isLock == true) {
+                scroller.addEventFilter(ScrollEvent.ANY, scrollEventHandler);
+                scroller.setPannable(false);
+            } else {
+                scroller.removeEventFilter(ScrollEvent.ANY, scrollEventHandler);
+                scroller.setPannable(true);
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            logger.error(ex.getCause().getMessage());
         }
     }
 
     public void setMQPlugin(MQPlugin mQPlugin) {
-        if (mQPlugin != null) {
-            this.mQPlugin = mQPlugin;
+        try {
+            if (mQPlugin != null) {
+                this.mQPlugin = mQPlugin;
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            logger.error(ex.getCause().getMessage());
         }
     }
 }
@@ -902,6 +942,7 @@ class Pdf {
             renderer = new PDFRenderer(document);//pass the file for BufferedImage rendering
             //document.close();
         } catch (IOException ex) {
+            ex.printStackTrace();
             logger.error(ex.getCause().getMessage());
         }
     }
@@ -912,6 +953,7 @@ class Pdf {
             document = PDDocument.load(path.toFile(), password);//load a PDF file with password
             renderer = new PDFRenderer(document);//pass the file for BufferedImage rendering
         } catch (IOException ex) {
+            ex.printStackTrace();
             logger.error(ex.getCause().getMessage());
         }
     }
@@ -941,6 +983,7 @@ class Pdf {
                 return null;
             }
         } catch (IOException e) {
+            e.printStackTrace();
             logger.error(e.getCause().getMessage());
             return null;
         }
@@ -969,6 +1012,7 @@ class Pdf {
                 return null;
             }
         } catch (IOException e) {
+            e.printStackTrace();
             logger.error(e.getCause().getMessage());
             return null;
         }

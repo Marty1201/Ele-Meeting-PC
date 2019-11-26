@@ -31,6 +31,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.OverrunStyle;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
@@ -323,6 +324,8 @@ public class MeetController {
             imageViews[k] = new ImageView(icon);
             //设置Label样式
             Label issueNameLabel = new Label(issueList.get(k).getIssueName());
+            //添加tooltip
+            issueNameLabel.setTooltip(new Tooltip(issueList.get(k).getIssueName()));
             issueNameLabel.setStyle("-fx-font-size:16.0px;-fx-font-size-family:Arial;-fx-cursor:hand;");
             issueNameLabel.setPrefSize(161, 185);
             issueNameLabel.setWrapText(true);

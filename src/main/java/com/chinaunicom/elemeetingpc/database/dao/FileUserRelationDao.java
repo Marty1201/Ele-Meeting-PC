@@ -34,9 +34,11 @@ public class FileUserRelationDao extends CommonDao {
         List<FileUserRelation> fileUserList = new ArrayList<>();
         try {
             Dao<FileUserRelation, Object> dao = getDao(FileUserRelation.class);
-            QueryBuilder<FileUserRelation, Object> queryBuilder = dao.queryBuilder();
-            queryBuilder.where().eq("userId", userId).and().eq("state", "0");
-            fileUserList = dao.query(queryBuilder.prepare());
+            if (dao != null) {
+                QueryBuilder<FileUserRelation, Object> queryBuilder = dao.queryBuilder();
+                queryBuilder.where().eq("userId", userId).and().eq("state", "0");
+                fileUserList = dao.query(queryBuilder.prepare());
+            }
         } catch (SQLException e) {
             logger.warn(e.getCause().getMessage());
             throw new ApplicationException(FxmlUtils.getResourceBundle().getString("error.not.found.all"));
@@ -56,9 +58,11 @@ public class FileUserRelationDao extends CommonDao {
         List<FileUserRelation> fileUserList = new ArrayList<>();
         try {
             Dao<FileUserRelation, Object> dao = getDao(FileUserRelation.class);
-            QueryBuilder<FileUserRelation, Object> queryBuilder = dao.queryBuilder();
-            queryBuilder.where().eq("fileId", fileId).and().eq("state", "0");
-            fileUserList = dao.query(queryBuilder.prepare());
+            if (dao != null) {
+                QueryBuilder<FileUserRelation, Object> queryBuilder = dao.queryBuilder();
+                queryBuilder.where().eq("fileId", fileId).and().eq("state", "0");
+                fileUserList = dao.query(queryBuilder.prepare());
+            }
         } catch (SQLException e) {
             logger.warn(e.getCause().getMessage());
             throw new ApplicationException(FxmlUtils.getResourceBundle().getString("error.not.found.all"));

@@ -39,6 +39,7 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.OverrunStyle;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Tooltip;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.Border;
@@ -138,6 +139,8 @@ public class MeetLeftController {
                         if (!empty && item != null) {
                             //自定义cell样式
                             Label labelCell = new Label(item.getMeetingName());
+                            //添加tooltip
+                            labelCell.setTooltip(new Tooltip(item.getMeetingName()));
                             labelCell.setPrefSize(400.0, 80.0);
                             labelCell.setPadding(new Insets(5.0, 20.0, 5.0, 10.0));
                             labelCell.setBackground(new Background(new BackgroundFill(Color.valueOf("#f0eff5"), CornerRadii.EMPTY, Insets.EMPTY)));

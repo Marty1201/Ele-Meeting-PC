@@ -12,9 +12,7 @@ import com.chinaunicom.elemeetingpc.utils.exceptions.ApplicationException;
 import com.j256.ormlite.logger.Logger;
 import com.j256.ormlite.logger.LoggerFactory;
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
 import javafx.application.Platform;
 import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
@@ -112,7 +110,8 @@ public class OrganInfoController {
             MeetController meetController = loader.getController(); //从loader中获取MeetController
             meetController.setBorderPane(borderPaneMain);//把borderPane设置为参数继续往下传，以便在MeetController中获取到当前BorderPane
             meetController.setMQPlugin(mQPlugin);//把MQPlugin往下传
-        } catch (IOException | TimeoutException | ApplicationException | SQLException e) {
+        } catch (IOException e) {
+            e.printStackTrace();
             logger.error(e.getCause().getMessage());
         }
     }
@@ -122,21 +121,22 @@ public class OrganInfoController {
      * 退出前正确关闭mq线程，否则会造因mq线程没有正确关闭而导致程序hang.
      */
     public void handleWindowCloseEvent(MQPlugin mQPlugin) {
-        Stage stage = (Stage) borderPaneMain.getScene().getWindow();
-        //monitor stage close event, close RabbitMQ connection
-        stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
-            @Override
-            public void handle(WindowEvent event) {
-                if (mQPlugin != null) {
-                    try {
+        try {
+            Stage stage = (Stage) borderPaneMain.getScene().getWindow();
+            //monitor stage close event, close RabbitMQ connection
+            stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+                @Override
+                public void handle(WindowEvent event) {
+                    if (mQPlugin != null) {
                         mQPlugin.closeConnection(); //关闭mq
-                    } catch (IOException | TimeoutException ex) {
-                        logger.error(ex.getCause().getMessage());
                     }
-            }
-            Platform.exit();
-            }
-        });
+                    Platform.exit();
+                }
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.error(e.getCause().getMessage());
+        }
     }
 
     public void setBorderPane(BorderPane borderPaneMain) {
