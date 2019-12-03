@@ -193,7 +193,7 @@ public class OpenPdfViewer extends BorderPane implements Initializable {
     private void initScroller() {
         try {
             currentImage = new SimpleObjectProperty<StackPane>();
-            updateImage(0);
+            updateImage(0, 0, true);
             //set the new scroller on the AnchorPane
             scroller = new ScrollPane();
             AnchorPane.setTopAnchor(scroller, 0.0);
@@ -335,7 +335,7 @@ public class OpenPdfViewer extends BorderPane implements Initializable {
                             //here set the zoomType straight to CUSTOM and zoomFactor to a multiple of 1.05
                             setZoomType(ZoomType.CUSTOM);
                             zoomFactor *= 1.05;
-                            updateImage(pagination.getCurrentPageIndex());//update the image with new zoomFactor
+                            updateImage(pagination.getCurrentPageIndex(), 0, true);//update the image with new zoomFactor
                             //zoom in when sync
                             if (GlobalStaticConstant.GLOBAL_ISSPEAKINGCLICKED == true) {
                                 String fileId = ",\"bookid\":\"" + fileDetailController.getFileInfo().getFileId();
@@ -349,7 +349,7 @@ public class OpenPdfViewer extends BorderPane implements Initializable {
                             //here set the zoomType straight to CUSTOM and zoomFactor to a multiple of .95
                             setZoomType(ZoomType.CUSTOM);
                             zoomFactor *= .95;
-                            updateImage(pagination.getCurrentPageIndex());//update the image with new zoomFactor
+                            updateImage(pagination.getCurrentPageIndex(), 0, true);//update the image with new zoomFactor
                             //zoom out when sync
                             if (GlobalStaticConstant.GLOBAL_ISSPEAKINGCLICKED == true) {
                                 String fileId = ",\"bookid\":\"" + fileDetailController.getFileInfo().getFileId();
@@ -361,7 +361,7 @@ public class OpenPdfViewer extends BorderPane implements Initializable {
                             }
                         } else if (actionEvent.getSource() == zoomHeightButton) {//define fit height event
                             setZoomType(ZoomType.HEIGHT);
-                            updateImage(pagination.getCurrentPageIndex());
+                            updateImage(pagination.getCurrentPageIndex(), 0, true);
                             //fit height when sync
                             if (GlobalStaticConstant.GLOBAL_ISSPEAKINGCLICKED == true) {
                                 String fileId = ",\"bookid\":\"" + fileDetailController.getFileInfo().getFileId();
@@ -373,7 +373,7 @@ public class OpenPdfViewer extends BorderPane implements Initializable {
                             }
                         } else if (actionEvent.getSource() == zoomWidthButton) {//define fit width event
                             setZoomType(ZoomType.WIDTH);
-                            updateImage(pagination.getCurrentPageIndex());
+                            updateImage(pagination.getCurrentPageIndex(), 0, true);
                             //fit width when sync
                             if (GlobalStaticConstant.GLOBAL_ISSPEAKINGCLICKED == true) {
                                 String fileId = ",\"bookid\":\"" + fileDetailController.getFileInfo().getFileId();
@@ -464,17 +464,17 @@ public class OpenPdfViewer extends BorderPane implements Initializable {
     }
 
     /**
-     * This method update a page image with zoomfactor, the image is first
-     * created by page index and zoom factor it is then added on a imageView,
+     * This method update a page image with zoomfactor/ios scale, the image is first
+     * created by page index and zoom factor/ios scale it is then added on a imageView,
      * the imageView is added on a stackpane, then the stackpane is wrapped by
      * the property wrapping.
      *
      * @param index the page index
+     * @param iosScale the scale factor from ios client
+     * @param isNotIosRequest indicate whether the request is from ios client(should we apply ios scale or not) by default the value is true(not from ios client)
      */
-    public void updateImage(int index) {
+    public void updateImage(int index, float iosScale, boolean isNotIosRequest) {
         try {
-            //recalculate the zoom factor
-            updateZoomFactor();
             //reset the vertical position for the scrollpane so everytime a page is turned(aka a new image is loaded)
             //the vertical scroller will always stay at the top right 
             if (scroller != null) {
@@ -487,9 +487,18 @@ public class OpenPdfViewer extends BorderPane implements Initializable {
             //create a imageView to put the image on
             ImageView imageView = new ImageView();
             if (pdf != null) {
-                Image image = pdf.getImage(index, zoomFactor);
-                if (image != null) {
-                    imageView.setImage(image);
+                if (isNotIosRequest) {
+                    //recalculate the zoom factor
+                    updateZoomFactor();
+                    Image image = pdf.getImage(index, zoomFactor);
+                    if (image != null) {
+                        imageView.setImage(image);
+                    }
+                } else {
+                    Image image = pdf.getImage(index, iosScale);
+                    if (image != null) {
+                        imageView.setImage(image);
+                    }
                 }
             }
             //add a double click mouse event to the imageView to achieve full screen effect
@@ -615,7 +624,7 @@ public class OpenPdfViewer extends BorderPane implements Initializable {
      */
     private void resize() {
         updateZoomFactor();
-        updateImage(pagination.getCurrentPageIndex());
+        updateImage(pagination.getCurrentPageIndex(), 0, true);
     }
 
     /**
@@ -629,7 +638,7 @@ public class OpenPdfViewer extends BorderPane implements Initializable {
      *
      */
     private Node createPdfImage(int index) {
-        updateImage(index);
+        updateImage(index, 0, true);
         return scroller;
     }
 

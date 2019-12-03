@@ -5,6 +5,8 @@ import com.chinaunicom.elemeetingpc.database.dao.OrganInfoDao;
 import com.chinaunicom.elemeetingpc.database.models.OrganInfo;
 import com.chinaunicom.elemeetingpc.utils.converters.OrganInfoConverter;
 import com.chinaunicom.elemeetingpc.utils.exceptions.ApplicationException;
+import com.j256.ormlite.logger.Logger;
+import com.j256.ormlite.logger.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -19,7 +21,10 @@ import javafx.collections.ObservableList;
  */
 public class OrganInfoModel {
     
+    private static final Logger logger = LoggerFactory.getLogger(OrganInfoModel.class);
+    
     private ObservableList<OrganInfoFx> organInfoNameObservableList = FXCollections.observableArrayList();
+    
     private List<OrganInfoFx> organInfoNameList = new ArrayList<>();
 
     /**
@@ -28,15 +33,20 @@ public class OrganInfoModel {
      *
      * @throws ApplicationException.
      */
-    public void init() throws ApplicationException {
-        OrganInfoDao organInfoDao = new OrganInfoDao();
-        //根据用户id从数据库里查到对应的组织机构信息
-        List<OrganInfo> OrganInfoList = organInfoDao.findByFieldNameAndValue(OrganInfo.class, "USERINFO_ID", GlobalStaticConstant.GLOBAL_USERINFO_ID);
-        organInfoNameList.clear();
-        OrganInfoList.forEach(organInfo -> {
-            this.organInfoNameList.add(OrganInfoConverter.convertToOrganInfoFx(organInfo));
-        });
-        organInfoNameObservableList.setAll(organInfoNameList);
+    public void init() {
+        try {
+            OrganInfoDao organInfoDao = new OrganInfoDao();
+            //根据用户id从数据库里查到对应的组织机构信息
+            List<OrganInfo> OrganInfoList = organInfoDao.findByFieldNameAndValue(OrganInfo.class, "USERINFO_ID", GlobalStaticConstant.GLOBAL_USERINFO_ID);
+            organInfoNameList.clear();
+            OrganInfoList.forEach(organInfo -> {
+                this.organInfoNameList.add(OrganInfoConverter.convertToOrganInfoFx(organInfo));
+            });
+            organInfoNameObservableList.setAll(organInfoNameList);
+        } catch (ApplicationException ex) {
+            ex.printStackTrace();
+            logger.error(ex.getCause().getMessage());
+        }
     }
 
     /**
@@ -53,9 +63,14 @@ public class OrganInfoModel {
      *
      * @param organInfo
      */
-    public void saveOrUpdateOrganInfo(OrganInfo organInfo) throws ApplicationException {
-        OrganInfoDao organDao = new OrganInfoDao();
-        organDao.saveOrUpdate(organInfo);
+    public void saveOrUpdateOrganInfo(OrganInfo organInfo) {
+        try {
+            OrganInfoDao organDao = new OrganInfoDao();
+            organDao.saveOrUpdate(organInfo);
+        } catch (ApplicationException ex) {
+            ex.printStackTrace();
+            logger.error(ex.getCause().getMessage());
+        }
     }
     
     /**
@@ -66,10 +81,15 @@ public class OrganInfoModel {
      * @param value
      * @return List<OrganInfo>
      */
-    public List<OrganInfo> queryOrganInfosByOrganId(String organizationId, String value) throws ApplicationException {
+    public List<OrganInfo> queryOrganInfosByOrganId(String organizationId, String value) {
         OrganInfoDao organDao = new OrganInfoDao();
         List<OrganInfo> organList = new ArrayList<>();
-        organList = organDao.findByFieldNameAndValue(OrganInfo.class, organizationId, value);
+        try {
+            organList = organDao.findByFieldNameAndValue(OrganInfo.class, organizationId, value);
+        } catch (ApplicationException ex) {
+            ex.printStackTrace();
+            logger.error(ex.getCause().getMessage());
+        }
         return organList;
     }
     
@@ -83,7 +103,12 @@ public class OrganInfoModel {
     public List<OrganInfo> queryOrganInfosByMap(Map fieldValues) throws ApplicationException {
         OrganInfoDao organDao = new OrganInfoDao();
         List<OrganInfo> organList = new ArrayList<>();
-        organList = organDao.findByFieldNamesAndValues(OrganInfo.class, fieldValues);
+        try {
+            organList = organDao.findByFieldNamesAndValues(OrganInfo.class, fieldValues);
+        } catch (ApplicationException ex) {
+            ex.printStackTrace();
+            logger.error(ex.getCause().getMessage());
+        }
         return organList;
     }
     
@@ -98,7 +123,12 @@ public class OrganInfoModel {
     public List<OrganInfo> queryOrganInfosByUserId(String userId, int value) throws ApplicationException {
         OrganInfoDao organDao = new OrganInfoDao();
         List<OrganInfo> organList = new ArrayList<>();
-        organList = organDao.findByFieldNameAndValue(OrganInfo.class, userId, value);
+        try {
+            organList = organDao.findByFieldNameAndValue(OrganInfo.class, userId, value);
+        } catch (ApplicationException ex) {
+            ex.printStackTrace();
+            logger.error(ex.getCause().getMessage());
+        }
         return organList;
     }
     
@@ -109,6 +139,11 @@ public class OrganInfoModel {
      */
     public void deleteAllOrganInfos(List<OrganInfo> organList) throws ApplicationException {
         OrganInfoDao identityDao = new OrganInfoDao();
-        identityDao.deleteByCollection(OrganInfo.class, organList);
+        try {
+            identityDao.deleteByCollection(OrganInfo.class, organList);
+        } catch (ApplicationException ex) {
+            ex.printStackTrace();
+            logger.error(ex.getCause().getMessage());
+        }
     }
 }

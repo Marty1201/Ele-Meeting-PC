@@ -190,17 +190,17 @@ public class MQPlugin {
                             if (StringUtils.equalsIgnoreCase(jSONObject.getString("command"), GlobalStaticConstant.GLOBAL_FITHEIGHT) || StringUtils.equalsIgnoreCase(jSONObject.getString("command"), GlobalStaticConstant.GLOBAL_FITWIDTH)) {
                                 handleFitSize(jSONObject);
                             }
-                            //if receiving command is horizontalScroll, then sync with the speaker by horizontal scrolling(PC client only)
-                            if (StringUtils.equalsIgnoreCase(jSONObject.getString("command"), GlobalStaticConstant.GLOBAL_HSCROLL)) {
-                                handleHorizontalScroll(jSONObject);
-                            }
                         }
                         //the full blown version of other sync abilities include: zoom in/out. vertical/horizontal scroll, but at the moment only we implemented vertical scrolling sync
                         //here handle all the messages which contain "platformType" key(Universal)
                         if (jSONObject.containsKey("platformType")) {
-                            //if the message is from ios/PC client， todo: need to change the condition if horizontal scroll is implemented, otherwise can't tell what action is taken, eg something like command = HorizontalScroll
-                            if (StringUtils.equalsIgnoreCase(jSONObject.getString("platformType"), GlobalStaticConstant.GLOBAL_IOSSYNCFLAG) || StringUtils.equalsIgnoreCase(jSONObject.getString("platformType"), GlobalStaticConstant.GLOBAL_PCSYNCFLAG)) {
-                                handleVerticalScroll(jSONObject);
+                            //handle message from pc client
+                            if (StringUtils.equalsIgnoreCase(jSONObject.getString("platformType"), GlobalStaticConstant.GLOBAL_PCSYNCFLAG)) {
+                                handlePCScroll(jSONObject);
+                            }
+                            //handle message from ios client
+                            if (StringUtils.equalsIgnoreCase(jSONObject.getString("platformType"), GlobalStaticConstant.GLOBAL_IOSSYNCFLAG)) {
+                                    handleIosScroll(jSONObject);
                             }
                         }
                     }
@@ -298,7 +298,7 @@ public class MQPlugin {
             logger.error(ex.getCause().getMessage());
         }
     }
-    
+
     /**
      * Handle zoom in/out, 2 cases which needed to be handled: 1.same file same
      * page/diff page, 2.diff files.
@@ -316,7 +316,7 @@ public class MQPlugin {
                         if (StringUtils.equalsIgnoreCase(jSONObject.getString("bookid"), fileDetailController.getFileInfo().getFileId())) {
                             fileDetailController.getOpenPdfViewer().setZoomType(OpenPdfViewer.ZoomType.CUSTOM);
                             fileDetailController.getOpenPdfViewer().setZoomFactor(Float.valueOf(jSONObject.get("zoomFactor").toString()));
-                            fileDetailController.getOpenPdfViewer().updateImage(jSONObject.getInt("page"));
+                            fileDetailController.getOpenPdfViewer().updateImage(jSONObject.getInt("page"), 0, true);
                         }
                         //diff files need to close currently opened file, go back to file list, open new file, go to the page and finally set the zoomType, zoomFactor and updateImage with the pageIndex
                         if (!StringUtils.equalsIgnoreCase(jSONObject.getString("bookid"), fileDetailController.getFileInfo().getFileId())) {
@@ -326,7 +326,7 @@ public class MQPlugin {
                             //set zoomFactor
                             fileDetailController.getOpenPdfViewer().setZoomFactor(Float.valueOf(jSONObject.get("zoomFactor").toString()));
                             //update page image
-                            fileDetailController.getOpenPdfViewer().updateImage(jSONObject.getInt("page"));
+                            fileDetailController.getOpenPdfViewer().updateImage(jSONObject.getInt("page"), 0, true);
                         }
                     }
                 }
@@ -354,11 +354,11 @@ public class MQPlugin {
                         if (StringUtils.equalsIgnoreCase(jSONObject.getString("bookid"), fileDetailController.getFileInfo().getFileId())) {
                             if (StringUtils.equalsIgnoreCase(jSONObject.getString("command"), GlobalStaticConstant.GLOBAL_FITHEIGHT)) {
                                 fileDetailController.getOpenPdfViewer().setZoomType(OpenPdfViewer.ZoomType.HEIGHT);
-                                fileDetailController.getOpenPdfViewer().updateImage(jSONObject.getInt("page"));
+                                fileDetailController.getOpenPdfViewer().updateImage(jSONObject.getInt("page"), 0, true);
                             }
                             if (StringUtils.equalsIgnoreCase(jSONObject.getString("command"), GlobalStaticConstant.GLOBAL_FITWIDTH)) {
                                 fileDetailController.getOpenPdfViewer().setZoomType(OpenPdfViewer.ZoomType.WIDTH);
-                                fileDetailController.getOpenPdfViewer().updateImage(jSONObject.getInt("page"));
+                                fileDetailController.getOpenPdfViewer().updateImage(jSONObject.getInt("page"), 0, true);
                             }
                         }
                         //diff files need to close currently opened file, go back to file list, open new file, go to the page and finally set the zoomType, zoomFactor and updateImage with the pageIndex
@@ -368,14 +368,14 @@ public class MQPlugin {
                                 //set zoomType
                                 fileDetailController.getOpenPdfViewer().setZoomType(OpenPdfViewer.ZoomType.HEIGHT);
                                 //update page image
-                                fileDetailController.getOpenPdfViewer().updateImage(jSONObject.getInt("page"));
+                                fileDetailController.getOpenPdfViewer().updateImage(jSONObject.getInt("page"), 0, true);
                             }
                             if (StringUtils.equalsIgnoreCase(jSONObject.getString("command"), GlobalStaticConstant.GLOBAL_FITWIDTH)) {
                                 handleDiffFile(jSONObject);
                                 //set zoomType
                                 fileDetailController.getOpenPdfViewer().setZoomType(OpenPdfViewer.ZoomType.WIDTH);
                                 //update page image
-                                fileDetailController.getOpenPdfViewer().updateImage(jSONObject.getInt("page"));
+                                fileDetailController.getOpenPdfViewer().updateImage(jSONObject.getInt("page"), 0, true);
                             }
                         }
                     }
@@ -386,80 +386,22 @@ public class MQPlugin {
             logger.error(ex.getCause().getMessage());
         }
     }
-    
+
     /**
-     * Handle horizontal scrolling, there 3 cases which needed to be handled :
-     * 1.same file and same page, 2.same file but diff page, 3.diff files.
+     * Handle PC vertical and horizontal scrolling, there 3 cases which needed
+     * to be handled : 1.same file and same page, 2.same file but diff page,
+     * 3.diff files.
      *
      * @param jSONObject the Json object
      */
-    public void handleHorizontalScroll(JSONObject jSONObject) {
+    public void handlePCScroll(JSONObject jSONObject) {
         try {
             Platform.runLater(new Runnable() {
                 @Override
                 public void run() {
                     //check if the user own this file
                     if (isOwnedByLoginUser(jSONObject.getString("bookid"))) {
-                        double hValue = jSONObject.getDouble("hValue");
-                        //if it's same file and on the same page, if true then set the hValue straight away
-                        if (StringUtils.equalsIgnoreCase(jSONObject.getString("bookid"), fileDetailController.getFileInfo().getFileId()) && jSONObject.getInt("page") == fileDetailController.getOpenPdfViewer().getCurrentPage()) {
-                            fileDetailController.getOpenPdfViewer().setHvalue(hValue);
-                        }
-                        //if it's same file but diff page, go to that page and set the hValue
-                        if (StringUtils.equalsIgnoreCase(jSONObject.getString("bookid"), fileDetailController.getFileInfo().getFileId()) && jSONObject.getInt("page") != fileDetailController.getOpenPdfViewer().getCurrentPage()) {
-                            fileDetailController.getOpenPdfViewer().goToCurrentPage(jSONObject.getInt("page"));
-                            fileDetailController.getOpenPdfViewer().setHvalue(hValue);
-                        }
-                        //diff files need to close currently opened file, go back to file list, open new file, go to the page and finally set the hValue
-                        if (!StringUtils.equalsIgnoreCase(jSONObject.getString("bookid"), fileDetailController.getFileInfo().getFileId())) {
-                            handleDiffFile(jSONObject);
-                            fileDetailController.getOpenPdfViewer().setHvalue(hValue);
-                        }
-
-                    }
-                }
-            });
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            logger.error(ex.getCause().getMessage());
-        }
-    }
-
-    /**
-     * Handle vertical scrolling, there 3 cases which needed to be handled :
-     * 1.same file and same page, 2.same file but diff page, 3.diff files.
-     *
-     * @param jSONObject the Json object
-     */
-    public void handleVerticalScroll(JSONObject jSONObject) {
-        try {
-            Platform.runLater(new Runnable() {
-                @Override
-                public void run() {
-                    //check if the user own this file
-                    if (isOwnedByLoginUser(jSONObject.getString("bookid"))) {
-                        //handle ios vertical scrolling
-                        if (StringUtils.equalsIgnoreCase(jSONObject.getString("platformType"), GlobalStaticConstant.GLOBAL_IOSSYNCFLAG)) {
-                            double offsetY = jSONObject.getDouble("offsetY");
-                            double height = jSONObject.getDouble("height");
-                            //if it's same file and on the same page, if true then set the vValue straight away
-                            if (StringUtils.equalsIgnoreCase(jSONObject.getString("bookid"), fileDetailController.getFileInfo().getFileId()) && jSONObject.getInt("page") == fileDetailController.getOpenPdfViewer().getCurrentPage()) {
-                                calculateVValue(offsetY, height);
-                            }
-                            //if it's same file but diff page, go to that page and set the vValue
-                            if (StringUtils.equalsIgnoreCase(jSONObject.getString("bookid"), fileDetailController.getFileInfo().getFileId()) && jSONObject.getInt("page") != fileDetailController.getOpenPdfViewer().getCurrentPage()) {
-                                fileDetailController.getOpenPdfViewer().goToCurrentPage(jSONObject.getInt("page"));
-                                calculateVValue(offsetY, height);
-                            }
-                            //diff files need to close currently opened file, go back to file list, open new file, go to the page and finally set the vValue
-                            if (!StringUtils.equalsIgnoreCase(jSONObject.getString("bookid"), fileDetailController.getFileInfo().getFileId())) {
-                                handleDiffFile(jSONObject);
-                                //set vertical value
-                                calculateVValue(offsetY, height);
-                            }
-                        }
-                        //handle pc client vertical scrolling
-                        if (StringUtils.equalsIgnoreCase(jSONObject.getString("platformType"), GlobalStaticConstant.GLOBAL_PCSYNCFLAG) && StringUtils.equalsIgnoreCase(jSONObject.getString("command"), GlobalStaticConstant.GLOBAL_VSCROLL)) {
+                        if (StringUtils.equalsIgnoreCase(jSONObject.getString("command"), GlobalStaticConstant.GLOBAL_VSCROLL)) {
                             double vValue = jSONObject.getDouble("vValue");
                             //if it's same file and on the same page, if true then set the vValue straight away
                             if (StringUtils.equalsIgnoreCase(jSONObject.getString("bookid"), fileDetailController.getFileInfo().getFileId()) && jSONObject.getInt("page") == fileDetailController.getOpenPdfViewer().getCurrentPage()) {
@@ -476,6 +418,23 @@ public class MQPlugin {
                                 fileDetailController.getOpenPdfViewer().setVvalue(vValue);
                             }
                         }
+                        if (StringUtils.equalsIgnoreCase(jSONObject.getString("command"), GlobalStaticConstant.GLOBAL_HSCROLL)) {
+                            double hValue = jSONObject.getDouble("hValue");
+                            //if it's same file and on the same page, if true then set the vValue straight away
+                            if (StringUtils.equalsIgnoreCase(jSONObject.getString("bookid"), fileDetailController.getFileInfo().getFileId()) && jSONObject.getInt("page") == fileDetailController.getOpenPdfViewer().getCurrentPage()) {
+                                fileDetailController.getOpenPdfViewer().setHvalue(hValue);
+                            }
+                            //if it's same file but diff page, go to that page and set the vValue
+                            if (StringUtils.equalsIgnoreCase(jSONObject.getString("bookid"), fileDetailController.getFileInfo().getFileId()) && jSONObject.getInt("page") != fileDetailController.getOpenPdfViewer().getCurrentPage()) {
+                                fileDetailController.getOpenPdfViewer().goToCurrentPage(jSONObject.getInt("page"));
+                                fileDetailController.getOpenPdfViewer().setHvalue(hValue);
+                            }
+                            //diff files need to close currently opened file, go back to file list, open new file, go to the page and finally set the vValue
+                            if (!StringUtils.equalsIgnoreCase(jSONObject.getString("bookid"), fileDetailController.getFileInfo().getFileId())) {
+                                handleDiffFile(jSONObject);
+                                fileDetailController.getOpenPdfViewer().setHvalue(hValue);
+                            }
+                        }
                     }
                 }
             });
@@ -486,16 +445,90 @@ public class MQPlugin {
     }
 
     /**
-     * Calculate and Set the vertical value for the scrollPane of the
+     * Handle ios vertical, horizontal and zooming scrolling, note: by default,
+     * the ios app use the width of the file to fit the width of the screen, 
+     * therefore there will be very limited case where we need to scroll a file
+     * horizontally without zooming in first, that is when a file is opened, 
+     * it should always be vertical scrolling and the offsetX is always set to 0,
+     * only if we zoom in on the file, the offsetX will be a positive value > 0,
+     * we use this change in offsetX to determine when to apply ios scale, there
+     * also 3 cases which needed to be handled: 1.same file and same page, 2.same
+     * file but diff page, 3.diff files.
+     *
+     * @param jSONObject the Json object
+     */
+    public void handleIosScroll(JSONObject jSONObject) {
+        try {
+            Platform.runLater(new Runnable() {
+                @Override
+                public void run() {
+                    //check if the user own this file
+                    if (isOwnedByLoginUser(jSONObject.getString("bookid"))) {
+                        double offsetY = jSONObject.getDouble("offsetY");
+                        double height = jSONObject.getDouble("height");
+                        double offsetX = jSONObject.getDouble("offsetX");
+                        double width = jSONObject.getDouble("width");
+                        //apply scale if offsetX > 0
+                        if (offsetX > 0) {
+                            //the scale of ios is same as the pc's zoomfactor, when scale is in use, when need to update the file image with scale rather than zoomfactor
+                            //note: there is a quite large deviation between ios scale and pc zoomfactor, but since it's too difficult to convert between scale and zoomfactor
+                            //also the deviation is tolerable, therefore we just use the raw ios scale straight away for the sake of simplicity
+                            fileDetailController.getOpenPdfViewer().updateImage(jSONObject.getInt("page"), Float.valueOf(jSONObject.get("scale").toString()), false);
+                        }
+                        //if it's same file and on the same page, if true then set the vValue straight away
+                        if (StringUtils.equalsIgnoreCase(jSONObject.getString("bookid"), fileDetailController.getFileInfo().getFileId()) && jSONObject.getInt("page") == fileDetailController.getOpenPdfViewer().getCurrentPage()) {
+                            convertVValue(offsetY, height);
+                            convertHValue(offsetX, width);
+                        }
+                        //if it's same file but diff page, go to that page and set the vValue
+                        if (StringUtils.equalsIgnoreCase(jSONObject.getString("bookid"), fileDetailController.getFileInfo().getFileId()) && jSONObject.getInt("page") != fileDetailController.getOpenPdfViewer().getCurrentPage()) {
+                            fileDetailController.getOpenPdfViewer().goToCurrentPage(jSONObject.getInt("page"));
+                            convertVValue(offsetY, height);
+                            convertHValue(offsetX, width);
+                        }
+                        //diff files need to close currently opened file, go back to file list, open new file, go to the page and finally set the vValue
+                        if (!StringUtils.equalsIgnoreCase(jSONObject.getString("bookid"), fileDetailController.getFileInfo().getFileId())) {
+                            handleDiffFile(jSONObject);
+                            convertVValue(offsetY, height);
+                            convertHValue(offsetX, width);
+                        }
+                    }
+                }
+            });
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            logger.error(ex.getCause().getMessage());
+        }
+    }
+
+    /**
+     * Convert and Set the vertical value for the scrollPane of the
      * OpenPdfViewer(handle ios vertical scrolling).
      *
      * @param offsetY
      * @param height
      */
-    public void calculateVValue(double offsetY, double height) {
+    public void convertVValue(double offsetY, double height) {
         try {
             double vValue = offsetY / (height - 70);
             fileDetailController.getOpenPdfViewer().setVvalue(vValue);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            logger.error(ex.getCause().getMessage());
+        }
+    }
+
+    /**
+     * Convert and Set the horizontal value for the scrollPane of the
+     * OpenPdfViewer(handle ios horizontal scrolling).
+     *
+     * @param offsetX
+     * @param width
+     */
+    public void convertHValue(double offsetX, double width) {
+        try {
+            double hValue = offsetX / (width); //-20 ?
+            fileDetailController.getOpenPdfViewer().setHvalue(hValue);
         } catch (Exception ex) {
             ex.printStackTrace();
             logger.error(ex.getCause().getMessage());

@@ -84,7 +84,7 @@ public class MeetController {
     private boolean isFolded = true;
 
     private BorderPane borderPaneMain;
-    
+
     private MQPlugin mQPlugin;
 
     private MeetInfoModel meetInfoModel;
@@ -425,6 +425,7 @@ public class MeetController {
             borderPaneMain.setCenter(loader.load()); //将当前BorderPane中间区域加载为机构选择界面
             OrganInfoController organInfoController = loader.getController(); //从loader中获取OrganInfoController
             organInfoController.setBorderPane(borderPaneMain);//设置传参当前的borderPaneMain，以便在OrganInfoController中获取到当前BorderPane
+            organInfoController.setMQPlugin(mQPlugin);//把mq回传给上个界面
         } catch (IOException e) {
             e.printStackTrace();
             logger.error(e.getCause().getMessage());
@@ -484,11 +485,11 @@ public class MeetController {
         controller.setDialogStage(noticeListDialogStage);
         noticeListDialogStage.showAndWait();
     }
-    
+
     public void setBorderPane(BorderPane borderPaneMain) {
         this.borderPaneMain = borderPaneMain;
     }
-    
+
     public void setMQPlugin(MQPlugin mQPlugin) {
         if (mQPlugin != null) {
             this.mQPlugin = mQPlugin;

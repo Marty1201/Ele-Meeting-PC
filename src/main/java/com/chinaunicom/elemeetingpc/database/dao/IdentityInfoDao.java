@@ -4,7 +4,8 @@ package com.chinaunicom.elemeetingpc.database.dao;
 
 
 /**
- * IdentityInfoDao.
+ * IdentityInfoDao to be implemented.
+ * 
  * @author chenxi
  * 创建时间：2019-6-24 15:55:43
  */
