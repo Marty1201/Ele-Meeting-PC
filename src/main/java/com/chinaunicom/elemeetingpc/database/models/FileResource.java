@@ -4,7 +4,7 @@ import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 
 /**
- *  文件资源类
+ *  文件实体类.
  * @author zhaojunfeng
  */
 @DatabaseTable(tableName = "FileResource")
@@ -22,15 +22,19 @@ public class FileResource implements BaseModel{
     @DatabaseField(columnName = "filePath")
     private String filePath;
     
+    //文件大小
     @DatabaseField(columnName = "fileSize")
     private String fileSize;
     
+    //文件密码
     @DatabaseField(columnName = "password")
     private String password;
     
+    //文件状态
     @DatabaseField(columnName = "state")
     private String state;
     
+    //文件排序
     @DatabaseField(columnName = "sort")
     private int sort;
     

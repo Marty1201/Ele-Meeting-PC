@@ -6,7 +6,7 @@ import com.j256.ormlite.table.DatabaseTable;
 
 
 /**
- * Rabbitmq 参数类
+ * Rabbitmq 同步阅读参数实体类.
  * @author chenxi
  * 创建时间：2019-7-26 17:57:50
  */
@@ -15,21 +15,27 @@ public class SyncParams implements BaseModel {
 	//id
     @DatabaseField(generatedId = true)
     private int id;
+    
     //rabbitmq端口port
     @DatabaseField(columnName = "port")
     private String port;
+    
     //rabbitmq机构唯一标示orgNo
     @DatabaseField(columnName = "orgNo")
     private String orgNo;
+    
     //rabbitmq账号userName
     @DatabaseField(columnName = "userName")
     private String userName;
+    
     //rabbitmq密码password
     @DatabaseField(columnName = "password")
     private String password;
+    
     //rabbitmq服务器ip
     @DatabaseField(columnName = "ip")
     private String ip;
+    
     //组织机构id（服务器端）
     @DatabaseField(columnName = "organizationId")
     private String organizationId;

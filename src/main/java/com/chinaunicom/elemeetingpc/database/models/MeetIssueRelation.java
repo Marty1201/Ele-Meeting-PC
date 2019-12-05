@@ -5,7 +5,7 @@ import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 
 /**
- *会议-议题关联类
+ * 会议议题关系实体类.
  * @author zhaojunfeng
  */
 @DatabaseTable(tableName = "MeetIssueRelation")
@@ -80,6 +80,4 @@ public class MeetIssueRelation implements BaseModel{
     public void setSort(int sort) {
         this.sort = sort;
     }
-    
-    
 }

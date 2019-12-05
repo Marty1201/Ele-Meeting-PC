@@ -4,7 +4,7 @@ import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 
 /**
- * 会议类
+ * 会议实体类.
  * @author zhaojunfeng
  */
 @DatabaseTable(tableName = "meetInfo")
@@ -56,8 +56,6 @@ public class MeetInfo implements BaseModel{
     //更新时间
     @DatabaseField(columnName = "updateDate")
     private String updateDate;
-
-
 
     public MeetInfo() {
     }
@@ -170,6 +168,5 @@ public class MeetInfo implements BaseModel{
 
     public void setUpdateDate(String updateDate) {
         this.updateDate = updateDate;
-    }  
-    
+    }     
 }

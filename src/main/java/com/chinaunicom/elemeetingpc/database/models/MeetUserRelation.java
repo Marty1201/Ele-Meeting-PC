@@ -4,7 +4,7 @@ import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 
 /**
- *会议-用户关联类
+ * 会议用户关系实体类.
  * @author zhaojunfeng
  */
 @DatabaseTable(tableName = "MeetUserRelation")
@@ -65,8 +65,5 @@ public class MeetUserRelation implements BaseModel{
 
     public void setState(String state) {
         this.state = state;
-    }
-    
-    
-           
+    }     
 }

@@ -5,7 +5,7 @@ import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 
 /**
- * 身份
+ * 身份实体类.
  * @author zhaojunfeng, chenxi
  */
 @DatabaseTable(tableName = "IdentityInfo")

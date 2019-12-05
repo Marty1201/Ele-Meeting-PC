@@ -5,7 +5,7 @@ import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 
 /**
- *议题-文件资源关联类
+ * 文件议题关系实体类.
  * @author zhaojunfeng
  */
 @DatabaseTable(tableName = "IssueFileRelation")
@@ -93,6 +93,4 @@ public class IssueFileRelation implements BaseModel{
     public void setSort(int sort) {
         this.sort = sort;
     }
-    
-    
 }

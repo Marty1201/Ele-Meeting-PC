@@ -6,7 +6,7 @@ import com.j256.ormlite.table.DatabaseTable;
 
 
 /**
- * 字典实体类，用来存放系统内需要持久化保存的数据
+ * 字典实体类，用来存放系统内需要持久化保存的数据.
  * @author chenxi
  * 创建时间：2019-7-12 18:12:26
  */
