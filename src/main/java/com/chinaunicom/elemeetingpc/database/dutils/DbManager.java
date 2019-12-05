@@ -1,4 +1,3 @@
-
 package com.chinaunicom.elemeetingpc.database.dutils;
 
 import com.chinaunicom.elemeetingpc.database.models.Annotation;
@@ -19,17 +18,15 @@ import com.j256.ormlite.logger.Logger;
 import com.j256.ormlite.logger.LoggerFactory;
 import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.TableUtils;
-import java.io.IOException;
-import java.sql.SQLException;
-
 
 /**
- * Handle ORMLite ConnectionSource configuration, a ConnectionSource 
- * is a factory for connections to the physical SQL database.
- * @author chenxi
- * 创建时间：2019-6-18 16:40:10
+ * Handle ORMLite ConnectionSource configuration, a ConnectionSource is a
+ * factory for connections to the physical SQL database.
+ *
+ * @author chenxi 创建时间：2019-6-18 16:40:10
  */
 public class DbManager {
+
     private static final Logger logger = LoggerFactory.getLogger(DbManager.class);
     //database URL
     //private static final String JDBC_DRIVER_HD = "jdbc:h2:~/EleMeetingPCDB";//production enviroment
@@ -37,9 +34,9 @@ public class DbManager {
     //database accout & password(production enviroment)
     //public static final String USER = "admin";
     //public static final String PASS = "#752poi#";
-    
+
     private static ConnectionSource connectionSource;
-    
+
     /**
      * Initialize our database.
      */
@@ -49,55 +46,58 @@ public class DbManager {
         createTable();
         closeConnectionSource();
     }
-    
+
     /**
      * Create a connection source to our database.
      */
-    public static void createConnectionSource(){
-        try{
+    public static void createConnectionSource() {
+        try {
             connectionSource = new JdbcConnectionSource(JDBC_DRIVER_HD);//development enviroment
             //connectionSource =  new JdbcConnectionSource(JDBC_DRIVER_HD, USER, PASS);//production enviroment
-        } catch(SQLException e){
-            logger.warn(e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.error(e.getCause().getMessage());
         }
     }
-    
+
     /**
      * Return the connection source, never null.
+     *
      * @return connectionSource
      */
-    public static ConnectionSource getConnectionSource(){
-        if(connectionSource == null) {
+    public static ConnectionSource getConnectionSource() {
+        if (connectionSource == null) {
             createConnectionSource();
         }
         return connectionSource;
     }
-    
+
     /**
      * Close the connection source.
      */
-    public static void closeConnectionSource(){
-        if(connectionSource != null){
-            try{
+    public static void closeConnectionSource() {
+        if (connectionSource != null) {
+            try {
                 connectionSource.close();
-            } catch(IOException e){
-                logger.warn(e.getMessage());
+            } catch (Exception e) {
+                e.printStackTrace();
+                logger.error(e.getCause().getMessage());
             }
         }
     }
-    
+
     /**
      * to do.
      */
-    private static void dropTable(){
-        
+    private static void dropTable() {
+
     }
-    
+
     /**
      * Create tables if not exist.
      */
-    private static void createTable(){
-        try{
+    private static void createTable() {
+        try {
             TableUtils.createTableIfNotExists(connectionSource, UserInfo.class);
             TableUtils.createTableIfNotExists(connectionSource, OrganInfo.class);
             TableUtils.createTableIfNotExists(connectionSource, IdentityInfo.class);
@@ -111,9 +111,9 @@ public class DbManager {
             TableUtils.createTableIfNotExists(connectionSource, DictionaryInfo.class);
             TableUtils.createTableIfNotExists(connectionSource, SyncParams.class);
             TableUtils.createTableIfNotExists(connectionSource, Annotation.class);
-        } catch(SQLException e){
-            logger.warn(e.getMessage());
-            //e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.error(e.getCause().getMessage());
         }
     }
 }

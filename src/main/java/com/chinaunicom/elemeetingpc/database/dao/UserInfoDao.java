@@ -3,7 +3,7 @@ package com.chinaunicom.elemeetingpc.database.dao;
 
 
 /**
- * UserInfoDao.
+ * UserInfoDao to be implemented.
  * @author chenxi
  * 创建时间：2019-6-24 15:55:22
  */

@@ -4,7 +4,7 @@ import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 
 /**
- *议题类
+ * 议题实体类.
  * @author zhaojunfeng
  */
 @DatabaseTable(tableName = "issueInfo")
@@ -79,6 +79,4 @@ public class IssueInfo implements BaseModel{
     public void setEnglishName(String englishName) {
         this.englishName = englishName;
     }
-    
-    
 }
