@@ -1,57 +1,70 @@
 package com.chinaunicom.elemeetingpc.service;
 
-import com.chinaunicom.elemeetingpc.constant.ServeIpConstant;
-import com.chinaunicom.elemeetingpc.utils.GsonUtil;
-import com.chinaunicom.elemeetingpc.utils.HttpClientUtil;
-import com.j256.ormlite.logger.Logger;
-import com.j256.ormlite.logger.LoggerFactory;
-import java.util.Map;
-import org.apache.commons.lang3.StringUtils;
+import com.chinaunicom.elemeetingpc.constant.GlobalStaticConstant;
+import com.chinaunicom.elemeetingpc.database.dao.UserInfoDao;
+import com.chinaunicom.elemeetingpc.database.models.UserInfo;
+import com.chinaunicom.elemeetingpc.utils.exceptions.ApplicationException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * 负责与后台修改密码接口进行数据交互处理（mUser.do?action=resetPassword），主要包括以下操作： 1、接口请求参数封装；
- * 2、接口请求； 3、接口数据解析.
+ * The UserInfoService class serves as a service layer between Controller and
+ * Dao, it provides variouse database operation methods on the UserInfoService
+ * table.
  *
- * @author zhaojunfeng, chenxi
+ * @author chenxi, zhaojunfeng 创建时间：2019-7-4 10:19:20
  */
 public class UserInfoService {
 
-    private static final Logger logger = LoggerFactory.getLogger(UserInfoService.class);
-
     /**
-     * 封装参数为json字符串.
+     * Query existing userInfo from the table by given the loginName & its
+     * value.
      *
-     * @param userId
-     * @param old_password
-     * @param new_password
-     * @return resultString
+     * @param loginName not null
+     * @param value not null
+     * @return a list of UserInfo obj
+     * @throws ApplicationException
      */
-    public String fzParam(String userId, String old_password, String new_password) {
-        String resultString = "{userId:'" + userId + "',oldPassword:'" + old_password + "',newPassword:'" + new_password + "'}";
-        return resultString;
+    public List<UserInfo> queryUserInfos(String loginName, String value) throws ApplicationException {
+        UserInfoDao userDao = new UserInfoDao();
+        List<UserInfo> userList = new ArrayList<>();
+        userList = userDao.findByFieldNameAndValue(UserInfo.class, loginName, value);
+        return userList;
     }
 
     /**
-     * 解析接口返回的数据.
+     * Save or update userInfo in to table.
      *
-     * @param resString 接口返回的提示语
+     * @param userInfo not null
+     * @throws ApplicationException
      */
-    public String resetPassword(String userId, String old_password, String new_password) {
-        String resString = "";
-        try {
-            //封装参数
-            String param = this.fzParam(userId, old_password, new_password);
-            //访问接口
-            String result = HttpClientUtil.getInstance().getResponseBodyAsString(ServeIpConstant.resetPasswordServicePath(), param);
-            if (StringUtils.isNotBlank(result)) {
-                //把json字符串转成map
-                Map temp_map = GsonUtil.getMap(result);
-                resString = String.valueOf(temp_map.get("resultDesc"));
-            }
-        } catch (Exception e) {
-            logger.error(e.getCause().getMessage());
-            e.printStackTrace();
-        }
-        return resString;
+    public void saveOrUpdateUserInfo(UserInfo userInfo) throws ApplicationException {
+        UserInfoDao userDao = new UserInfoDao();
+        userDao.saveOrUpdate(userInfo);
+    }
+
+    /**
+     * Delete a list of userInfos from the table.
+     *
+     * @param userList not null
+     * @throws ApplicationException
+     */
+    public void deleteAllUserInfos(List<UserInfo> userList) throws ApplicationException {
+        UserInfoDao userDao = new UserInfoDao();
+        userDao.deleteByCollection(UserInfo.class, userList);
+    }
+
+    /**
+     * 获取用户的旧密码.
+     *
+     * @return oldPassword
+     * @throws ApplicationException
+     */
+    public String getOldPassword() throws ApplicationException {
+        String oldPassword = null;
+        UserInfoDao userDao = new UserInfoDao();
+        UserInfo userInfo = userDao.findById(UserInfo.class, GlobalStaticConstant.GLOBAL_USERINFO_ID);
+        oldPassword = userInfo.getPassword();
+        return oldPassword;
     }
 }

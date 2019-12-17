@@ -1,5 +1,5 @@
 
-package com.chinaunicom.elemeetingpc.modelFx;
+package com.chinaunicom.elemeetingpc.service;
 
 import com.chinaunicom.elemeetingpc.database.dao.IdentityInfoDao;
 import com.chinaunicom.elemeetingpc.database.models.IdentityInfo;
@@ -9,20 +9,22 @@ import java.util.List;
 
 
 /**
- * This class provides various methods implementation for IdentityInfo, mainly
- * focus on the logic for the Dao operation.
- * @author chenxi
- * 创建时间：2019-7-9 11:36:27
+ * The IdentityInfoService class serves as a service layer between Controller and
+ * Dao, it provides variouse database operation methods on the IdentityInfo
+ * table.
+ *
+ * @author chenxi 创建时间：2019-7-9 11:36:27
  */
-public class IdentityInfoModel {
+public class IdentityInfoService {
     
     /**
      * Query existing identityInfo from the table by given the ORGANINFOR_ID & its
      * value.
      *
-     * @param ORGANINFOR_ID
-     * @param value
-     * @return List<IdentityInfo>
+     * @param ORGANINFOR_ID not null
+     * @param value not null
+     * @return a list of IdentityInfo
+     * @throws ApplicationException
      */
     public List<IdentityInfo> queryIdentityInfos(String ORGANINFOR_ID, int value) throws ApplicationException {
         IdentityInfoDao identityDao = new IdentityInfoDao();
@@ -34,7 +36,8 @@ public class IdentityInfoModel {
     /**
      * Save or update userInfo in to table.
      *
-     * @param identityInfo
+     * @param identityInfo not null
+     * @throws ApplicationException
      */
     public void saveOrUpdateIdentityInfo(IdentityInfo identityInfo) throws ApplicationException {
         IdentityInfoDao identityDao = new IdentityInfoDao();
@@ -44,7 +47,8 @@ public class IdentityInfoModel {
     /**
      * Delete a list of identityInfos from the table.
      *
-     * @param identityList
+     * @param identityList not null
+     * @throws ApplicationException
      */
     public void deleteAllIdentityInfos(List<IdentityInfo> identityList) throws ApplicationException {
         IdentityInfoDao identityDao = new IdentityInfoDao();
