@@ -77,7 +77,7 @@
                 </HBox>
                 <ListView fx:id="meetHistoryListView" prefWidth="400.0" styleClass="meeting-list-view" />
                 <!-- to do: 如果将来把上面的代码高度确定下来，按钮的位置就能确定下来了 -->
-                <Button mnemonicParsing="false" onAction="#handExit" prefHeight="50.0" minHeight="50.0" prefWidth="400.0" styleClass="exit-btn" text="%left_navigation.exit" textAlignment="CENTER" />
+                <Button mnemonicParsing="false" onAction="#handleExit" prefHeight="50.0" minHeight="50.0" prefWidth="400.0" styleClass="exit-btn" text="%left_navigation.exit" textAlignment="CENTER" />
             </children>
         </VBox>
     </children>

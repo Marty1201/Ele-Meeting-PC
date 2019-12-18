@@ -8,7 +8,7 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox fx:id="mainIndex" alignment="TOP_LEFT" BorderPane.alignment="TOP_LEFT" maxWidth="Infinity" maxHeight="Infinity" prefWidth="1366.0" prefHeight="768.0" style="-fx-background-color: #f1f1f1;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.chinaunicom.elemeetingpc.controllers.MeetController">
+<VBox fx:id="mainIndex" alignment="TOP_LEFT" BorderPane.alignment="TOP_LEFT" maxWidth="Infinity" maxHeight="Infinity" prefWidth="1366.0" prefHeight="768.0" style="-fx-background-color: #f1f1f1;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.chinaunicom.elemeetingpc.controllers.MeetInfoController">
     <children>
         <!-- 菜单区域 -->
         <AnchorPane maxWidth="Infinity" maxHeight="Infinity" prefHeight="120.0" prefWidth="1366.0" style="-fx-background-color: #ffffff;">

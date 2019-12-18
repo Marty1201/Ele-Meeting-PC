@@ -1,14 +1,11 @@
 package com.chinaunicom.elemeetingpc.utils;
 
-import com.j256.ormlite.logger.Logger;
-import com.j256.ormlite.logger.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
-
 import org.apache.http.NameValuePair;
 import org.apache.http.StatusLine;
 import org.apache.http.client.config.RequestConfig;
@@ -34,7 +31,6 @@ import org.apache.http.util.EntityUtils;
     
 public class HttpClientUtil {
 
-    private static Logger LOGGER = LoggerFactory.getLogger(HttpClientUtil.class);
     private static final String TYPE_STRING = "string";
      
     private static final String TYPE_BYTEARRAY = "byte[]";
@@ -186,7 +182,6 @@ public class HttpClientUtil {
         CloseableHttpResponse response = null;
 
         try{
-        	LOGGER.info("Request url:" + targetUrl +" data:" + requestContent);
 
             HttpPost httppost = new HttpPost(targetUrl);
             //设置超时
@@ -220,16 +215,15 @@ public class HttpClientUtil {
             //根据指定类型进行返回
             if(StringUtils.equals(TYPE_STRING,responseType)){
                 responseResult = EntityUtils.toString(response.getEntity(),"GBK");
-                
-                LOGGER.info("resp data:" + (String)responseResult);
+
             }else if(StringUtils.equals(TYPE_BYTEARRAY,responseType)){
                 responseResult = EntityUtils.toByteArray(response.getEntity());
-                LOGGER.info("resp data:" + new String((byte[])responseResult));
+
             }
             
         }catch(Exception e){
             e.printStackTrace();
-            LOGGER.error("setPostRequest Exception:",e);
+
         }finally{
             //释放链接
         	response.close();
@@ -257,7 +251,7 @@ public class HttpClientUtil {
         CloseableHttpResponse response = null;
 
         try{
-        	LOGGER.info("Request url:" + targetUrl +" data:" + requestContent);
+
 
             HttpPost httppost = new HttpPost(targetUrl);
             //设置超时
@@ -286,15 +280,15 @@ public class HttpClientUtil {
             if(StringUtils.equals(TYPE_STRING,responseType)){
                 responseResult = EntityUtils.toString(response.getEntity(),"GBK");
                 
-                LOGGER.info("resp data:" + (String)responseResult);
+
             }else if(StringUtils.equals(TYPE_BYTEARRAY,responseType)){
                 responseResult = EntityUtils.toByteArray(response.getEntity());
-                LOGGER.info("resp data:" + new String((byte[])responseResult));
+
             }
             
         }catch(Exception e){
             e.printStackTrace();
-            LOGGER.error("setPostRequest Exception:",e);
+
         }finally{
             //释放链接
         	response.close();
@@ -356,7 +350,7 @@ public class HttpClientUtil {
                 httppost.setEntity(entity);
             }
              
-            LOGGER.info("Request url:" + targetUrl +" data:" + entity.toString());
+
             response = httpClient.execute(httppost);
             
             //StatusLine state = response.getStatusLine();
@@ -372,16 +366,16 @@ public class HttpClientUtil {
             if(StringUtils.equals(TYPE_STRING,responseType)){
                 responseResult = EntityUtils.toString(response.getEntity(),"GBK");
                 
-                LOGGER.info("resp data:" + (String)responseResult);
+
             }else if(StringUtils.equals(TYPE_BYTEARRAY,responseType)){
                 responseResult = EntityUtils.toByteArray(response.getEntity());
                 
-                LOGGER.info("resp data:" + new String((byte[])responseResult));
+
             }
             
         }catch(Exception e){
             e.printStackTrace();
-            LOGGER.error("setPostRequestWithMap Exception:",e);
+
         }finally{
             //释放链接
         	response.close();
@@ -461,7 +455,7 @@ public class HttpClientUtil {
         	RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(READ_TIMEOUT).setConnectTimeout(CONNECT_TIMEOUT).build();//设置请求和传输超时时间
         	httpget.setConfig(requestConfig);
             //LOGGER.info("Request url:" + targetUrl +" data:" + entity.toString());
-            LOGGER.info("Request url:" + url );
+
             response = httpClient.execute(httpget);
             
             //StatusLine state = response.getStatusLine();
@@ -476,17 +470,15 @@ public class HttpClientUtil {
             //根据指定类型进行返回
             if(StringUtils.equals(TYPE_STRING,responseType)){
                 responseResult = EntityUtils.toString(response.getEntity(),"GBK");
-                
-                LOGGER.info("resp data:" + (String)responseResult);
+
             }else if(StringUtils.equals(TYPE_BYTEARRAY,responseType)){
                 responseResult = EntityUtils.toByteArray(response.getEntity());
-                
-                LOGGER.info("resp data:" + new String((byte[])responseResult));
+
             }
             
         }catch(Exception e){
             e.printStackTrace();
-            LOGGER.error("setGetRequestWithMap Exception:",e);
+
         }finally{
             //释放链接
         	response.close();
@@ -567,7 +559,7 @@ public class HttpClientUtil {
         	RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(READ_TIMEOUT).setConnectTimeout(CONNECT_TIMEOUT).build();//设置请求和传输超时时间
         	httpget.setConfig(requestConfig);
             //LOGGER.info("Request url:" + targetUrl +" data:" + entity.toString());
-            LOGGER.info("Request url:" + url );
+
             response = httpClient.execute(httpget);
             
             //StatusLine state = response.getStatusLine();
@@ -583,16 +575,16 @@ public class HttpClientUtil {
             if(StringUtils.equals(TYPE_STRING,responseType)){
                 responseResult = EntityUtils.toString(response.getEntity(),charset);
                 
-                LOGGER.info("resp data:" + (String)responseResult);
+
             }else if(StringUtils.equals(TYPE_BYTEARRAY,responseType)){
                 responseResult = EntityUtils.toByteArray(response.getEntity());
                 
-                LOGGER.info("resp data:" + new String((byte[])responseResult));
+
             }
             
         }catch(Exception e){
             e.printStackTrace();
-            LOGGER.error("setGetRequestWithMap Exception:",e);
+
         }finally{
             //释放链接
         	response.close();
@@ -679,7 +671,7 @@ public class HttpClientUtil {
         	RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(READ_TIMEOUT).setConnectTimeout(CONNECT_TIMEOUT).build();//设置请求和传输超时时间
         	httpget.setConfig(requestConfig);
             //LOGGER.info("Request url:" + targetUrl +" data:" + entity.toString());
-            LOGGER.info("Request url:" + url );
+
             
 
             response = httpClient.execute(httpget);
@@ -697,16 +689,16 @@ public class HttpClientUtil {
             if(StringUtils.equals(TYPE_STRING,responseType)){
                 responseResult = EntityUtils.toString(response.getEntity(),charset);
                 
-                LOGGER.info("resp data:" + (String)responseResult);
+
             }else if(StringUtils.equals(TYPE_BYTEARRAY,responseType)){
                 responseResult = EntityUtils.toByteArray(response.getEntity());
                 
-                LOGGER.info("resp data:" + new String((byte[])responseResult));
+
             }
             
         }catch(Exception e){
             e.printStackTrace();
-            LOGGER.error("setGetRequestWithMap Exception:",e);
+
         }finally{
             //释放链接
         	response.close();

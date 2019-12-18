@@ -10,7 +10,10 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 
 /**
- * MeetIssueRelationDao, 自定义数据库操作方法实现.
+ * This class provides advanced database operation on MeetIssueRelation table, all
+ * methods in this class handle exceptions by try and catch, then throw the
+ * approperate error message to the caller, it's the caller's responsibility to
+ * catch and process the error message.
  *
  * @author zhaojunfeng, chenxi
  */
@@ -25,6 +28,7 @@ public class MeetIssueRelationDao extends CommonDao {
      *
      * @param childMeetingId 子会议id
      * @return meetIssueList 会议议题列表
+     * @throws ApplicationException
      */
     public List<MeetIssueRelation> findMeetIssueRelationByMeetId(String childMeetingId) throws ApplicationException {
         List<MeetIssueRelation> meetIssueList = new ArrayList<>();

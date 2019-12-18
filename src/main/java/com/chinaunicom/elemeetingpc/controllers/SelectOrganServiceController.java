@@ -1,4 +1,4 @@
-package com.chinaunicom.elemeetingpc.service;
+package com.chinaunicom.elemeetingpc.controllers;
 
 import com.chinaunicom.elemeetingpc.constant.GlobalStaticConstant;
 import com.chinaunicom.elemeetingpc.constant.ServeIpConstant;
@@ -15,11 +15,12 @@ import com.chinaunicom.elemeetingpc.database.models.SyncParams;
 import com.chinaunicom.elemeetingpc.modelFx.FileResourceModel;
 import com.chinaunicom.elemeetingpc.modelFx.FileUserRelationModel;
 import com.chinaunicom.elemeetingpc.modelFx.IssueFileRelationModel;
-import com.chinaunicom.elemeetingpc.modelFx.IssueInfoModel;
-import com.chinaunicom.elemeetingpc.modelFx.MeetInfoModel;
-import com.chinaunicom.elemeetingpc.modelFx.MeetIssueRelationModel;
-import com.chinaunicom.elemeetingpc.modelFx.MeetUserRelationModel;
+import com.chinaunicom.elemeetingpc.service.IssueInfoService;
 import com.chinaunicom.elemeetingpc.modelFx.SyncParamsModel;
+import com.chinaunicom.elemeetingpc.service.MeetInfoService;
+import com.chinaunicom.elemeetingpc.service.MeetIssueRelationService;
+import com.chinaunicom.elemeetingpc.service.MeetUserRelationService;
+import com.chinaunicom.elemeetingpc.service.OrganInfoService;
 import com.chinaunicom.elemeetingpc.utils.DateUtil;
 import com.chinaunicom.elemeetingpc.utils.FileDownloader;
 import com.chinaunicom.elemeetingpc.utils.FileUtil;
@@ -47,19 +48,19 @@ public class SelectOrganServiceController {
 
     private static final Logger logger = LoggerFactory.getLogger(SelectOrganServiceController.class);
 
-    private MeetInfoModel meetInfoModel;
+    private MeetInfoService meetInfoService;
 
-    private IssueInfoModel issueInfoModel;
+    private IssueInfoService issueInfoService;
 
     private FileResourceModel fileResourceModel;
 
-    private MeetIssueRelationModel meetIssueRelationModel;
+    private MeetIssueRelationService meetIssueRelationService;
 
     private IssueFileRelationModel issueFileRelationModel;
 
     private OrganInfoService organInfoModel;
 
-    private MeetUserRelationModel meetUserRelationModel;
+    private MeetUserRelationService meetUserRelationService;
 
     private FileUserRelationModel fileUserRelationModel;
 
@@ -70,13 +71,13 @@ public class SelectOrganServiceController {
      */
     public void initialize() throws ApplicationException, Exception {
         //初始化
-        meetInfoModel = new MeetInfoModel();
-        issueInfoModel = new IssueInfoModel();
+        meetInfoService = new MeetInfoService();
+        issueInfoService = new IssueInfoService();
         fileResourceModel = new FileResourceModel();
-        meetIssueRelationModel = new MeetIssueRelationModel();
+        meetIssueRelationService = new MeetIssueRelationService();
         issueFileRelationModel = new IssueFileRelationModel();
         organInfoModel = new OrganInfoService();
-        meetUserRelationModel = new MeetUserRelationModel();
+        meetUserRelationService = new MeetUserRelationService();
         fileUserRelationModel = new FileUserRelationModel();
         syncParamsModel = new SyncParamsModel();
         String response = "";
@@ -179,7 +180,7 @@ public class SelectOrganServiceController {
             Map meetInfoMap = new HashMap();
             for (int i = 0; i < meetInfoListMap.size(); i++) {
                 meetInfoMap = meetInfoListMap.get(i);
-                meetInfoModel.saveOrUpdateMeetInfo(setMeetInfoProperties(meetInfoMap));
+                meetInfoService.saveOrUpdateMeetInfo(setMeetInfoProperties(meetInfoMap));
             }
         }
     }
@@ -221,7 +222,7 @@ public class SelectOrganServiceController {
             Map issueInfoMap = new HashMap();
             for (int i = 0; i < issueInfoListMap.size(); i++) {
                 issueInfoMap = issueInfoListMap.get(i);
-                issueInfoModel.saveOrUpdateIssueInfo(setIssueInfoProperties(issueInfoMap));
+                issueInfoService.saveOrUpdateIssueInfo(setIssueInfoProperties(issueInfoMap));
             }
         }
     }
@@ -336,7 +337,7 @@ public class SelectOrganServiceController {
             Map meetIssueRelationMap = new HashMap();
             for (int i = 0; i < meetIssueRelationListMap.size(); i++) {
                 meetIssueRelationMap = meetIssueRelationListMap.get(i);
-                meetIssueRelationModel.saveOrUpdate(setMeetIssueRelationProperties(meetIssueRelationMap));
+                meetIssueRelationService.saveOrUpdateMeetIssueRelation(setMeetIssueRelationProperties(meetIssueRelationMap));
             }
         }
     }
@@ -405,7 +406,7 @@ public class SelectOrganServiceController {
             Map meetUserRelationMap = new HashMap();
             for (int i = 0; i < meetUserRelationListMap.size(); i++) {
                 meetUserRelationMap = meetUserRelationListMap.get(i);
-                meetUserRelationModel.saveOrUpdate(setMeetUserRelationProperties(meetUserRelationMap));
+                meetUserRelationService.saveOrUpdateMeetUserRelation(setMeetUserRelationProperties(meetUserRelationMap));
             }
         }
     }

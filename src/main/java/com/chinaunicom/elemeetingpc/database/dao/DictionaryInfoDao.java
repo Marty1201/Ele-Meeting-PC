@@ -11,8 +11,10 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 
 /**
- * This class provides various methods implementation for DictionaryInfo, mainly
- * focus on the logic for the Dao operation.
+ * This class provides advanced database operation on DictionaryInfo table, all
+ * methods in this class handle exceptions by try and catch, then throw the
+ * approperate error message to the caller, it's the caller's responsibility to
+ * catch and process the error message.
  *
  * @author chenxi 创建时间：2019-7-12 18:19:34
  */

@@ -8,8 +8,8 @@ import java.util.List;
 
 /**
  * The DictionaryInfoService class serves as a service layer between Controller and
- Dao, it provides variouse database operation methods on the DictionaryInfo
- table.
+ * Dao, it provides variouse database operation methods on the DictionaryInfo
+ * table.
  *
  * @author chenxi 创建时间：2019-7-12 18:21:53
  */

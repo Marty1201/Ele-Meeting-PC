@@ -10,7 +10,10 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 
 /**
- * MeetUserRelationDao, 自定义数据库操作方法实现（用户id对应其所在的子会议id）.
+ * This class provides advanced database operation on MeetUserRelation table, all
+ * methods in this class handle exceptions by try and catch, then throw the
+ * approperate error message to the caller, it's the caller's responsibility to
+ * catch and process the error message.
  *
  * @author zhaojunfeng, chenxi
  */
@@ -25,6 +28,7 @@ public class MeetUserRelationDao extends CommonDao {
      *
      * @param userId 用户id
      * @return meetUserRelationList 用户与子会议对应关系列表
+     * @throws ApplicationException
      */
     public List<MeetUserRelation> findMeetUserRelationByUserId(String userId) throws ApplicationException {
         List<MeetUserRelation> meetUserRelationList = new ArrayList<>();
