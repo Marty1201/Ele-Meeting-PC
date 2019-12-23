@@ -10,7 +10,10 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 
 /**
- * IssueFileRelationDao, 自定义数据库操作方法实现.
+ * This class provides advanced database operation on IssueFileRelation table, all
+ * methods in this class handle exceptions by try and catch, then throw the
+ * approperate error message to the caller, it's the caller's responsibility to
+ * catch and process the error message.
  *
  * @author zhaojunfeng, chenxi
  */

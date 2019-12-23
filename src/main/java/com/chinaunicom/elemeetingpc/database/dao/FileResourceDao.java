@@ -9,8 +9,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * This class provides various methods implementation for FileResource, mainly
- * focus on the logic for the Dao operation.
+ * This class provides advanced database operation on FileResource table, all
+ * methods in this class handle exceptions by try and catch, then throw the
+ * approperate error message to the caller, it's the caller's responsibility to
+ * catch and process the error message.
  *
  * @author zhaojunfeng, chenxi
  */
@@ -25,6 +27,7 @@ public class FileResourceDao extends CommonDao {
      *
      * @param fileIdList 文件id列表
      * @return fileList 文件列表
+     * @throws ApplicationException
      */
     public List<FileResource> findFilesById(List<String> fileIdList) throws ApplicationException {
         List<FileResource> fileList = new ArrayList<>();

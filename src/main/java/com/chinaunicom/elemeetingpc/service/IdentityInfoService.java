@@ -17,6 +17,14 @@ import java.util.List;
  */
 public class IdentityInfoService {
     
+    private IdentityInfoDao identityInfoDao;
+    
+    public IdentityInfoService() {
+        
+        identityInfoDao = new IdentityInfoDao();
+        
+    }
+    
     /**
      * Query existing identityInfo from the table by given the ORGANINFOR_ID & its
      * value.
@@ -27,9 +35,8 @@ public class IdentityInfoService {
      * @throws ApplicationException
      */
     public List<IdentityInfo> queryIdentityInfos(String ORGANINFOR_ID, int value) throws ApplicationException {
-        IdentityInfoDao identityDao = new IdentityInfoDao();
         List<IdentityInfo> identityList = new ArrayList<>();
-        identityList = identityDao.findByFieldNameAndValue(IdentityInfo.class, ORGANINFOR_ID, value);
+        identityList = identityInfoDao.findByFieldNameAndValue(IdentityInfo.class, ORGANINFOR_ID, value);
         return identityList;
     }
     
@@ -40,8 +47,7 @@ public class IdentityInfoService {
      * @throws ApplicationException
      */
     public void saveOrUpdateIdentityInfo(IdentityInfo identityInfo) throws ApplicationException {
-        IdentityInfoDao identityDao = new IdentityInfoDao();
-        identityDao.saveOrUpdate(identityInfo);
+        identityInfoDao.saveOrUpdate(identityInfo);
     }
     
     /**
@@ -51,7 +57,6 @@ public class IdentityInfoService {
      * @throws ApplicationException
      */
     public void deleteAllIdentityInfos(List<IdentityInfo> identityList) throws ApplicationException {
-        IdentityInfoDao identityDao = new IdentityInfoDao();
-        identityDao.deleteByCollection(IdentityInfo.class, identityList);
+        identityInfoDao.deleteByCollection(IdentityInfo.class, identityList);
     }
 }

@@ -9,7 +9,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * IssueInfoDao, 自定义数据库操作方法实现.
+ * This class provides advanced database operation on IssueInfo table, all
+ * methods in this class handle exceptions by try and catch, then throw the
+ * approperate error message to the caller, it's the caller's responsibility to
+ * catch and process the error message.
  *
  * @author zhaojunfeng, chenxi
  */
@@ -22,8 +25,9 @@ public class IssueInfoDao extends CommonDao {
     /**
      * 根据议题ids批量查询所有议题信息，增加state=0和sort条件.
      *
-     * @param issueIds 议题id
-     * @return issueList 议题列表
+     * @param issueIds a list of issue ids
+     * @return issueList a list of IssueInfo
+     * @throws ApplicationException
      */
     public List<IssueInfo> findIssueInfosByIds(List<String> issueIds) throws ApplicationException {
         List<IssueInfo> issueList = new ArrayList<>();

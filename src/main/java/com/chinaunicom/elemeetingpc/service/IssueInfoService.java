@@ -18,6 +18,14 @@ import java.util.List;
  */
 public class IssueInfoService {
     
+    private IssueInfoDao issueInfoDao;
+    
+    public IssueInfoService() {
+        
+        issueInfoDao = new IssueInfoDao();
+        
+    }
+    
     /**
      * 保存或修改.
      * 
@@ -25,7 +33,6 @@ public class IssueInfoService {
      * @throws ApplicationException 
      */
     public void saveOrUpdateIssueInfo(IssueInfo issueInfo) throws ApplicationException{
-        IssueInfoDao issueInfoDao = new IssueInfoDao();
         issueInfoDao.saveOrUpdate(issueInfo);
     }
 
@@ -39,13 +46,12 @@ public class IssueInfoService {
     public List<IssueInfo> queryIssueInfosByMeetId(String meetId) throws ApplicationException {
         List<IssueInfo> list = new ArrayList<>();
         List<MeetIssueRelation> tempList = new ArrayList<>();
-        MeetIssueRelationDao rdao = new MeetIssueRelationDao();
-        tempList = rdao.findByFieldNameAndValue(MeetIssueRelation.class, "meetingId", meetId);
+        MeetIssueRelationDao meetIssueRelationDao = new MeetIssueRelationDao();
+        tempList = meetIssueRelationDao.findByFieldNameAndValue(MeetIssueRelation.class, "meetingId", meetId);
         List<String> ids = new ArrayList<>();
-        for (MeetIssueRelation mr : tempList) {
-            ids.add(mr.getIssueId());
+        for (MeetIssueRelation meetIssueRelation : tempList) {
+            ids.add(meetIssueRelation.getIssueId());
         }
-        IssueInfoDao issueInfoDao = new IssueInfoDao();
         list = issueInfoDao.findIssueInfosByIds(ids);
         return list;
     }
@@ -58,7 +64,6 @@ public class IssueInfoService {
      * @throws ApplicationException
      */
     public List<IssueInfo> queryIssueByIds(List<String> issueIdList) throws ApplicationException {
-        IssueInfoDao issueInfoDao = new IssueInfoDao();
         List<IssueInfo> issueList = new ArrayList<>();
         issueList = issueInfoDao.findIssueInfosByIds(issueIdList);
         return issueList;

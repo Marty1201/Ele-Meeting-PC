@@ -3,6 +3,7 @@ package com.chinaunicom.elemeetingpc.controllers;
 import com.chinaunicom.elemeetingpc.constant.GlobalStaticConstant;
 import com.chinaunicom.elemeetingpc.constant.ServeIpConstant;
 import com.chinaunicom.elemeetingpc.constant.StatusConstant;
+import com.chinaunicom.elemeetingpc.database.models.Annotation;
 import com.chinaunicom.elemeetingpc.database.models.FileResource;
 import com.chinaunicom.elemeetingpc.database.models.FileUserRelation;
 import com.chinaunicom.elemeetingpc.database.models.IssueFileRelation;
@@ -10,24 +11,20 @@ import com.chinaunicom.elemeetingpc.database.models.IssueInfo;
 import com.chinaunicom.elemeetingpc.database.models.MeetInfo;
 import com.chinaunicom.elemeetingpc.database.models.MeetIssueRelation;
 import com.chinaunicom.elemeetingpc.database.models.MeetUserRelation;
-import com.chinaunicom.elemeetingpc.database.models.OrganInfo;
-import com.chinaunicom.elemeetingpc.database.models.SyncParams;
-import com.chinaunicom.elemeetingpc.modelFx.FileResourceModel;
-import com.chinaunicom.elemeetingpc.modelFx.FileUserRelationModel;
-import com.chinaunicom.elemeetingpc.modelFx.IssueFileRelationModel;
+import com.chinaunicom.elemeetingpc.service.AnnotationService;
+import com.chinaunicom.elemeetingpc.service.FileResourceService;
+import com.chinaunicom.elemeetingpc.service.FileUserRelationService;
+import com.chinaunicom.elemeetingpc.service.IssueFileRelationService;
 import com.chinaunicom.elemeetingpc.service.IssueInfoService;
-import com.chinaunicom.elemeetingpc.modelFx.SyncParamsModel;
 import com.chinaunicom.elemeetingpc.service.MeetInfoService;
 import com.chinaunicom.elemeetingpc.service.MeetIssueRelationService;
 import com.chinaunicom.elemeetingpc.service.MeetUserRelationService;
-import com.chinaunicom.elemeetingpc.service.OrganInfoService;
 import com.chinaunicom.elemeetingpc.utils.DateUtil;
 import com.chinaunicom.elemeetingpc.utils.FileDownloader;
 import com.chinaunicom.elemeetingpc.utils.FileUtil;
 import com.chinaunicom.elemeetingpc.utils.GsonUtil;
 import com.chinaunicom.elemeetingpc.utils.HttpClientUtil;
 import com.chinaunicom.elemeetingpc.utils.exceptions.ApplicationException;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -39,112 +36,107 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * 当用户选择机构后将触发SelectOrganServiceController，此控制器负责与后台的默认会议接口进行数据交互处理（mLogin.do?action=defaultMeeting），主要包括以下操作：
- * 1、接口请求参数封装； 2、接口请求； 3、接口数据解析； 4、接口数据保存本地数据库.
+ * 当用户在左侧会议列表中选择会议后将触发MeetInfoServiceController，此控制器负责与后台选择会议接口进行数据交互处理（mMeet.do?action=getMeeting），
+ * 主要包括以下操作： 1、接口请求参数封装； 2、接口请求； 3、接口数据解析； 4、调用service层对象进行数据本地保存.
  *
  * @author zhaojunfeng, chenxi
  */
-public class SelectOrganServiceController {
+public class MeetInfoServiceController {
 
-    private static final Logger logger = LoggerFactory.getLogger(SelectOrganServiceController.class);
+    private static final Logger logger = LoggerFactory.getLogger(MeetInfoServiceController.class);
 
     private MeetInfoService meetInfoService;
 
     private IssueInfoService issueInfoService;
 
-    private FileResourceModel fileResourceModel;
+    private FileResourceService fileResourceService;
 
     private MeetIssueRelationService meetIssueRelationService;
 
-    private IssueFileRelationModel issueFileRelationModel;
-
-    private OrganInfoService organInfoModel;
+    private IssueFileRelationService issueFileRelationService;
 
     private MeetUserRelationService meetUserRelationService;
 
-    private FileUserRelationModel fileUserRelationModel;
+    private FileUserRelationService fileUserRelationService;
 
-    private SyncParamsModel syncParamsModel;
+    private AnnotationService annotationService;
 
     /**
-     * initialize方法是SelectOrganServiceController业务逻辑的触发点和唯一入口.
+     * 调用会议接口逻辑处理,根据会议ID查询会议信息.
      */
-    public void initialize() throws ApplicationException, Exception {
+    public void getMeetInfosFromRemote() throws ApplicationException, Exception {
         //初始化
         meetInfoService = new MeetInfoService();
         issueInfoService = new IssueInfoService();
-        fileResourceModel = new FileResourceModel();
+        fileResourceService = new FileResourceService();
         meetIssueRelationService = new MeetIssueRelationService();
-        issueFileRelationModel = new IssueFileRelationModel();
-        organInfoModel = new OrganInfoService();
+        issueFileRelationService = new IssueFileRelationService();
         meetUserRelationService = new MeetUserRelationService();
-        fileUserRelationModel = new FileUserRelationModel();
-        syncParamsModel = new SyncParamsModel();
-        String response = "";
-        String jsonRequestString = "";
+        fileUserRelationService = new FileUserRelationService();
+        annotationService = new AnnotationService();
         //封装参数
-        jsonRequestString = buildJsonRequestString(GlobalStaticConstant.GLOBAL_ORGANINFO_OWNER_USERID, GlobalStaticConstant.GLOBAL_ORGANINFO_ORGANIZATIONID, "zh_CN", getupdateDate());
+        String jsonRequestString = buildJsonRequestString(GlobalStaticConstant.GLOBAL_ORGANINFO_OWNER_USERID, GlobalStaticConstant.GLOBAL_SELECTED_MEETID, getUpdateDate());
         //访问接口
-        logger.debug("调用defaultMeeting接口开始时间：{}", DateUtil.formatFullDateTime(new Date()));
-        response = HttpClientUtil.getInstance().getResponseBodyAsString(ServeIpConstant.selectOrganServicePath(), jsonRequestString);
-        logger.debug("调用defaultMeeting接口结束时间：{}", DateUtil.formatFullDateTime(new Date()));
+        logger.debug("调用getMeeting接口开始时间：{}", DateUtil.formatFullDateTime(new Date()));
+        String response = HttpClientUtil.getInstance().getResponseBodyAsString(ServeIpConstant.meetingOfOrganServicePath(), jsonRequestString);
+        logger.debug("调用getMeeting接口结束时间：{}", DateUtil.formatFullDateTime(new Date()));
         if (StringUtils.isNotBlank(response)) {
             //把json字符串转成map
-            Map tempMap = GsonUtil.getMap(response);
-            String resultCode = String.valueOf(tempMap.get("resultCode"));
+            Map temp_map = GsonUtil.getMap(response);
+            String resultCode = String.valueOf(temp_map.get("resultCode"));
             if (StatusConstant.RESULT_CODE_SUCCESS.equals(resultCode)) {//查询成功
-                //取出真正有用的数据
-                String resultData = String.valueOf(tempMap.get("resultData"));
+                String resultData = String.valueOf(temp_map.get("resultData"));
                 Map dataMap = GsonUtil.getMap(resultData);
-                logger.debug("处理defaultMeeting接口返回数据开始时间：{}", DateUtil.formatFullDateTime(new Date()));
-                parseDataMap(dataMap);//to do: the cause of slowness? output the processing time for each operation
-                logger.debug("处理defaultMeeting接口返回数据结束时间：{}", DateUtil.formatFullDateTime(new Date()));
+                logger.debug("处理getMeeting接口返回数据开始时间：{}", DateUtil.formatFullDateTime(new Date()));
+                parseDataMap(dataMap);
+                logger.debug("处理getMeeting接口返回数据结束时间：{}", DateUtil.formatFullDateTime(new Date()));
             }
         }
     }
-    
+
     /**
-     * 获取updateDate字段值.
+     * 从MeetInfo中获取updateDate字段值.
+     *
      * @return updateDate 更新时间
+     * @throws ApplicationException
      */
-    public String getupdateDate() throws ApplicationException {
-        List<OrganInfo> organInfoList = new ArrayList<>();
+    public String getUpdateDate() throws ApplicationException {
         String updateDate = "";
-        //根据用户id和机构id查出对应的机构
-        organInfoList = organInfoModel.queryOrganInfosByMap(GlobalStaticConstant.GLOBAL_ORGANINFO_ORGANIZATIONID, GlobalStaticConstant.GLOBAL_ORGANINFO_OWNER_USERID);
-        if (!organInfoList.isEmpty()) {
-            updateDate = organInfoList.get(0).getUpdateDate();
-            if (StringUtils.isBlank(updateDate)) {//解决首次请求接口updateDate值传null的问题
-                updateDate = "";
+        Map<String, String> queryMap = new HashMap<>();
+        MeetInfo info = meetInfoService.getMeetInfoByMeetId(GlobalStaticConstant.GLOBAL_SELECTED_MEETID);
+        if (info != null) {
+            String existUpdateDate = info.getUpdateDate();
+            if (StringUtils.isNotBlank(existUpdateDate)) {
+                updateDate = existUpdateDate;
             }
         }
         return updateDate;
     }
 
     /**
-     * 封装请求参数为json字符串，示例：{userId:'20190610100440876451901291839127',locale:'zh_CN',organizationId:'20170526152646214211565279562682',updateDate:''}.
+     * 封装参数为json字符串，示例：{userId:'20190724085930588875478137127383',meetingId:'20190701145559610372604487039259',organizationId:'20190109175459084818173570055782',updateDate:''}.
      *
      * @param userId 用户id
-     * @param organizationId 组织机构id
-     * @param locale 语言
+     * @param meetingId 会议id
      * @param updateDate 数据更新时间
-     * @return requestContent 请求主体
+     * @return 请求主体
      */
-    private String buildJsonRequestString(String userId, String organizationId, String locale, String updateDate) {
-        String requestString = "{userId:'" + userId + "',locale:'" + locale + "',organizationId:'" + organizationId + "',updateDate:'" + updateDate + "'}";
-        return requestString;
+    private String buildJsonRequestString(String userId, String meetingId, String updateDate) {
+        String resultString = "{userId:'" + userId + "',meetingId:'" + meetingId + "',updateDate:'" + updateDate + "'}";
+        return resultString;
     }
 
     /**
-     * 解析接口返回的Map数据集合，需要处理的数据类型主要包括以下几种： 1、会议信息 2、议题信息 3、文件信息（线程池下载文件）
+     * 解析接口返回的Map数据集合，需要处理的数据类型主要包括以下几种： 1、子会议信息 2、议题信息 3、文件信息（线程池下载文件）
      * 4、会议议题关联信息 5、议题文件关联信息 6、会议用户关联信息 7、文件用户关联信息 8、rabbitMQ相关信息 9、misc.
      *
-     * @param dataMap 服务器返回的数据集合
+     * @param dataMap
      * @throws ApplicationException
      */
-    public void parseDataMap(Map dataMap) throws ApplicationException {
-        //处理会议信息
-        handleMeetingInfo(dataMap);
+    private void parseDataMap(Map dataMap) throws ApplicationException {
+
+        //处理子会议信息
+        handleChildMeetingInfo(dataMap);
         //处理议题信息
         handleIssueInfo(dataMap);
         //处理文件信息
@@ -157,13 +149,10 @@ public class SelectOrganServiceController {
         handleMeetUserRelation(dataMap);
         //处理文件用户关联信息
         handleFileUserRelation(dataMap);
-        //处理rabbitmq的syncParams
-        handleSyncParams(dataMap);
-        //处理更新时间updateDate和投票倒计时countDownTime
+        //处理批注信息
+        handleAnnotation(dataMap);
+        //处理更新时间updateDate
         handleMisc(dataMap);
-        //todo:处理投票信息
-        //todo:处理签到信息
-        //todo:处理批注信息        
     }
 
     /**
@@ -173,13 +162,13 @@ public class SelectOrganServiceController {
      * @param dataMap 服务器返回的数据集合
      * @throws ApplicationException
      */
-    public void handleMeetingInfo(Map dataMap) throws ApplicationException {
-        //获取会议信息
-        List<Map> meetInfoListMap = (List<Map>) dataMap.get("meetings");
-        if (meetInfoListMap != null && !meetInfoListMap.isEmpty()) {
+    public void handleChildMeetingInfo(Map dataMap) throws ApplicationException {
+        //处理子会议信息        
+        List<Map> childMeetingsListMap = (List<Map>) dataMap.get("childMeetings");
+        if (childMeetingsListMap != null && !childMeetingsListMap.isEmpty()) {
             Map meetInfoMap = new HashMap();
-            for (int i = 0; i < meetInfoListMap.size(); i++) {
-                meetInfoMap = meetInfoListMap.get(i);
+            for (int i = 0; i < childMeetingsListMap.size(); i++) {
+                meetInfoMap = childMeetingsListMap.get(i);
                 meetInfoService.saveOrUpdateMeetInfo(setMeetInfoProperties(meetInfoMap));
             }
         }
@@ -200,7 +189,6 @@ public class SelectOrganServiceController {
         meetInfo.setState(String.valueOf(meetInfoMap.get("state")));
         meetInfo.setCreateTime(String.valueOf(meetInfoMap.get("createTime")));
         meetInfo.setParentMeetingId(String.valueOf(meetInfoMap.get("parentMeetingId")));
-        //这里必须要吐槽一下，sort类型明明是int，怎么接口返回以后就成double了？还带个小数点，找了半天才发现是这里转换出错了，太坑了
         meetInfo.setSort(Double.valueOf(String.valueOf(meetInfoMap.get("sort"))).intValue());
         meetInfo.setEnglishName(String.valueOf(meetInfoMap.get("englishName")));
         meetInfo.setIsEng(String.valueOf(meetInfoMap.get("isEng")));
@@ -233,7 +221,7 @@ public class SelectOrganServiceController {
      * @param issueInfoMap 接口返回的一个IssueInfo对象
      * @return 一个被赋值的IssueInfo对象
      */
-    public IssueInfo setIssueInfoProperties(Map issueInfoMap) throws ApplicationException {
+    public IssueInfo setIssueInfoProperties(Map issueInfoMap) {
         IssueInfo issueInfo = new IssueInfo();
         issueInfo.setIssueId(String.valueOf(issueInfoMap.get("issueId")));
         issueInfo.setIssueName(String.valueOf(issueInfoMap.get("issueName")));
@@ -267,7 +255,7 @@ public class SelectOrganServiceController {
             for (int i = 0; i < fileResourceListMap.size(); i++) {
                 fileResourceMap = fileResourceListMap.get(i);
                 //根据接口返回的文件id，查询数据库中是否已存在此条数据并对已存在的文件进行相应的处理
-                List<FileResource> oldFile = fileResourceModel.queryFilesById(String.valueOf(fileResourceMap.get("fileId")));
+                List<FileResource> oldFile = fileResourceService.queryFilesById(String.valueOf(fileResourceMap.get("fileId")));
                 if (!oldFile.isEmpty()) { //如果文件已存在，检查是否需要对已存在的文件进行更新
                     String fileName = StringUtils.substringAfterLast(oldFile.get(0).getFilePath(), "/");
                     //1.根据状态state检查文件是否需要删除
@@ -293,12 +281,12 @@ public class SelectOrganServiceController {
                         service.execute(new FileDownloader(ServeIpConstant.IP + "/" + ServeIpConstant.FILE_FOLDER + "/" + String.valueOf(fileResourceMap.get("filePath"))));
                     }
                     //更新文件信息
-                    fileResourceModel.saveOrUpdateFileResource(setFileResourceProperties(fileResourceMap));
+                    fileResourceService.saveOrUpdateFileResource(setFileResourceProperties(fileResourceMap));
                 } else { //如果文件不存在，开启线程下载文件
                     //开启多线程下载新文件，FileDownloader实现Runnable，重写run方法
                     service.execute(new FileDownloader(ServeIpConstant.IP + "/" + ServeIpConstant.FILE_FOLDER + String.valueOf(fileResourceMap.get("filePath"))));
                     //新增文件信息
-                    fileResourceModel.saveOrUpdateFileResource(setFileResourceProperties(fileResourceMap));
+                    fileResourceService.saveOrUpdateFileResource(setFileResourceProperties(fileResourceMap));
                 }
             }
             service.shutdown();//关闭线程
@@ -331,7 +319,7 @@ public class SelectOrganServiceController {
      * @throws ApplicationException
      */
     public void hanleMeetIssueRelation(Map dataMap) throws ApplicationException {
-        //获取会议议题关系信息
+        //处理会议议题关联信息
         List<Map> meetIssueRelationListMap = (List<Map>) dataMap.get("meetingIssueInfos");
         if (meetIssueRelationListMap != null && !meetIssueRelationListMap.isEmpty()) {
             Map meetIssueRelationMap = new HashMap();
@@ -366,12 +354,13 @@ public class SelectOrganServiceController {
      * @throws ApplicationException
      */
     public void hanleIssueFileRelation(Map dataMap) throws ApplicationException {
+        //处理议题文件关联信息
         List<Map> issueFileRelationListMap = (List<Map>) dataMap.get("issueFileInfos");
         if (issueFileRelationListMap != null && !issueFileRelationListMap.isEmpty()) {
             Map issueFileRelationMap = new HashMap();
             for (int i = 0; i < issueFileRelationListMap.size(); i++) {
                 issueFileRelationMap = issueFileRelationListMap.get(i);
-                issueFileRelationModel.saveOrUpdate(setIssueFileRelationProperties(issueFileRelationMap));
+                issueFileRelationService.saveOrUpdateIssueFileRelation(setIssueFileRelationProperties(issueFileRelationMap));
             }
         }
     }
@@ -401,6 +390,7 @@ public class SelectOrganServiceController {
      * @throws ApplicationException
      */
     public void handleMeetUserRelation(Map dataMap) throws ApplicationException {
+        //处理会议用户关联信息
         List<Map> meetUserRelationListMap = (List<Map>) dataMap.get("meetingUserInfos");
         if (meetUserRelationListMap != null && !meetUserRelationListMap.isEmpty()) {
             Map meetUserRelationMap = new HashMap();
@@ -434,12 +424,13 @@ public class SelectOrganServiceController {
      * @throws ApplicationException
      */
     public void handleFileUserRelation(Map dataMap) throws ApplicationException {
+        //处理文件用户关联信息
         List<Map> fileUserRelationListMap = (List<Map>) dataMap.get("fileUserInfos");
         if (fileUserRelationListMap != null && !fileUserRelationListMap.isEmpty()) {
             Map fileUserRelationMap = new HashMap();
             for (int i = 0; i < fileUserRelationListMap.size(); i++) {
                 fileUserRelationMap = fileUserRelationListMap.get(i);
-                fileUserRelationModel.saveOrUpdate(setFileUserRelationProperties(fileUserRelationMap));
+                fileUserRelationService.saveOrUpdateFileUserRelation(setFileUserRelationProperties(fileUserRelationMap));
             }
         }
     }
@@ -460,64 +451,62 @@ public class SelectOrganServiceController {
     }
 
     /**
-     * 从接口返回的Map集合中获取SyncParams对象（一个Map的列表集合），循环该集合，获取每条SyncParams对象的属性，
-     * 创建新的SyncParams对象，对其属性进行赋值并保存到数据库里.
+     * 从接口返回的Map集合中获取Annotation对象（一个Map的列表集合），循环该集合，获取每条Annotation对象的属性，
+     * 创建新的Annotation对象，对其属性进行赋值并保存到数据库里.
      *
      * @param dataMap 服务器返回的数据集合
      * @throws ApplicationException
      */
-    public void handleSyncParams(Map dataMap) throws ApplicationException {
-        Map syncParamsMap = (Map) dataMap.get("syncParams");
-        if (!syncParamsMap.isEmpty()) {
-            SyncParams syncParams = new SyncParams();
-            //根据机构id查询数据库里是否已存在同样的数据
-            //注意：这里不建议直接用createOrUpdate方法因为SyncParams表中的id是应用自动生成的，而不是接口传过来的，而createOrUpdate是从接口返回的对象中获取id
-            //然后在数据表中查询此id来判断是否更新或新增此条数据的
-            List<SyncParams> syncParamsList = syncParamsModel.querySyncParamsByOrganId("organizationId", GlobalStaticConstant.GLOBAL_ORGANINFO_ORGANIZATIONID);
-            if (!syncParamsList.isEmpty()) { //如果数据已存在，更新这条数据
-                syncParams = syncParamsList.get(0);
-                syncParamsModel.saveOrUpdateOrganInfo(setSyncParamsProperties(syncParams, syncParamsMap));
-            } else { //如果数据不存在，创建一条新数据
-                syncParamsModel.saveOrUpdateOrganInfo(setSyncParamsProperties(syncParams, syncParamsMap));
+    public void handleAnnotation(Map dataMap) throws ApplicationException {
+        //处理批注信息       
+        List<Map> annotationListMap = (List<Map>) dataMap.get("annotations");
+        if (annotationListMap != null && !annotationListMap.isEmpty()) {
+            Map annotationMap = new HashMap();
+            for (int i = 0; i < annotationListMap.size(); i++) {
+                annotationMap = annotationListMap.get(i);
+                annotationService.saveOrUpdateAnnotation(setAnnotationProperties(annotationMap));
             }
         }
     }
 
     /**
-     * SyncParams对象赋值，获取接口返回的SyncParams对象的值，并对已有或新建的SyncParams对象其进行赋值然后保存到数据库里.
+     * Annotation对象赋值，获取接口返回的Annotation对象的值，创建一个空白的Annotation对象并对其进行赋值然后保存到数据库里.
      *
-     * @param syncParams SyncParams对象，可能已存在或为空
-     * @param syncParamsMap 接口返回的一个SyncParams对象
-     * @return 一个被赋值的SyncParams对象
+     * @param annotationMap 接口返回的一个Annotation对象
+     * @return 一个被赋值的Annotation对象
      */
-    public SyncParams setSyncParamsProperties(SyncParams syncParams, Map syncParamsMap) {
-        syncParams.setPort(String.valueOf(syncParamsMap.get("port")));
-        syncParams.setOrgNo(String.valueOf(syncParamsMap.get("orgNo")));
-        syncParams.setUserName(String.valueOf(syncParamsMap.get("userName")));
-        syncParams.setPassword(String.valueOf(syncParamsMap.get("password")));
-        syncParams.setIp(String.valueOf(syncParamsMap.get("ip")));
-        syncParams.setOrganizationId(GlobalStaticConstant.GLOBAL_ORGANINFO_ORGANIZATIONID);
-        return syncParams;
+    public Annotation setAnnotationProperties(Map annotationMap) {
+        Annotation annotation = new Annotation();
+        annotation.setAnnoId(String.valueOf(annotationMap.get("annoId")));
+        annotation.setAnnoDate(String.valueOf(annotationMap.get("annoDate")));
+        annotation.setAnnoType(String.valueOf(annotationMap.get("annoType")));
+        annotation.setContent(String.valueOf(annotationMap.get("content")));
+        annotation.setFileId(String.valueOf(annotationMap.get("fileId")));
+        annotation.setHeight(String.valueOf(annotationMap.get("height")));
+        annotation.setPageNum(Double.valueOf(String.valueOf(annotationMap.get("pageNum"))).intValue());
+        annotation.setState(String.valueOf(annotationMap.get("state")));
+        annotation.setUserId(String.valueOf(annotationMap.get("userId")));
+        annotation.setWidth(String.valueOf(annotationMap.get("width")));
+        annotation.setxPoint(String.valueOf(annotationMap.get("xPoint")));
+        annotation.setyPoint(String.valueOf(annotationMap.get("yPoint")));
+        return annotation;
     }
 
     /**
-     * 从接口返回的Map集合中获取updateDate和countDownTime值，并将这两个值存入OrganInfo表中.
+     * 从接口返回的Map集合中获取updateDate的值，并将这两个值存入MeetInfo表中.
      *
      * @param dataMap 服务器返回的数据集合
      * @throws ApplicationException
      */
     public void handleMisc(Map dataMap) throws ApplicationException {
+        //处理更新时间
         String updateDate = String.valueOf(dataMap.get("updateDate"));
-        String countDownTime = String.valueOf(dataMap.get("countDownTime"));
-        OrganInfo organInfo = new OrganInfo();
-        List<OrganInfo> organInfoList = new ArrayList<>();
-        //根据用户id和机构id查出对应的机构
-        organInfoList = organInfoModel.queryOrganInfosByMap(GlobalStaticConstant.GLOBAL_ORGANINFO_ORGANIZATIONID, GlobalStaticConstant.GLOBAL_ORGANINFO_OWNER_USERID);
-        if (!organInfoList.isEmpty()) {
-            organInfo = organInfoList.get(0);
-            organInfo.setUpdateDate(updateDate);//更新时间updateDate必须与用户和用户所在机构关联
-            organInfo.setCountDownTime(countDownTime);
-            organInfoModel.saveOrUpdateOrganInfo(organInfo);
+        if (updateDate != null) {
+            MeetInfo info = meetInfoService.getMeetInfoByMeetId(GlobalStaticConstant.GLOBAL_SELECTED_MEETID);
+            if (info != null) {
+                info.setUpdateDate(updateDate);
+                meetInfoService.saveOrUpdateMeetInfo(info);
+            }
         }
     }
 }

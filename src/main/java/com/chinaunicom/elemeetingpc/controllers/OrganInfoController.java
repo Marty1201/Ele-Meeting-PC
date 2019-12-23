@@ -37,7 +37,7 @@ public class OrganInfoController {
     @FXML
     private ListView<OrganInfoFx> organListView;
 
-    private OrganInfoService organInfoModel;
+    private OrganInfoService organInfoService;
 
     private BorderPane borderPaneMain;
 
@@ -50,10 +50,10 @@ public class OrganInfoController {
      */
     public void initialize() {
         try {
-            organInfoModel = new OrganInfoService();
-            organInfoModel.init();
-            int listSize = organInfoModel.getOrganInfoNameObservableList().size();
-            organListView.setItems(organInfoModel.getOrganInfoNameObservableList());
+            organInfoService = new OrganInfoService();
+            organInfoService.init();
+            int listSize = organInfoService.getOrganInfoNameObservableList().size();
+            organListView.setItems(organInfoService.getOrganInfoNameObservableList());
             //ListView的高=list的size X 每条list-cell的size + 4
             organListView.setFixedCellSize(40.0);
             organListView.setPrefHeight(listSize * 40.0 + 4.0);
@@ -69,9 +69,9 @@ public class OrganInfoController {
                 final Task task = new Task<Void>() {
                     @Override
                     protected Void call() throws InterruptedException, ExecutionException, Exception {
-                        SelectOrganServiceController selectOrganServiceController = new SelectOrganServiceController();
+                        OrganInfoServiceController organInfoServiceController = new OrganInfoServiceController();
                         //调接口解析数据
-                        selectOrganServiceController.initialize();
+                        organInfoServiceController.initialize();
                         return null;
                     }
                 };

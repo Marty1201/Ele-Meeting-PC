@@ -10,7 +10,10 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 
 /**
- * MeetInfoDao, 自定义数据库操作方法实现.
+ * This class provides advanced database operation on MeetInfo table, all
+ * methods in this class handle exceptions by try and catch, then throw the
+ * approperate error message to the caller, it's the caller's responsibility to
+ * catch and process the error message.
  *
  * @author zhaojunfeng, chenxi
  */
@@ -24,7 +27,7 @@ public class MeetInfoDao extends CommonDao {
      * 获取正在进行的会议列表.
      *
      * @param parentMeetIdList 父会议id列表
-     * @param dateTimeString 时间字符串yyyy-MM-dd hh:mm:ss
+     * @param dateTimeString 时间字符串 yyyy-MM-dd hh:mm:ss
      * @return meetInfoList
      * @throws ApplicationException
      */
@@ -107,6 +110,7 @@ public class MeetInfoDao extends CommonDao {
      * @param parentMeetingId 父会议id
      * @param childMeetIdList 子会议id列表
      * @return childMeetInfoList 子会议信息列表
+     * @throws ApplicationException
      */
     public List<MeetInfo> findChildMeetInfos(String parentMeetingId, List<String> childMeetIdList) throws ApplicationException {
         List<MeetInfo> childMeetInfoList = new ArrayList<>();
@@ -130,6 +134,7 @@ public class MeetInfoDao extends CommonDao {
      *
      * @param meetingId 会议id
      * @return meetInfoList 会议信息列表
+     * @throws ApplicationException
      */
     public List<MeetInfo> findMeetInfosById(String meetingId) throws ApplicationException {
         List<MeetInfo> meetInfoList = new ArrayList<>();

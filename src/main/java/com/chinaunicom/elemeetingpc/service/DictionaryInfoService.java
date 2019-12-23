@@ -14,6 +14,14 @@ import java.util.List;
  * @author chenxi 创建时间：2019-7-12 18:21:53
  */
 public class DictionaryInfoService {
+    
+    private DictionaryInfoDao dictionaryInfoDao;
+    
+    public DictionaryInfoService() {
+        
+        dictionaryInfoDao = new DictionaryInfoDao();
+        
+    }
 
     /**
      * Save or update dictionaryInfo in to table.
@@ -22,8 +30,7 @@ public class DictionaryInfoService {
      * @throws ApplicationException
      */
     public void saveOrUpdateDictionaryInfo(DictionaryInfo dictionaryInfo) throws ApplicationException {
-        DictionaryInfoDao organDao = new DictionaryInfoDao();
-        organDao.saveOrUpdate(dictionaryInfo);
+        dictionaryInfoDao.saveOrUpdate(dictionaryInfo);
     }
 
     /**
@@ -33,9 +40,8 @@ public class DictionaryInfoService {
      * @throws ApplicationException
      */
     public List<DictionaryInfo> queryAllDictionaryInfoItems() throws ApplicationException {
-        DictionaryInfoDao dicDao = new DictionaryInfoDao();
         List<DictionaryInfo> dicList = new ArrayList<>();
-        dicList = dicDao.findAll(DictionaryInfo.class);
+        dicList = dictionaryInfoDao.findAll(DictionaryInfo.class);
         return dicList;
     }
 
@@ -47,9 +53,8 @@ public class DictionaryInfoService {
      * @throws ApplicationException
      */
     public DictionaryInfo queryDictionaryInfoById(int id) throws ApplicationException {
-        DictionaryInfoDao dicDao = new DictionaryInfoDao();
         DictionaryInfo dicList = new DictionaryInfo();
-        dicList = dicDao.findById(DictionaryInfo.class, id);
+        dicList = dictionaryInfoDao.findById(DictionaryInfo.class, id);
         return dicList;
     }
 
@@ -61,10 +66,9 @@ public class DictionaryInfoService {
      */
     public String queryRegiCode() throws ApplicationException {
         String result = "";
-        DictionaryInfoDao dicDao = new DictionaryInfoDao();
         List<DictionaryInfo> dicList = new ArrayList<DictionaryInfo>();
         //dicList = dicDao.findByFieldValueNotNull(DictionaryInfo.class, "dictionaryinfo", "registercode");
-        dicList = dicDao.findByFieldIsNotNull("registercode");
+        dicList = dictionaryInfoDao.findByFieldIsNotNull("registercode");
         if (!dicList.isEmpty()) {
             for (DictionaryInfo dicInfo : dicList) {
                 result = dicInfo.getRegisterCode();

@@ -6,17 +6,14 @@ import com.chinaunicom.elemeetingpc.database.models.IssueInfo;
 import com.chinaunicom.elemeetingpc.database.models.MeetInfo;
 import com.chinaunicom.elemeetingpc.database.models.MeetIssueRelation;
 import com.chinaunicom.elemeetingpc.database.models.MeetUserRelation;
-import com.chinaunicom.elemeetingpc.modelFx.IssueInfoModel;
-import com.chinaunicom.elemeetingpc.modelFx.MeetInfoModel;
-import com.chinaunicom.elemeetingpc.modelFx.MeetIssueRelationModel;
-import com.chinaunicom.elemeetingpc.modelFx.MeetUserRelationModel;
+import com.chinaunicom.elemeetingpc.service.IssueInfoService;
+import com.chinaunicom.elemeetingpc.service.MeetInfoService;
+import com.chinaunicom.elemeetingpc.service.MeetIssueRelationService;
+import com.chinaunicom.elemeetingpc.service.MeetUserRelationService;
+import com.chinaunicom.elemeetingpc.utils.DialogsUtils;
 import com.chinaunicom.elemeetingpc.utils.FxmlUtils;
 import com.chinaunicom.elemeetingpc.utils.MQPlugin;
 import com.chinaunicom.elemeetingpc.utils.exceptions.ApplicationException;
-import com.j256.ormlite.logger.Logger;
-import com.j256.ormlite.logger.LoggerFactory;
-import java.io.IOException;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -46,15 +43,17 @@ import javafx.scene.text.TextAlignment;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * 会议首页面控制器
+ * 会议主界面控制器，展示会议，议题等信息.
  *
  * @author zhaojunfeng, chenxi
  */
-public class MeetController {
+public class MeetInfoController {
 
-    private static final Logger logger = LoggerFactory.getLogger(MeetController.class);
+    private static final Logger logger = LoggerFactory.getLogger(MeetInfoController.class);
 
     @FXML
     private VBox subMeetingSection;
@@ -87,62 +86,68 @@ public class MeetController {
 
     private MQPlugin mQPlugin;
 
-    private MeetInfoModel meetInfoModel;
+    private MeetInfoService meetInfoService;
 
-    private MeetIssueRelationModel meetIssueRelationModel;
+    private MeetIssueRelationService meetIssueRelationService;
 
-    private IssueInfoModel issueInfoModel;
+    private IssueInfoService issueInfoService;
 
-    private MeetUserRelationModel meetUserRelationModel;
+    private MeetUserRelationService meetUserRelationService;
 
-    public MeetController() {
+    public MeetInfoController() {
 
-        this.meetInfoModel = new MeetInfoModel();
+        meetInfoService = new MeetInfoService();
 
-        this.meetIssueRelationModel = new MeetIssueRelationModel();
+        meetIssueRelationService = new MeetIssueRelationService();
 
-        this.issueInfoModel = new IssueInfoModel();
+        issueInfoService = new IssueInfoService();
+        
+        meetUserRelationService = new MeetUserRelationService();
     }
 
     /**
-     * 会议首页面布局初始化.
+     * 会议首页面布局初始化和数据载入.
      *
-     * @throws ApplicationException
      */
-    public void initialize() throws ApplicationException {
-        List<MeetInfo> childMeetList = new ArrayList<>();//子会议列表
-        List<String> childMeetIdList = new ArrayList<>();//子会议id列表
-        List<MeetIssueRelation> meetIssueRelationList = new ArrayList<>();//子会议与议题关系列表
-        List<IssueInfo> issueList = new ArrayList<>();//议题列表
-        List<String> issueIdList = new ArrayList<>();//议题id列表
-        List<Node> uiControlsList = new ArrayList<>();//存放界面UI控件的列表
-        String parentMeetId = "";
+    public void initialize() {
+        //子会议列表
+        List<MeetInfo> childMeetInfoList = new ArrayList<>();
+        //子会议id列表
+        List<String> childMeetInfoIdList = new ArrayList<>();
+        //子会议与议题关系列表
+        List<MeetIssueRelation> meetIssueRelationList = new ArrayList<>();
+        //议题列表
+        List<IssueInfo> issueInfoList = new ArrayList<>();
+        //议题id列表
+        List<String> issueInfoIdList = new ArrayList<>();
+        //存放界面UI控件的列表
+        List<Node> uiControlsList = new ArrayList<>();
         try {
             //获取默认会议的父会议id
-            parentMeetId = getDefaultMeetingId();
+            String parentMeetId = getDefaultMeetingId();
             GlobalStaticConstant.GLOBAL_SELECTED_MEETID = parentMeetId;
             //父会议名称区域
             createParentMeetingTitle(parentMeetId);
             //获取当前登录用户所属子会议信息
-            childMeetIdList = getChildMeetList(GlobalStaticConstant.GLOBAL_ORGANINFO_OWNER_USERID);
-            childMeetList = meetInfoModel.queryChildMeetInfosByParentId(parentMeetId, childMeetIdList);
-            if (!childMeetList.isEmpty()) {
-                for (int i = 0; i < childMeetList.size(); i++) {
+            childMeetInfoIdList = getChildMeetList(GlobalStaticConstant.GLOBAL_ORGANINFO_OWNER_USERID);
+            childMeetInfoList = meetInfoService.queryChildMeetInfosByIds(parentMeetId, childMeetInfoIdList);
+            if (!childMeetInfoList.isEmpty()) {
+                for (int i = 0; i < childMeetInfoList.size(); i++) {
                     //子会议名称区域
-                    createSubMeetingTitle(childMeetList.get(i).getMeetingName(), uiControlsList);
+                    createSubMeetingTitle(childMeetInfoList.get(i).getMeetingName(), uiControlsList);
                     //在MeetIssueRelation表里根据子会议id获取对应的会议和议题关系
-                    meetIssueRelationList = meetIssueRelationModel.queryMeetIssueRelation(childMeetList.get(i).getMeetingId());
+                    meetIssueRelationList = meetIssueRelationService.queryMeetIssueRelation(childMeetInfoList.get(i).getMeetingId());
                     if (!meetIssueRelationList.isEmpty()) {
                         //获取所有议题ids
                         for (int j = 0; j < meetIssueRelationList.size(); j++) {
-                            issueIdList.add(meetIssueRelationList.get(j).getIssueId());
+                            issueInfoIdList.add(meetIssueRelationList.get(j).getIssueId());
                         }
                         //根据议题ids获取议题信息
-                        issueList = issueInfoModel.queryIssueByIds(issueIdList);
-                        issueIdList.clear();
-                        int issueSize = issueList.size(); //议题个数
+                        issueInfoList = issueInfoService.queryIssueByIds(issueInfoIdList);
+                        issueInfoIdList.clear();
+                        int issueSize = issueInfoList.size(); //议题个数
                         //议题区域
-                        createMeetingIssues(issueSize, issueList, uiControlsList);
+                        createMeetingIssues(issueSize, issueInfoList, uiControlsList);
                     }
                 }
             }
@@ -155,28 +160,26 @@ public class MeetController {
             scroll.setStyle("-fx-background-insets:0.0px;-fx-border-color:transparent;");
             mainIndex.getChildren().addAll(scroll);
         } catch (Exception ex) {
-            ex.printStackTrace();
-            logger.error(ex.getCause().getMessage());
+            DialogsUtils.errorAlert("system.malfunction");
+            logger.error(FxmlUtils.getResourceBundle().getString("error.MeetInfoController.initialize"), ex);
         }
     }
 
     /**
-     * 获取默认父会议id，存在两种情况： 1、未选择左侧会议列表中的会议，则获取默认父会议id的顺序优先级为当前会议 > 即将召开会议 > 历史会议
+     * 获取默认父会议id，存在两种情况：1、未选择左侧会议列表中的会议，则获取默认父会议id的顺序优先级为当前会议 > 即将召开会议 > 历史会议
      * 2、已选择左侧会议列表中的会议，则从全局常量中的GLOBAL_SELECTED_MEETID获取默认父会议id.
      *
      * @return parentMeetingId 父会议id
-     * @throws ApplicationException
-     * @throws java.sql.SQLException
      */
-    public String getDefaultMeetingId() throws ApplicationException, SQLException {
+    public String getDefaultMeetingId() throws ApplicationException {
         String parentMeetingId = GlobalStaticConstant.GLOBAL_SELECTED_MEETID;
         if (StringUtils.isBlank(parentMeetingId)) {
             List<String> parentMeetIdList = new ArrayList<>();
             parentMeetIdList = getParentMeetList(GlobalStaticConstant.GLOBAL_ORGANINFO_OWNER_USERID);
             if (!parentMeetIdList.isEmpty()) {
-                List<MeetInfo> currentMeetList = meetInfoModel.getCurrentMeetInfo(parentMeetIdList);
-                List<MeetInfo> futureMeetList = meetInfoModel.getFutureMeetInfo(parentMeetIdList);
-                List<MeetInfo> historyMeetList = meetInfoModel.getHistoryMeetInfo(parentMeetIdList);
+                List<MeetInfo> currentMeetList = meetInfoService.getCurrentMeetInfo(parentMeetIdList);
+                List<MeetInfo> futureMeetList = meetInfoService.getFutureMeetInfo(parentMeetIdList);
+                List<MeetInfo> historyMeetList = meetInfoService.getHistoryMeetInfo(parentMeetIdList);
                 if (!currentMeetList.isEmpty()) {
                     parentMeetingId = currentMeetList.get(0).getMeetingId();
                 } else if (!futureMeetList.isEmpty()) {
@@ -192,17 +195,15 @@ public class MeetController {
     /**
      * 根据用户id获取其所在的父会议id列表.
      *
-     * @param userId
+     * @param userId 不为空
      * @return parentMeetIdList 父会议id列表
      * @throws ApplicationException
-     * @throws java.sql.SQLException
      */
-    public List<String> getParentMeetList(String userId) throws ApplicationException, SQLException {
+    public List<String> getParentMeetList(String userId) throws ApplicationException {
         List<String> parentMeetIdList = new ArrayList<>();
-        this.meetUserRelationModel = new MeetUserRelationModel();
         List<MeetUserRelation> meetUserRelationList = new ArrayList<>();
         //根据用户id在会议用户关系表里查询其对应的所有子会议
-        meetUserRelationList = meetUserRelationModel.queryMeetUserRelationByUserId(userId);
+        meetUserRelationList = meetUserRelationService.queryMeetUserRelationByUserId(userId);
         if (!meetUserRelationList.isEmpty()) {
             for (MeetUserRelation meetUserRelation : meetUserRelationList) {
                 //根据子会议获取其父会议
@@ -220,14 +221,13 @@ public class MeetController {
     /**
      * 根据子会议id获取其父会议id.
      *
-     * @param childMeetId
+     * @param childMeetId not null
      * @return parentMeetId 父会议id
      * @throws ApplicationException
-     * @throws java.sql.SQLException
      */
-    public String getParentMeetIdByChildMeetId(String childMeetId) throws ApplicationException, SQLException {
+    public String getParentMeetIdByChildMeetId(String childMeetId) throws ApplicationException {
         String parentMeetId = "";
-        List<MeetInfo> meetInfoList = meetInfoModel.queryMeetInfoByChildMeetId(childMeetId);
+        List<MeetInfo> meetInfoList = meetInfoService.queryMeetInfoByChildMeetId(childMeetId);
         if (!meetInfoList.isEmpty()) {
             parentMeetId = meetInfoList.get(0).getParentMeetingId();
         }
@@ -237,36 +237,32 @@ public class MeetController {
     /**
      * 根据用户id获取其所在的子会议id列表.
      *
-     * @param userId
-     * @return childMeetIdList 子会议id列表
+     * @param userId not null
+     * @return childMeetInfoIdList 子会议id列表
      * @throws ApplicationException
-     * @throws java.sql.SQLException
      */
-    public List<String> getChildMeetList(String userId) throws ApplicationException, SQLException {
-        List<String> childMeetIdList = new ArrayList<>();
-        this.meetUserRelationModel = new MeetUserRelationModel();
+    public List<String> getChildMeetList(String userId) throws ApplicationException {
+        List<String> childMeetInfoIdList = new ArrayList<>();
         List<MeetUserRelation> meetUserRelationList = new ArrayList<>();
         //根据用户id在会议用户关系表里查询其对应的所有子会议
-        meetUserRelationList = meetUserRelationModel.queryMeetUserRelationByUserId(userId);
+        meetUserRelationList = meetUserRelationService.queryMeetUserRelationByUserId(userId);
         if (!meetUserRelationList.isEmpty()) {
             for (MeetUserRelation meetUserRelation : meetUserRelationList) {
-                childMeetIdList.add(meetUserRelation.getMeetingId());
+                childMeetInfoIdList.add(meetUserRelation.getMeetingId());
             }
         }
-        return childMeetIdList;
+        return childMeetInfoIdList;
     }
 
     /**
      * 创建父会议标题.
      *
      * @param parentMeetId
-     * @throws
-     * com.chinaunicom.elemeetingpc.utils.exceptions.ApplicationException
-     * @throws java.sql.SQLException
+     * @throws ApplicationException
      */
-    public void createParentMeetingTitle(String parentMeetId) throws ApplicationException, SQLException {
+    public void createParentMeetingTitle(String parentMeetId) throws ApplicationException {
         //获取父会议名称
-        List<MeetInfo> parentMeetList = meetInfoModel.queryMeetInfoByParentMeetId(parentMeetId);
+        List<MeetInfo> parentMeetList = meetInfoService.queryMeetInfoByParentMeetId(parentMeetId);
         if (!parentMeetList.isEmpty()) {
             //父会议名称区域赋值
             indexMeetTitle.setText(parentMeetList.get(0).getMeetingName());
@@ -281,8 +277,8 @@ public class MeetController {
     /**
      * 创建子会议标题, HBox包裹Label解决宽屏自适应问题.
      *
-     * @param meetingName
-     * @param uiControlsList
+     * @param meetingName not null
+     * @param uiControlsList UI容器list
      */
     public void createSubMeetingTitle(String meetingName, List<Node> uiControlsList) {
         Label childMeetingName = new Label(meetingName);
@@ -307,10 +303,10 @@ public class MeetController {
      * 创建议题并添加事件处理，从低层到顶层所用的UI控件分别是：FlowPane -> StackPane -> ImageView -> Label.
      *
      * @param issueSize
-     * @param issueList
+     * @param issueInfoList
      * @param uiControlsList
      */
-    public void createMeetingIssues(int issueSize, List<IssueInfo> issueList, List<Node> uiControlsList) {
+    public void createMeetingIssues(int issueSize, List<IssueInfo> issueInfoList, List<Node> uiControlsList) {
         //设置FlowPane样式
         FlowPane issueFlowPane = new FlowPane(Orientation.HORIZONTAL, 10.0, 10.0);
         issueFlowPane.setPadding(new Insets(5.0, 3.0, 5.0, 3.0));
@@ -320,12 +316,12 @@ public class MeetController {
         Image icon = new Image(getClass().getResourceAsStream("/images/icon-book.jpg"));
         ImageView[] imageViews = new ImageView[issueSize];
         for (int k = 0; k < issueSize; k++) {
-            IssueInfo issueInfo = issueList.get(k);
+            IssueInfo issueInfo = issueInfoList.get(k);
             imageViews[k] = new ImageView(icon);
             //设置Label样式
-            Label issueNameLabel = new Label(issueList.get(k).getIssueName());
+            Label issueNameLabel = new Label(issueInfoList.get(k).getIssueName());
             //添加tooltip
-            issueNameLabel.setTooltip(new Tooltip(issueList.get(k).getIssueName()));
+            issueNameLabel.setTooltip(new Tooltip(issueInfoList.get(k).getIssueName()));
             issueNameLabel.setStyle("-fx-font-size:16.0px;-fx-font-size-family:Arial;-fx-cursor:hand;");
             issueNameLabel.setPrefSize(161, 185);
             issueNameLabel.setWrapText(true);
@@ -356,9 +352,9 @@ public class MeetController {
             public void handle(final MouseEvent event) {
                 try {
                     showFxmlFileList((IssueInfo) issueStackPane.getUserData());//跳转到文件列表界面，从StackPane获取到对应的议题信息
-                } catch (ApplicationException | SQLException ex) {
-                    ex.printStackTrace();
-                    logger.error(ex.getCause().getMessage());
+                } catch (Exception ex) {
+                    DialogsUtils.errorAlert("system.malfunction");
+                    logger.error(FxmlUtils.getResourceBundle().getString("error.MeetInfoController.addMouseClickEvent"), ex);
                 }
             }
         });
@@ -368,25 +364,18 @@ public class MeetController {
      * 跳转文件列表界面并传入对应的议题信息.
      *
      * @param issueInfo 议题信息
-     * @throws
-     * com.chinaunicom.elemeetingpc.utils.exceptions.ApplicationException
-     * @throws java.sql.SQLException
+     * @throws ApplicationException
      */
     @FXML
-    public void showFxmlFileList(IssueInfo issueInfo) throws ApplicationException, SQLException {
-        try {
-            FXMLLoader loader = FxmlUtils.getFXMLLoader(FXML_FILE);
-            borderPaneMain.getChildren().remove(borderPaneMain.getCenter());//清除当前BorderPane内中间区域的内容
-            borderPaneMain.getChildren().remove(borderPaneMain.getLeft());//清除当前BorderPane内左侧区域的内容
-            borderPaneMain.setCenter(loader.load()); //将当前BorderPane中间区域加载为文件列表界面
-            FileController fileController = loader.getController(); //从loader中获取FileController
-            fileController.setBorderPane(borderPaneMain);//设置传参当前的borderPaneMain，以便在FileController中使用
-            fileController.initData(issueInfo);//把当前选择的议题传到FileController里，以便在下个控制器中使用，注意这里调用的是重写过的初始化方法
-            fileController.setMQPlugin(mQPlugin);//把MQPlugin往下传
-        } catch (IOException e) {
-            e.printStackTrace();
-            logger.error(e.getCause().getMessage());
-        }
+    public void showFxmlFileList(IssueInfo issueInfo) throws ApplicationException, Exception {
+        FXMLLoader loader = FxmlUtils.getFXMLLoader(FXML_FILE);
+        borderPaneMain.getChildren().remove(borderPaneMain.getCenter());//清除当前BorderPane内中间区域的内容
+        borderPaneMain.getChildren().remove(borderPaneMain.getLeft());//清除当前BorderPane内左侧区域的内容
+        borderPaneMain.setCenter(loader.load()); //将当前BorderPane中间区域加载为文件列表界面
+        FileController fileController = loader.getController(); //从loader中获取FileController
+        fileController.setBorderPane(borderPaneMain);//设置传参当前的borderPaneMain，以便在FileController中使用
+        fileController.initData(issueInfo);//把当前选择的议题传到FileController里，以便在下个控制器中使用，注意这里调用的是重写过的初始化方法
+        fileController.setMQPlugin(mQPlugin);//把MQPlugin往下传
     }
 
     /**
@@ -407,9 +396,9 @@ public class MeetController {
                 borderPaneMain.getChildren().remove(borderPaneMain.getLeft());//清除当前BorderPane内左侧区域的内容
                 isFolded = true;//设置为收起状态
             }
-        } catch (IOException e) {
-            logger.error(e.getCause().getMessage());
-            e.printStackTrace();
+        } catch (Exception ex) {
+            DialogsUtils.errorAlert("system.malfunction");
+            logger.error(FxmlUtils.getResourceBundle().getString("error.MeetInfoController.showFxmlLeftNavigation"), ex);
         }
     }
 
@@ -426,9 +415,9 @@ public class MeetController {
             OrganInfoController organInfoController = loader.getController(); //从loader中获取OrganInfoController
             organInfoController.setBorderPane(borderPaneMain);//设置传参当前的borderPaneMain，以便在OrganInfoController中获取到当前BorderPane
             organInfoController.setMQPlugin(mQPlugin);//把mq回传给上个界面
-        } catch (IOException e) {
-            e.printStackTrace();
-            logger.error(e.getCause().getMessage());
+        } catch (Exception ex) {
+            DialogsUtils.errorAlert("system.malfunction");
+            logger.error(FxmlUtils.getResourceBundle().getString("error.MeetInfoController.showFxmlOrg"), ex);
         }
     }
 
@@ -452,38 +441,39 @@ public class MeetController {
             ResetPasswordController controller = loader.getController();
             controller.setDialogStage(dialogStage);//把界面传递到下一个控制器里
             dialogStage.showAndWait();
-        } catch (IOException ex) {
-            logger.error(ex.getCause().getMessage());
+        } catch (Exception ex) {
+            DialogsUtils.errorAlert("system.malfunction");
+            logger.error(FxmlUtils.getResourceBundle().getString("error.MeetInfoController.handleResetPassword"), ex);
         }
     }
 
     /**
-     * 通知列表信息
+     * 通知列表信息.
      */
     @FXML
     public void handNoticeList() {
-        //加载通知列表内容
-        FXMLLoader loader = FxmlUtils.getFXMLLoader(FXML_NOTICE_LIST);
-        AnchorPane noticeListContent = new AnchorPane();
         try {
+            //加载通知列表内容
+            FXMLLoader loader = FxmlUtils.getFXMLLoader(FXML_NOTICE_LIST);
+            AnchorPane noticeListContent = new AnchorPane();
             noticeListContent = loader.load();
-        } catch (IOException ex) {
-            ex.printStackTrace();
-            logger.error(ex.getCause().getMessage());
+            Scene scene = new Scene(noticeListContent);
+            //创建弹窗
+            Stage noticeListDialogStage = new Stage();
+            noticeListDialogStage.setWidth(1300.0);
+            noticeListDialogStage.setHeight(700.0);
+            noticeListDialogStage.setTitle(FxmlUtils.getResourceBundle().getString("MeetController.noticeTitle"));
+            noticeListDialogStage.initModality(Modality.WINDOW_MODAL);
+            noticeListDialogStage.initOwner(borderPaneMain.getScene().getWindow());
+            noticeListDialogStage.setScene(scene);
+            //把当前stage作为下个界面的父界面使用（通知详情）
+            NoticeInfoController controller = loader.getController();
+            controller.setDialogStage(noticeListDialogStage);
+            noticeListDialogStage.showAndWait();
+        } catch (Exception ex) {
+            DialogsUtils.errorAlert("system.malfunction");
+            logger.error(FxmlUtils.getResourceBundle().getString("error.MeetInfoController.handNoticeList"), ex);
         }
-        Scene scene = new Scene(noticeListContent);
-        //创建弹窗
-        Stage noticeListDialogStage = new Stage();
-        noticeListDialogStage.setWidth(1300.0);
-        noticeListDialogStage.setHeight(700.0);
-        noticeListDialogStage.setTitle(FxmlUtils.getResourceBundle().getString("MeetController.noticeTitle"));
-        noticeListDialogStage.initModality(Modality.WINDOW_MODAL);
-        noticeListDialogStage.initOwner(borderPaneMain.getScene().getWindow());
-        noticeListDialogStage.setScene(scene);
-        //把当前stage作为下个界面的父界面使用（通知详情）
-        NoticeInfoController controller = loader.getController();
-        controller.setDialogStage(noticeListDialogStage);
-        noticeListDialogStage.showAndWait();
     }
 
     public void setBorderPane(BorderPane borderPaneMain) {
