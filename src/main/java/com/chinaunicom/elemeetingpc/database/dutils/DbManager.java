@@ -13,11 +13,13 @@ import com.chinaunicom.elemeetingpc.database.models.MeetUserRelation;
 import com.chinaunicom.elemeetingpc.database.models.OrganInfo;
 import com.chinaunicom.elemeetingpc.database.models.SyncParams;
 import com.chinaunicom.elemeetingpc.database.models.UserInfo;
+import com.chinaunicom.elemeetingpc.utils.DialogsUtils;
+import com.chinaunicom.elemeetingpc.utils.FxmlUtils;
 import com.j256.ormlite.jdbc.JdbcConnectionSource;
-import com.j256.ormlite.logger.Logger;
-import com.j256.ormlite.logger.LoggerFactory;
 import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.TableUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Handle ORMLite ConnectionSource configuration, a ConnectionSource is a
@@ -54,9 +56,9 @@ public class DbManager {
         try {
             connectionSource = new JdbcConnectionSource(JDBC_DRIVER_HD);//development enviroment
             //connectionSource =  new JdbcConnectionSource(JDBC_DRIVER_HD, USER, PASS);//production enviroment
-        } catch (Exception e) {
-            e.printStackTrace();
-            logger.error(e.getCause().getMessage());
+        } catch (Exception ex) {
+            DialogsUtils.errorAlert("system.malfunction");
+            logger.error(FxmlUtils.getResourceBundle().getString("error.DbManager.createConnectionSource"), ex);
         }
     }
 
@@ -67,7 +69,12 @@ public class DbManager {
      */
     public static ConnectionSource getConnectionSource() {
         if (connectionSource == null) {
-            createConnectionSource();
+            try {
+                createConnectionSource();
+            } catch (Exception ex) {
+                DialogsUtils.errorAlert("system.malfunction");
+                logger.error(FxmlUtils.getResourceBundle().getString("error.DbManager.getConnectionSource"), ex);
+            }
         }
         return connectionSource;
     }
@@ -79,9 +86,9 @@ public class DbManager {
         if (connectionSource != null) {
             try {
                 connectionSource.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-                logger.error(e.getCause().getMessage());
+            } catch (Exception ex) {
+                DialogsUtils.errorAlert("system.malfunction");
+                logger.error(FxmlUtils.getResourceBundle().getString("error.DbManager.closeConnectionSource"), ex);
             }
         }
     }
@@ -111,9 +118,9 @@ public class DbManager {
             TableUtils.createTableIfNotExists(connectionSource, DictionaryInfo.class);
             TableUtils.createTableIfNotExists(connectionSource, SyncParams.class);
             TableUtils.createTableIfNotExists(connectionSource, Annotation.class);
-        } catch (Exception e) {
-            e.printStackTrace();
-            logger.error(e.getCause().getMessage());
+        } catch (Exception ex) {
+            DialogsUtils.errorAlert("system.malfunction");
+            logger.error(FxmlUtils.getResourceBundle().getString("error.DbManager.createTable"), ex);
         }
     }
 }

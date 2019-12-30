@@ -5,12 +5,10 @@ import com.chinaunicom.elemeetingpc.controllers.FileDetailController;
 import com.chinaunicom.elemeetingpc.database.models.FileResource;
 import com.chinaunicom.elemeetingpc.database.models.FileUserRelation;
 import com.chinaunicom.elemeetingpc.database.models.SyncParams;
-import com.chinaunicom.elemeetingpc.modelFx.FileResourceModel;
-import com.chinaunicom.elemeetingpc.modelFx.FileUserRelationModel;
-import com.chinaunicom.elemeetingpc.modelFx.SyncParamsModel;
+import com.chinaunicom.elemeetingpc.service.FileResourceService;
+import com.chinaunicom.elemeetingpc.service.FileUserRelationService;
+import com.chinaunicom.elemeetingpc.service.SyncParamsService;
 import com.chinaunicom.elemeetingpc.utils.exceptions.ApplicationException;
-import com.j256.ormlite.logger.Logger;
-import com.j256.ormlite.logger.LoggerFactory;
 import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.BuiltinExchangeType;
 import com.rabbitmq.client.Channel;
@@ -21,12 +19,12 @@ import com.rabbitmq.client.Envelope;
 import com.rabbitmq.client.ShutdownListener;
 import com.rabbitmq.client.ShutdownSignalException;
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.List;
-import java.util.concurrent.TimeoutException;
 import javafx.application.Platform;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A RabbitMQ plugin object take care of syn between clients and server plus a
@@ -70,9 +68,9 @@ public class MQPlugin {
             //declare a queue and bind the queue to exchange
             queueName = channel.queueDeclare().getQueue();
             channel.queueBind(queueName, EXCHANGE_NAME, routingKey);
-        } catch (IOException | TimeoutException ex) {
-            ex.printStackTrace();
-            logger.error(ex.getCause().getMessage());
+        } catch (Exception ex) {
+            DialogsUtils.errorAlert("system.malfunction");
+            logger.error(FxmlUtils.getResourceBundle().getString("error.MQPlugin"), ex);
         }
     }
 
@@ -95,8 +93,8 @@ public class MQPlugin {
                 factory.setPort(Integer.parseInt(syncParams.getPort()));
             }
         } catch (Exception ex) {
-            ex.printStackTrace();
-            logger.error(ex.getCause().getMessage());
+            DialogsUtils.errorAlert("system.malfunction");
+            logger.error(FxmlUtils.getResourceBundle().getString("error.MQPlugin.initConnectionFactory"), ex);
         }
         return factory;
     }
@@ -109,9 +107,9 @@ public class MQPlugin {
     public void publishMessage(String message) {
         try {
             channel.basicPublish(EXCHANGE_NAME, routingKey, null, message.getBytes("UTF-8"));
-        } catch (IOException ex) {
-            ex.printStackTrace();
-            logger.error(ex.getCause().getMessage());
+        } catch (Exception ex) {
+            DialogsUtils.errorAlert("system.malfunction");
+            logger.error(FxmlUtils.getResourceBundle().getString("error.MQPlugin.publishMessage"), ex);
         }
     }
 
@@ -146,9 +144,9 @@ public class MQPlugin {
                     channel.basicAck(deliveryTag, false);
                 }
             });
-        } catch (IOException ex) {
-            ex.printStackTrace();
-            logger.error(ex.getCause().getMessage());
+        } catch (Exception ex) {
+            DialogsUtils.errorAlert("system.malfunction");
+            logger.error(FxmlUtils.getResourceBundle().getString("error.MQPlugin.consumeMessage"), ex);
         }
     }
 
@@ -200,7 +198,7 @@ public class MQPlugin {
                             }
                             //handle message from ios client
                             if (StringUtils.equalsIgnoreCase(jSONObject.getString("platformType"), GlobalStaticConstant.GLOBAL_IOSSYNCFLAG)) {
-                                    handleIosScroll(jSONObject);
+                                handleIosScroll(jSONObject);
                             }
                         }
                     }
@@ -223,8 +221,8 @@ public class MQPlugin {
                 }
             }
         } catch (Exception ex) {
-            ex.printStackTrace();
-            logger.error(ex.getCause().getMessage());
+            DialogsUtils.errorAlert("system.malfunction");
+            logger.error(FxmlUtils.getResourceBundle().getString("error.MQPlugin.handleMessage"), ex);
         }
     }
 
@@ -236,12 +234,12 @@ public class MQPlugin {
      * @param jSONObject the Json object
      */
     public void handleTurnPage(JSONObject jSONObject) {
-        try {
-            //Important note：in javafx, when a FX thread try to modify UI component other than the application thread, must alway use Platform.runLater
-            //eg. here the RabbitMQ thread(handleDelivery method) try to modify the application UI(fileDetailController), need to wait for RabbitMQ thread finish, than start application's thread
-            Platform.runLater(new Runnable() {
-                @Override
-                public void run() {
+        //Important note：in javafx, when a FX thread try to modify UI component other than the application thread, must alway use Platform.runLater
+        //eg. here the RabbitMQ thread(handleDelivery method) try to modify the application UI(fileDetailController), need to wait for RabbitMQ thread finish, than start application's thread
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                try {
                     //check if the user own this file
                     if (isOwnedByLoginUser(jSONObject.getString("bookid"))) {
                         //check if it's same file, if true then turn page straight away
@@ -252,12 +250,12 @@ public class MQPlugin {
                             handleDiffFile(jSONObject);
                         }
                     }
+                } catch (Exception ex) {
+                    DialogsUtils.errorAlert("system.malfunction");
+                    logger.error(FxmlUtils.getResourceBundle().getString("error.MQPlugin.handleTurnPage"), ex);
                 }
-            });
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            logger.error(ex.getCause().getMessage());
-        }
+            }
+        });
     }
 
     /**
@@ -269,15 +267,15 @@ public class MQPlugin {
     public void handleDiffFile(JSONObject jSONObject) {
         try {
             //query the speaker's file
-            FileResourceModel fileResourceModel = new FileResourceModel();
-            FileResource fileInfo = fileResourceModel.queryFilesById(jSONObject.getString("bookid")).get(0);
+            FileResourceService fileResourceService = new FileResourceService();
+            FileResource fileInfo = fileResourceService.queryFilesById(jSONObject.getString("bookid")).get(0);
             //close the currently opened view and go back to file list view(close the currently opened file)
             fileDetailController.showFxmlFileList();
             //open the same file detail view as the speaker(open the speaker's file) and go to the right page
             fileDetailController.getFileController().showFxmlFileDetail(fileInfo, jSONObject.getString("fileName"), jSONObject.getInt("page"));
-        } catch (ApplicationException | SQLException ex) {
-            ex.printStackTrace();
-            logger.error(ex.getCause().getMessage());
+        } catch (Exception ex) {
+            DialogsUtils.errorAlert("system.malfunction");
+            logger.error(FxmlUtils.getResourceBundle().getString("error.MQPlugin.handleDiffFile"), ex);
         }
     }
 
@@ -286,17 +284,12 @@ public class MQPlugin {
      *
      */
     public void handleGiveupSpeaker() {
-        try {
-            Platform.runLater(new Runnable() {
-                @Override
-                public void run() {
-                    DialogsUtils.infoAlert("MQPlugin.giveupSpeaker");
-                }
-            });
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            logger.error(ex.getCause().getMessage());
-        }
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                DialogsUtils.infoAlert("MQPlugin.giveupSpeaker");
+            }
+        });
     }
 
     /**
@@ -306,10 +299,10 @@ public class MQPlugin {
      * @param jSONObject the Json object
      */
     public void handleZoom(JSONObject jSONObject) {
-        try {
-            Platform.runLater(new Runnable() {
-                @Override
-                public void run() {
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                try {
                     //check if the user own this file
                     if (isOwnedByLoginUser(jSONObject.getString("bookid"))) {
                         //if it's same file and on the same page/diff page, if true then set the zoomType, zoomFactor and updateImage with the pageIndex
@@ -329,12 +322,12 @@ public class MQPlugin {
                             fileDetailController.getOpenPdfViewer().updateImage(jSONObject.getInt("page"), 0, true);
                         }
                     }
+                } catch (Exception ex) {
+                    DialogsUtils.errorAlert("system.malfunction");
+                    logger.error(FxmlUtils.getResourceBundle().getString("error.MQPlugin.handleZoom"), ex);
                 }
-            });
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            logger.error(ex.getCause().getMessage());
-        }
+            }
+        });
     }
 
     /**
@@ -344,10 +337,10 @@ public class MQPlugin {
      * @param jSONObject the Json object
      */
     public void handleFitSize(JSONObject jSONObject) {
-        try {
-            Platform.runLater(new Runnable() {
-                @Override
-                public void run() {
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                try {
                     //check if the user own this file
                     if (isOwnedByLoginUser(jSONObject.getString("bookid"))) {
                         //if it's same file and on the same page/diff page, if true then set the zoomType, zoomFactor and updateImage with the pageIndex
@@ -379,12 +372,12 @@ public class MQPlugin {
                             }
                         }
                     }
+                } catch (Exception ex) {
+                    DialogsUtils.errorAlert("system.malfunction");
+                    logger.error(FxmlUtils.getResourceBundle().getString("error.MQPlugin.handleFitSize"), ex);
                 }
-            });
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            logger.error(ex.getCause().getMessage());
-        }
+            }
+        });
     }
 
     /**
@@ -395,10 +388,10 @@ public class MQPlugin {
      * @param jSONObject the Json object
      */
     public void handlePCScroll(JSONObject jSONObject) {
-        try {
-            Platform.runLater(new Runnable() {
-                @Override
-                public void run() {
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                try {
                     //check if the user own this file
                     if (isOwnedByLoginUser(jSONObject.getString("bookid"))) {
                         if (StringUtils.equalsIgnoreCase(jSONObject.getString("command"), GlobalStaticConstant.GLOBAL_VSCROLL)) {
@@ -436,32 +429,33 @@ public class MQPlugin {
                             }
                         }
                     }
+                } catch (Exception ex) {
+                    DialogsUtils.errorAlert("system.malfunction");
+                    logger.error(FxmlUtils.getResourceBundle().getString("error.MQPlugin.handlePCScroll"), ex);
                 }
-            });
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            logger.error(ex.getCause().getMessage());
-        }
+
+            }
+        });
     }
 
     /**
      * Handle ios vertical, horizontal and zooming scrolling, note: by default,
-     * the ios app use the width of the file to fit the width of the screen, 
+     * the ios app use the width of the file to fit the width of the screen,
      * therefore there will be very limited case where we need to scroll a file
-     * horizontally without zooming in first, that is when a file is opened, 
-     * it should always be vertical scrolling and the offsetX is always set to 0,
+     * horizontally without zooming in first, that is when a file is opened, it
+     * should always be vertical scrolling and the offsetX is always set to 0,
      * only if we zoom in on the file, the offsetX will be a positive value > 0,
      * we use this change in offsetX to determine when to apply ios scale, there
-     * also 3 cases which needed to be handled: 1.same file and same page, 2.same
-     * file but diff page, 3.diff files.
+     * also 3 cases which needed to be handled: 1.same file and same page,
+     * 2.same file but diff page, 3.diff files.
      *
      * @param jSONObject the Json object
      */
     public void handleIosScroll(JSONObject jSONObject) {
-        try {
-            Platform.runLater(new Runnable() {
-                @Override
-                public void run() {
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                try {
                     //check if the user own this file
                     if (isOwnedByLoginUser(jSONObject.getString("bookid"))) {
                         double offsetY = jSONObject.getDouble("offsetY");
@@ -493,12 +487,12 @@ public class MQPlugin {
                             convertHValue(offsetX, width);
                         }
                     }
+                } catch (Exception ex) {
+                    DialogsUtils.errorAlert("system.malfunction");
+                    logger.error(FxmlUtils.getResourceBundle().getString("error.MQPlugin.handleIosScroll"), ex);
                 }
-            });
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            logger.error(ex.getCause().getMessage());
-        }
+            }
+        });
     }
 
     /**
@@ -513,8 +507,8 @@ public class MQPlugin {
             double vValue = offsetY / (height - 70);
             fileDetailController.getOpenPdfViewer().setVvalue(vValue);
         } catch (Exception ex) {
-            ex.printStackTrace();
-            logger.error(ex.getCause().getMessage());
+            DialogsUtils.errorAlert("system.malfunction");
+            logger.error(FxmlUtils.getResourceBundle().getString("error.MQPlugin.convertVValue"), ex);
         }
     }
 
@@ -530,8 +524,8 @@ public class MQPlugin {
             double hValue = offsetX / (width); //-20 ?
             fileDetailController.getOpenPdfViewer().setHvalue(hValue);
         } catch (Exception ex) {
-            ex.printStackTrace();
-            logger.error(ex.getCause().getMessage());
+            DialogsUtils.errorAlert("system.malfunction");
+            logger.error(FxmlUtils.getResourceBundle().getString("error.MQPlugin.convertHValue"), ex);
         }
     }
 
@@ -554,9 +548,9 @@ public class MQPlugin {
                 channel.close();
                 connection.close();
             }
-        } catch (ShutdownSignalException | IOException | TimeoutException ex) {
-            ex.printStackTrace();
-            logger.error(ex.getCause().getMessage());
+        } catch (Exception ex) {
+            DialogsUtils.errorAlert("system.malfunction");
+            logger.error(FxmlUtils.getResourceBundle().getString("error.MQPlugin.closeConnection"), ex);
         }
     }
 
@@ -583,7 +577,7 @@ public class MQPlugin {
                 } else {
                     applInit = "broker";
                 }
-                System.out.println("Connectivity to MQ has stopped. It was caused by "
+                logger.debug("Connectivity to MQ has stopped. It was caused by "
                         + applInit + " at the " + hardError
                         + " level. Reason received " + cause.getReason());
             }
@@ -592,7 +586,7 @@ public class MQPlugin {
 
     /**
      * Check whether the login user own this file and hence has the right to
-     * operate the file, it's done by querying FileUserRelationModel using
+     * operate the file, it's done by querying FileUserRelationService using
      * fileId, find the corresponding userIds, then comparing userIds with the
      * currently login user's id.
      *
@@ -602,8 +596,8 @@ public class MQPlugin {
     public boolean isOwnedByLoginUser(String fileId) {
         boolean hasRight = false;
         try {
-            FileUserRelationModel fileUserRelationModel = new FileUserRelationModel();
-            List<FileUserRelation> fileUserRelationList = fileUserRelationModel.queryFileUserRelationByFileId(fileId);
+            FileUserRelationService fileUserRelationService = new FileUserRelationService();
+            List<FileUserRelation> fileUserRelationList = fileUserRelationService.queryFileUserRelationByFileId(fileId);
             if (!fileUserRelationList.isEmpty()) {
                 for (int i = 0; i < fileUserRelationList.size(); i++) {
                     if (StringUtils.equals(fileUserRelationList.get(i).getUserId(), GlobalStaticConstant.GLOBAL_ORGANINFO_OWNER_USERID)) {
@@ -612,9 +606,9 @@ public class MQPlugin {
                     }
                 }
             }
-        } catch (ApplicationException | SQLException ex) {
-            ex.printStackTrace();
-            logger.error(ex.getCause().getMessage());
+        } catch (ApplicationException ex) {
+            DialogsUtils.errorAlert("system.malfunction");
+            logger.error(FxmlUtils.getResourceBundle().getString("error.MQPlugin.isOwnedByLoginUser"), ex);
         }
         return hasRight;
     }
@@ -627,13 +621,13 @@ public class MQPlugin {
     public SyncParams getSyncParams() {
         SyncParams syncParams = new SyncParams();
         try {
-            SyncParamsModel syncParamsModel = new SyncParamsModel();
+            SyncParamsService syncParamsService = new SyncParamsService();
             //get RabbitMQ server infos from the database
-            List<SyncParams> syncParamsList = syncParamsModel.querySyncParamsByOrganId("organizationId", GlobalStaticConstant.GLOBAL_ORGANINFO_ORGANIZATIONID);
+            List<SyncParams> syncParamsList = syncParamsService.querySyncParamsByOrganId("organizationId", GlobalStaticConstant.GLOBAL_ORGANINFO_ORGANIZATIONID);
             syncParams = syncParamsList.get(0);
         } catch (ApplicationException ex) {
-            ex.printStackTrace();
-            logger.error(ex.getCause().getMessage());
+            DialogsUtils.errorAlert("system.malfunction");
+            logger.error(FxmlUtils.getResourceBundle().getString("error.MQPlugin.getSyncParams"), ex);
         }
         return syncParams;
     }

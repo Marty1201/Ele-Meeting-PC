@@ -8,11 +8,6 @@ import com.chinaunicom.elemeetingpc.utils.FileUtil;
 import com.chinaunicom.elemeetingpc.utils.FxmlUtils;
 import com.chinaunicom.elemeetingpc.utils.MQPlugin;
 import com.chinaunicom.elemeetingpc.utils.OpenPdfViewer;
-import com.chinaunicom.elemeetingpc.utils.exceptions.ApplicationException;
-import com.j256.ormlite.logger.Logger;
-import com.j256.ormlite.logger.LoggerFactory;
-import java.io.IOException;
-import java.sql.SQLException;
 import java.util.ResourceBundle;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -27,6 +22,8 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.TextAlignment;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 文件详情控制器，实现一个文件容器，FileDetailController，MQPlugin和OpenPdfViewer共同实现了
@@ -105,8 +102,14 @@ public class FileDetailController {
             //AnchorPane的高度绑定为VBox高度，让openPdfViewer高度撑满
             pdfArea.prefHeightProperty().bind(mainView.heightProperty());
             createFileTitle(this.fileName);
-            //获取文件路径
-            filePath = GlobalStaticConstant.GLOBAL_FILE_DISK + "\\" + GlobalStaticConstant.GLOBAL_FILE_FOLDER + "\\" + StringUtils.substringAfterLast(fileInfo.getFilePath(), "/");
+            //获取文件路径, Windows操作系统路径
+            if (StringUtils.containsIgnoreCase(System.getProperty("os.name"), GlobalStaticConstant.GLOBAL_WINDOWS_SYSTEM)) {
+                filePath = GlobalStaticConstant.GLOBAL_FILE_DISK + "\\" + GlobalStaticConstant.GLOBAL_FILE_FOLDER + "\\" + StringUtils.substringAfterLast(fileInfo.getFilePath(), "/");
+            }
+            //获取文件路径, Mac操作系统路径
+            if (StringUtils.containsIgnoreCase(System.getProperty("os.name"), GlobalStaticConstant.GLOBAL_MAC_SYSTEM)) {
+                filePath = GlobalStaticConstant.GLOBAL_FILE_DISK + "/" + GlobalStaticConstant.GLOBAL_FILE_FOLDER + "/" + StringUtils.substringAfterLast(fileInfo.getFilePath(), "/");
+            }
             //如果文件存在，打开文件
             if (FileUtil.isFileExist(filePath)) {
                 //支持打开加密的PDF文件
@@ -130,8 +133,8 @@ public class FileDetailController {
             openPdfViewer.setFileDetaiController(this);//把FileDetailController传到OpenPdfViewer里面使用
             openPdfViewer.setMQPlugin(mQPlugin);//把MQPlugin传到OpenPdfViewer里面使用 
         } catch (Exception ex) {
-            ex.printStackTrace();
-            logger.error(ex.getCause().getMessage());
+            DialogsUtils.errorAlert("system.malfunction");
+            logger.error(FxmlUtils.getResourceBundle().getString("error.FileDetailController.initialize"), ex);
         }
     }
 
@@ -150,7 +153,6 @@ public class FileDetailController {
 
     /**
      * 返回按钮，跳转文件列表界面，回传议题信息用于文件列表界面数据加载，同时关闭当前打开的PDF文件.
-     *
      */
     @FXML
     public void showFxmlFileList() {
@@ -163,16 +165,15 @@ public class FileDetailController {
             localFileController.initData(issueInfo);//初始化文件列表，回传议题信息
             localFileController.setMQPlugin(mQPlugin);//回传mq信息
             openPdfViewer.closePdf();//关闭当前打开的pdf文件
-        } catch (ApplicationException | SQLException | IOException ex) {
-            ex.printStackTrace();
-            logger.error(ex.getCause().getMessage());
+        } catch (Exception ex) {
+            DialogsUtils.errorAlert("system.malfunction");
+            logger.error(FxmlUtils.getResourceBundle().getString("error.FileDetailController.showFxmlFileList"), ex);
         }
     }
 
     /**
      * 处理主讲操作，主讲分为两种状态：1、申请主讲，2、取消主讲，系统常量GLOBAL_ISSPEAKINGCLICKED=false代表还未主讲并准备申请主讲
      * GLOBAL_ISSPEAKINGCLICKED=true代表已经主讲并准备取消主讲，申请主讲前需要先开启consumer.
-     *
      */
     @FXML
     public void handleSpeaking() {
@@ -203,8 +204,8 @@ public class FileDetailController {
                 mQPlugin.publishMessage(message);
             }
         } catch (Exception ex) {
-            ex.printStackTrace();
-            logger.error(ex.getCause().getMessage());
+            DialogsUtils.errorAlert("system.malfunction");
+            logger.error(FxmlUtils.getResourceBundle().getString("error.FileDetailController.handleSpeaking"), ex);
         }
     }
 
@@ -227,8 +228,8 @@ public class FileDetailController {
             }
             updateFileDetailView(GlobalStaticConstant.GLOBAL_FOLLOWING);
         } catch (Exception ex) {
-            ex.printStackTrace();
-            logger.error(ex.getCause().getMessage());
+            DialogsUtils.errorAlert("system.malfunction");
+            logger.error(FxmlUtils.getResourceBundle().getString("error.FileDetailController.handleFollowing"), ex);
         }
     }
 
@@ -248,8 +249,8 @@ public class FileDetailController {
                 }
             }
         } catch (Exception ex) {
-            ex.printStackTrace();
-            logger.error(ex.getCause().getMessage());
+            DialogsUtils.errorAlert("system.malfunction");
+            logger.error(FxmlUtils.getResourceBundle().getString("error.FileDetailController.initConsumer"), ex);
         }
     }
 
@@ -367,8 +368,8 @@ public class FileDetailController {
                 }
             }
         } catch (Exception ex) {
-            ex.printStackTrace();
-            logger.error(ex.getCause().getMessage());
+            DialogsUtils.errorAlert("system.malfunction");
+            logger.error(FxmlUtils.getResourceBundle().getString("error.FileDetailController.updateFileDetailView"), ex);
         }
     }
 

@@ -17,22 +17,19 @@ public class FxmlUtils {
      * 
      * @param fxmlPath the path of the fxml template
      * @return Pane
+     * @throws Exception
      */
-    public static Pane fxmlLoader(String fxmlPath) {
+    public static Pane fxmlLoader(String fxmlPath) throws Exception {
         FXMLLoader loader = new FXMLLoader(FxmlUtils.class.getResource(fxmlPath));
         loader.setResources(getResourceBundle());
-        try{
-            return loader.load();
-        } catch(Exception e){
-            DialogsUtils.customErrorAlert(e.getMessage());
-        }
-        return null;
+        return loader.load();
     }
     
     /**
      * Load the locale language properties file.
      *
      * @return ResourceBundle
+     * @throws Exception
      */
     public static ResourceBundle getResourceBundle() {
         return ResourceBundle.getBundle("bundles.messages");
@@ -43,6 +40,7 @@ public class FxmlUtils {
      * set.
      *
      * @return FXMLLoader
+     * @throws Exception
      */
     public static FXMLLoader getFXMLLoader(String fxmlPath) {
         FXMLLoader loader = new FXMLLoader(FxmlUtils.class.getResource(fxmlPath));

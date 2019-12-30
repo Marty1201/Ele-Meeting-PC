@@ -9,6 +9,8 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * File downloader, implements Runnable and override run method to achieve
@@ -18,23 +20,45 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class FileDownloader implements Runnable {
 
-    //file stored location on the server side
-    private final String fileURL;
+    private static final Logger logger = LoggerFactory.getLogger(FileDownloader.class);
 
-    public FileDownloader(String fileURL) {
+    //the location of a file on the remote server
+    private final String remoteUrl;
 
-        this.fileURL = fileURL;
+    public FileDownloader(String remoteUrl) {
+
+        this.remoteUrl = remoteUrl;
 
     }
 
     /**
+     * Override the run method.
+     */
+    @Override
+    public void run() {
+        try {
+            String fileName = StringUtils.substringAfterLast(remoteUrl, "/");
+            URL url = new URL(remoteUrl);
+            //the local files storage path
+            String localFilePath = GlobalStaticConstant.GLOBAL_FILE_DISK + "/" + GlobalStaticConstant.GLOBAL_FILE_FOLDER + "/" + fileName;
+            long begin = System.currentTimeMillis(); //debug
+            downloadFile(url, new FileOutputStream(localFilePath), 1024);
+            logger.debug("thread spent time: ", (System.currentTimeMillis() - begin));
+        } catch (Exception ex) {
+            DialogsUtils.errorAlert("system.malfunction");
+            logger.error(FxmlUtils.getResourceBundle().getString("error.FileDownloader.run"), ex);
+        }
+    }
+
+    /**
+     * Download file from remote server to the local folder,
      * 从指定的URL下载文件，并将其保存到指定的输出流中.
      *
      * @param url 文件下载地址
      * @param outputStream 文件输出路径
      * @param bufSize 用来存储每次读取到的字节数组大小
      */
-    public void downloadFile(URL url, OutputStream outputStream, int bufSize) throws IOException {
+    public void downloadFile(URL url, OutputStream outputStream, int bufSize) {
         BufferedInputStream bis = null;
         BufferedOutputStream bos = null;
         HttpURLConnection connection = null;
@@ -66,8 +90,9 @@ public class FileDownloader implements Runnable {
                     bos.write(buff, 0, bytesRead);//写入到输出流
                 }
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (Exception ex) {
+            DialogsUtils.errorAlert("system.malfunction");
+            logger.error(FxmlUtils.getResourceBundle().getString("error.FileDownloader.downloadFile"), ex);
         } finally {
             if (connection != null) {
                 try {
@@ -93,23 +118,6 @@ public class FileDownloader implements Runnable {
                 }
                 bos = null;
             }
-        }
-    }
-
-    /**
-     * 重写线程执行
-     */
-    @Override
-    public void run() {
-        String fileBaseName = StringUtils.substringAfterLast(fileURL, "/");
-        try {
-            URL url = new URL(fileURL);
-            String localFileName = GlobalStaticConstant.GLOBAL_FILE_DISK + "/" + GlobalStaticConstant.GLOBAL_FILE_FOLDER + "/" + fileBaseName;
-            //long begin = System.currentTimeMillis(); //debug
-            downloadFile(url, new FileOutputStream(localFileName), 1024);
-            //System.out.println("thread spent time: " + (System.currentTimeMillis() - begin)); //debug
-        } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 }

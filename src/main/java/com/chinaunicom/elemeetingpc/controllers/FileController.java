@@ -6,16 +6,13 @@ import com.chinaunicom.elemeetingpc.database.models.FileResource;
 import com.chinaunicom.elemeetingpc.database.models.FileUserRelation;
 import com.chinaunicom.elemeetingpc.database.models.IssueFileRelation;
 import com.chinaunicom.elemeetingpc.database.models.IssueInfo;
-import com.chinaunicom.elemeetingpc.modelFx.FileResourceModel;
-import com.chinaunicom.elemeetingpc.modelFx.FileUserRelationModel;
-import com.chinaunicom.elemeetingpc.modelFx.IssueFileRelationModel;
+import com.chinaunicom.elemeetingpc.service.FileResourceService;
+import com.chinaunicom.elemeetingpc.service.FileUserRelationService;
+import com.chinaunicom.elemeetingpc.service.IssueFileRelationService;
+import com.chinaunicom.elemeetingpc.utils.DialogsUtils;
 import com.chinaunicom.elemeetingpc.utils.FxmlUtils;
 import com.chinaunicom.elemeetingpc.utils.MQPlugin;
 import com.chinaunicom.elemeetingpc.utils.exceptions.ApplicationException;
-import com.j256.ormlite.logger.Logger;
-import com.j256.ormlite.logger.LoggerFactory;
-import java.io.IOException;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import javafx.event.EventHandler;
@@ -40,9 +37,11 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * 文件控制器.
+ * 文件列表控制器，选择议题后进入文件列表界面.
  *
  * @author chenxi 创建时间：2019-8-29 15:31:28
  */
@@ -84,22 +83,23 @@ public class FileController {
     
     private MQPlugin mQPlugin;
 
-    private IssueFileRelationModel issueFileRelationModel;
+    private IssueFileRelationService issueFileRelationService;
 
-    private FileUserRelationModel fileUserRelationModel;
+    private FileUserRelationService fileUserRelationService;
 
-    private FileResourceModel fileResourceModel;
+    private FileResourceService fileResourceService;
 
     //文件所属议题，从MeetController里传过来的
     private IssueInfo issueInfo;
 
     public FileController() {
 
-        this.issueFileRelationModel = new IssueFileRelationModel();
+        issueFileRelationService = new IssueFileRelationService();
 
-        this.fileUserRelationModel = new FileUserRelationModel();
+        fileUserRelationService = new FileUserRelationService();
 
-        this.fileResourceModel = new FileResourceModel();
+        fileResourceService = new FileResourceService();
+
     }
 
     /**
@@ -108,32 +108,34 @@ public class FileController {
      * @throws ApplicationException
      */
     public void initialize() throws ApplicationException {
+        
     }
 
     /**
-     * 重写文件页面布局初始化.
+     * 重写文件页面布局初始化方法.
      *
      * @param issueInfo 文件所属议题
      * @throws ApplicationException
-     * @throws java.sql.SQLException
      */
-    public void initData(IssueInfo issueInfo) throws ApplicationException, SQLException {
-        List<String> issueFileIdList = new ArrayList<>();//议题文件关系表文件id列表
-        List<String> fileUserFileIdList = new ArrayList<>();//文件人员关系表文件id列表
+    public void initData(IssueInfo issueInfo) throws ApplicationException {
+        //议题文件关系表文件id列表
+        List<String> issueFileIdList = new ArrayList<>();
+        //文件人员关系表文件id列表
+        List<String> fileUserFileIdList = new ArrayList<>();
         this.issueInfo = issueInfo;
         try {
             //创建议题名称区域
             createIssueTitle(issueInfo);
             //根据议题id查询议题文件关系表对应的文件id
             String issueId = issueInfo.getIssueId();
-            List<IssueFileRelation> issueFileRelationList = issueFileRelationModel.queryIssueFileRelationByIssueId(issueId);
+            List<IssueFileRelation> issueFileRelationList = issueFileRelationService.queryIssueFileRelationByIssueId(issueId);
             if (!issueFileRelationList.isEmpty()) {
                 issueFileRelationList.forEach((issueFileRelation) -> {
                     issueFileIdList.add(issueFileRelation.getFileId());
                 });
             }
             //根据当前登录用户id查询文件人员关系表对应的文件id
-            List<FileUserRelation> fileUserRelationList = fileUserRelationModel.queryFileUserRelationByUserId(GlobalStaticConstant.GLOBAL_ORGANINFO_OWNER_USERID);
+            List<FileUserRelation> fileUserRelationList = fileUserRelationService.queryFileUserRelationByUserId(GlobalStaticConstant.GLOBAL_ORGANINFO_OWNER_USERID);
             if (!fileUserRelationList.isEmpty()) {
                 fileUserRelationList.forEach((fileUserRelation) -> {
                     fileUserFileIdList.add(fileUserRelation.getFileId());
@@ -142,14 +144,14 @@ public class FileController {
             //比较两个列表并获取两个列表中重合的数据,如果没有重合数据则issueFileIdList为空
             issueFileIdList.retainAll(fileUserFileIdList);
             //根据筛选过的文件id列表和议题id获取IssueFileRelation表里的数据
-            List<IssueFileRelation> issueFileList = issueFileRelationModel.queryIssueFileRelationByFileIds(issueFileIdList, issueId);
+            List<IssueFileRelation> issueFileList = issueFileRelationService.queryIssueFileRelationByFileIds(issueFileIdList, issueId);
             if (!issueFileList.isEmpty()) {
                 //创建文件区域，注意：文件名称是从议题文件关系表里获取的，而不是从文件表里获取的，故此处传入的是IssueFileRelation列表
                 createFiles(issueFileList, fileSection);
             }
-        } catch (ApplicationException | SQLException ex) {
-            ex.printStackTrace();
-            logger.error(ex.getCause().getMessage());
+        } catch (Exception ex) {
+            DialogsUtils.errorAlert("system.malfunction");
+            logger.error(FxmlUtils.getResourceBundle().getString("error.FileController.initData"), ex);
         }
     }
     
@@ -172,7 +174,7 @@ public class FileController {
      *
      * @param issueFileList 议题文件列表
      * @param fileSection 文件显示区域
-     * @throws com.chinaunicom.elemeetingpc.utils.exceptions.ApplicationException
+     * @throws ApplicationException
      */
     public void createFiles(List<IssueFileRelation> issueFileList, VBox fileSection) throws ApplicationException {
         //设置FlowPane样式
@@ -187,7 +189,7 @@ public class FileController {
         ImageView[] imageList = new ImageView[issueFileListSize];
         for (int k = 0; k < issueFileListSize; k++) {
             //根据文件id列表查询文件信息
-            FileResource file = fileResourceModel.queryFilesById(issueFileList.get(k).getFileId()).get(0);
+            FileResource file = fileResourceService.queryFilesById(issueFileList.get(k).getFileId()).get(0);
             imageList[k] = new ImageView(image);
             //设置Label样式
             Label issueFileLabel = new Label(issueFileList.get(k).getFileName());
@@ -232,9 +234,9 @@ public class FileController {
                 try {
                     FileResource file = (FileResource) fileStackPane.getUserData();
                     showFxmlFileDetail(file, fileName, 0);//跳转到文件详情界面
-                } catch (ApplicationException | SQLException ex) {
-                    ex.printStackTrace(); //debug
-                    logger.error(ex.getCause().getMessage());
+                } catch (Exception ex) {
+                    DialogsUtils.errorAlert("system.malfunction");
+                    logger.error(FxmlUtils.getResourceBundle().getString("error.FileController.addMouseClickEvent"), ex);
                 }
             }
         });
@@ -245,12 +247,10 @@ public class FileController {
      *
      * @param file 文件
      * @param fileName 文件名称
-     * @throws
-     * com.chinaunicom.elemeetingpc.utils.exceptions.ApplicationException
-     * @throws java.sql.SQLException
+     * @throws ApplicationException
      */
     @FXML
-    public void showFxmlFileDetail(FileResource file, String fileName, int pageIndex) throws ApplicationException, SQLException {
+    public void showFxmlFileDetail(FileResource file, String fileName, int pageIndex) throws ApplicationException {
         try {
             FXMLLoader loader = FxmlUtils.getFXMLLoader(FXML_FILE_DETAIL);
             borderPaneMain.getChildren().remove(borderPaneMain.getCenter());//清除当前BorderPane内中间区域的内容
@@ -262,9 +262,9 @@ public class FileController {
             fileDetailController.initialize(file, fileName, issueInfo, this, pageIndex);//把当前选择的文件，文件名，文件所属议题和FileController传到FileDetailController里，以便在下个控制器中使用
             //同步阅读时，MQPlugin需要知道那个文件被打开了，因此需要把文件详情传入mQPlugin
             mQPlugin.setFileDetailController(fileDetailController);
-        } catch (IOException e) {
-            e.printStackTrace();
-            logger.error(e.getCause().getMessage());
+        } catch (Exception ex) {
+            DialogsUtils.errorAlert("system.malfunction");
+            logger.error(FxmlUtils.getResourceBundle().getString("error.FileController.showFxmlFileDetail"), ex);
         }
     }
 
@@ -280,9 +280,9 @@ public class FileController {
             borderPaneMain.setCenter(loader.load()); //将当前BorderPane中间区域加载为机构选择界面
             OrganInfoController organInfoController = loader.getController(); //从loader中获取OrganInfoController
             organInfoController.setBorderPane(borderPaneMain);//设置传参当前的borderPaneMain，以便在OrganInfoController中获取到当前BorderPane
-        } catch (IOException e) {
-            e.printStackTrace();
-            logger.error(e.getCause().getMessage());
+        } catch (Exception ex) {
+            DialogsUtils.errorAlert("system.malfunction");
+            logger.error(FxmlUtils.getResourceBundle().getString("error.FileController.showFxmlOrg"), ex);
         }
     }
 
@@ -304,9 +304,9 @@ public class FileController {
                 borderPaneMain.getChildren().remove(borderPaneMain.getLeft());//清除当前BorderPane内左侧区域的内容
                 isFolded = true;//设置为收起状态
             }
-        } catch (IOException e) {
-            logger.error(e.getCause().getMessage());
-            e.printStackTrace();
+        } catch (Exception ex) {
+            DialogsUtils.errorAlert("system.malfunction");
+            logger.error(FxmlUtils.getResourceBundle().getString("error.FileController.showFxmlLeftNavigation"), ex);
         }
     }
 
@@ -320,42 +320,42 @@ public class FileController {
             borderPaneMain.getChildren().remove(borderPaneMain.getCenter());//清除当前BorderPane内中间区域的内容
             borderPaneMain.getChildren().remove(borderPaneMain.getLeft());//清除当前BorderPane内左侧区域的内容
             borderPaneMain.setCenter(loader.load()); //将当前BorderPane中间区域加载为机构选择界面
-            MeetController meetController = loader.getController(); //从loader中获取MeetController
+            MeetInfoController meetController = loader.getController(); //从loader中获取MeetController
             meetController.setBorderPane(borderPaneMain);//设置传参当前的borderPane，以便在MeetController中获取到当前BorderPane
             meetController.setMQPlugin(mQPlugin);//把MQPlugin往下传
-        } catch (IOException e) {
-            logger.error(e.getCause().getMessage());
-            e.printStackTrace();
+        } catch (Exception ex) {
+            DialogsUtils.errorAlert("system.malfunction");
+            logger.error(FxmlUtils.getResourceBundle().getString("error.FileController.showFxmlMeet"), ex);
         }
     }
 
     /**
-     * 通知列表信息
+     * 通知列表信息.
      */
     @FXML
     public void handNoticeList() {
-        //加载通知列表内容
-        FXMLLoader loader = FxmlUtils.getFXMLLoader(FXML_NOTICE_LIST);
-        AnchorPane noticeListContent = new AnchorPane();
         try {
+            //加载通知列表内容
+            FXMLLoader loader = FxmlUtils.getFXMLLoader(FXML_NOTICE_LIST);
+            AnchorPane noticeListContent = new AnchorPane();
             noticeListContent = loader.load();
-        } catch (IOException ex) {
-            ex.printStackTrace();
-            logger.error(ex.getCause().getMessage());
+            Scene scene = new Scene(noticeListContent);
+            //创建弹窗
+            Stage noticeListDialogStage = new Stage();
+            noticeListDialogStage.setWidth(1300.0);
+            noticeListDialogStage.setHeight(700.0);
+            noticeListDialogStage.setTitle(FxmlUtils.getResourceBundle().getString("MeetController.noticeTitle"));
+            noticeListDialogStage.initModality(Modality.WINDOW_MODAL);
+            noticeListDialogStage.initOwner(borderPaneMain.getScene().getWindow());
+            noticeListDialogStage.setScene(scene);
+            //把当前stage作为下个界面的父界面使用（通知详情）
+            NoticeInfoController controller = loader.getController();
+            controller.setDialogStage(noticeListDialogStage);
+            noticeListDialogStage.showAndWait();
+        } catch (Exception ex) {
+            DialogsUtils.errorAlert("system.malfunction");
+            logger.error(FxmlUtils.getResourceBundle().getString("error.FileController.handNoticeList"), ex);
         }
-        Scene scene = new Scene(noticeListContent);
-        //创建弹窗
-        Stage noticeListDialogStage = new Stage();
-        noticeListDialogStage.setWidth(1300.0);
-        noticeListDialogStage.setHeight(700.0);
-        noticeListDialogStage.setTitle(FxmlUtils.getResourceBundle().getString("MeetController.noticeTitle"));
-        noticeListDialogStage.initModality(Modality.WINDOW_MODAL);
-        noticeListDialogStage.initOwner(borderPaneMain.getScene().getWindow());
-        noticeListDialogStage.setScene(scene);
-        //把当前stage作为下个界面的父界面使用（通知详情）
-        NoticeInfoController controller = loader.getController();
-        controller.setDialogStage(noticeListDialogStage);
-        noticeListDialogStage.showAndWait();
     }
 
     /**
@@ -378,8 +378,9 @@ public class FileController {
             ResetPasswordController controller = loader.getController();
             controller.setDialogStage(dialogStage);//把界面传递到下一个控制器里
             dialogStage.showAndWait();
-        } catch (IOException ex) {
-            logger.error(ex.getCause().getMessage());
+        } catch (Exception ex) {
+            DialogsUtils.errorAlert("system.malfunction");
+            logger.error(FxmlUtils.getResourceBundle().getString("error.FileController.handleResetPassword"), ex);
         }
     }
     

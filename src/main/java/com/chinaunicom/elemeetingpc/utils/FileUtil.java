@@ -1,8 +1,8 @@
 package com.chinaunicom.elemeetingpc.utils;
 
-import com.j256.ormlite.logger.Logger;
-import com.j256.ormlite.logger.LoggerFactory;
 import java.io.File;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Files utility class.
@@ -24,9 +24,9 @@ public class FileUtil {
             if (deleteFile.exists() && deleteFile.isFile()) {
                 deleteFile.delete();
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-            logger.error(e.getCause().getMessage());
+        } catch (Exception ex) {
+            DialogsUtils.errorAlert("system.malfunction");
+            logger.error(FxmlUtils.getResourceBundle().getString("error.FileUtil.deleteFile"), ex);
         }
     }
 
@@ -41,9 +41,9 @@ public class FileUtil {
             if (!meetingFileFolder.exists()) {
                 meetingFileFolder.mkdir();
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-            logger.error(e.getCause().getMessage());
+        } catch (Exception ex) {
+            DialogsUtils.errorAlert("system.malfunction");
+            logger.error(FxmlUtils.getResourceBundle().getString("error.FileUtil.createFolder"), ex);
         }
     }
 
@@ -60,9 +60,9 @@ public class FileUtil {
             if (file.exists() && file.isFile()) {
                 result = true;
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-            logger.error(e.getCause().getMessage());
+        } catch (Exception ex) {
+            DialogsUtils.errorAlert("system.malfunction");
+            logger.error(FxmlUtils.getResourceBundle().getString("error.FileUtil.isFileExist"), ex);
         }
         return result;
     }
