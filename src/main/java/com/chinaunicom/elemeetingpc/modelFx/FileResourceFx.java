@@ -1,8 +1,4 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package com.chinaunicom.elemeetingpc.modelFx;
 
 import javafx.beans.property.IntegerProperty;
@@ -10,7 +6,11 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 /**
- *
+ * This is a JavaFx wrapper class for FileResource, a JavaFx wrap class
+ * encapsulates a Java primitive and adds some extra functionality 
+ * (the classes under javafx.beans.property all contain built-in support 
+ * for observability and binding as part of their design).
+ * 
  * @author zhaojunfeng
  */
 public class FileResourceFx {

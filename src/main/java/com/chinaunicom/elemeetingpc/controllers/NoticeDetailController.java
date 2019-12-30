@@ -2,14 +2,11 @@ package com.chinaunicom.elemeetingpc.controllers;
 
 import com.chinaunicom.elemeetingpc.modelFx.NoticeAccessoriesFx;
 import com.chinaunicom.elemeetingpc.modelFx.NoticeInfoFx;
-import com.chinaunicom.elemeetingpc.service.NoticeInfoService;
+import com.chinaunicom.elemeetingpc.utils.DialogsUtils;
 import com.chinaunicom.elemeetingpc.utils.FileDownloader;
 import com.chinaunicom.elemeetingpc.utils.FxmlUtils;
-import com.j256.ormlite.logger.Logger;
-import com.j256.ormlite.logger.LoggerFactory;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 import javafx.event.ActionEvent;
@@ -23,6 +20,8 @@ import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 通知详情控制器.
@@ -56,6 +55,14 @@ public class NoticeDetailController {
     
     //通知详情界面
     private Stage noticeDetailDialogStage;
+    
+    private NoticeInfoServiceController noticeInfoServiceController;
+    
+    //会议通知信息
+    private NoticeInfoFx noticeInfoFx;
+    
+    //会议通知附件列表
+    private List<NoticeAccessoriesFx> noticeAccessoriesFxList;
 
     public void initialize() {
 
@@ -67,22 +74,25 @@ public class NoticeDetailController {
      * @param notice 通知信息
      */
     public void initData(NoticeInfoFx notice) {
-        //根据当前选择的会议通知id，调接口获取会议通知详情
-        NoticeInfoService noticeInfoService = new NoticeInfoService();
-        NoticeInfoFx noticeInfoFx = noticeInfoService.getNoticeDeatilFXById(notice.getNoticeId());
-        List<NoticeAccessoriesFx> noticeAccessoriesFxList = noticeInfoService.getNoticeAccessoriesList();
-        if (noticeInfoFx != null) {
-            showNoticeDetail(noticeInfoFx, noticeAccessoriesFxList);
+        try {
+            //根据当前选择的会议通知id，调接口获取会议通知详情
+            noticeInfoServiceController = new NoticeInfoServiceController();
+            noticeInfoFx = noticeInfoServiceController.getNoticeDeatilFXById(notice.getNoticeId());
+            noticeAccessoriesFxList = noticeInfoServiceController.getNoticeAccessoriesList();
+            if (noticeInfoFx != null) {
+                showNoticeDetail();
+            }
+        } catch (Exception ex) {
+            DialogsUtils.errorAlert("system.malfunction");
+            logger.error(FxmlUtils.getResourceBundle().getString("error.NoticeDetailController.initData"), ex);
         }
     }
 
     /**
      * 会议通知界面布局.
-     *
-     * @param noticeInfoFx 会议通知信息
-     * @param noticeAccessoriesFxList 会议通知附件列表
+     * @throws Exception
      */
-    public void showNoticeDetail(NoticeInfoFx noticeInfoFx, List<NoticeAccessoriesFx> noticeAccessoriesFxList) {
+    public void showNoticeDetail() throws Exception {
         //通知标题
         noticeTitle.setText(noticeInfoFx.getNoticeTitle());
         noticeTitle.setTextOverrun(OverrunStyle.ELLIPSIS);
@@ -119,9 +129,9 @@ public class NoticeDetailController {
                     FileDownloader fileDownloader = new FileDownloader(fileUrl);
                     URL url = new URL(fileUrl);
                     fileDownloader.downloadFile(url, new FileOutputStream(dest), 1024);
-                } catch (IOException ex) {
-                    ex.printStackTrace();
-                    logger.error(ex.getCause().getMessage());
+                } catch (Exception ex) {
+                    DialogsUtils.errorAlert("system.malfunction");
+                    logger.error(FxmlUtils.getResourceBundle().getString("error.NoticeDetailController.showNoticeDetail.setOnAction"), ex);
                 }
             });
             files.getChildren().addAll(link);

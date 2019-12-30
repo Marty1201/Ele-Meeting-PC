@@ -9,7 +9,7 @@ import java.util.List;
 
 /**
  * The UserInfoService class serves as a service layer between Controller and
- * Dao, it provides variouse database operation methods on the UserInfoService
+ * Dao, it provides variouse database operation methods on the UserInfo
  * table.
  *
  * @author chenxi, zhaojunfeng 创建时间：2019-7-4 10:19:20

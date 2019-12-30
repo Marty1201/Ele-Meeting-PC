@@ -1,8 +1,6 @@
 package com.chinaunicom.elemeetingpc.controllers;
 
 import com.chinaunicom.elemeetingpc.constant.GlobalStaticConstant;
-import com.chinaunicom.elemeetingpc.modelFx.ResetPasswordModel;
-import com.chinaunicom.elemeetingpc.modelFx.UserInfoModel;
 import com.chinaunicom.elemeetingpc.service.UserInfoService;
 import com.chinaunicom.elemeetingpc.utils.DialogsUtils;
 import com.chinaunicom.elemeetingpc.utils.HashUtil;
@@ -30,51 +28,50 @@ public class ResetPasswordController {
 
     private Stage dialogStage;
 
-    private ResetPasswordModel resetPasswordModel;
-
-    private UserInfoModel userInfoModel;
+    private UserInfoService userInfoService;
 
     @FXML
     public void initialize() {
 
     }
 
-    public void setDialogStage(Stage dialogStage) {
-        this.dialogStage = dialogStage;
-    }
-
+    /**
+     * 确定提交.
+     */
     @FXML
-    public void handleOK() throws ApplicationException {
-        String infoString = "";
-        userInfoModel = new UserInfoModel();
+    public void handleOK() throws Exception {
+        userInfoService = new UserInfoService();
         String errorMessage = isInputValid();
         //校验密码是否符合规则
         if (StringUtils.isBlank(errorMessage)) {
-            String oldPassword = userInfoModel.getOldPassword();
+            String oldPassword = userInfoService.getOldPassword();
             String newPassword = HashUtil.toMD5(newPasswordField.getText());
-            UserInfoService service = new UserInfoService();
-            infoString = service.resetPassword(GlobalStaticConstant.GLOBAL_ORGANINFO_OWNER_USERID, oldPassword, newPassword);
-            DialogsUtils.customInfoAlert(infoString);
+            //调后台修改用户密码接口
+            UserInfoServiceController service = new UserInfoServiceController();
+            String resultString = service.resetPassword(GlobalStaticConstant.GLOBAL_ORGANINFO_OWNER_USERID, oldPassword, newPassword);
+            DialogsUtils.customInfoAlert(resultString);
             dialogStage.close();//关闭上一个密码修改界面
         } else {
             DialogsUtils.infoAlert(errorMessage);
         }
     }
 
+    /**
+     * 确定关闭.
+     */
     @FXML
     public void handleCancel() {
         dialogStage.close();
     }
 
     /**
-     * 密码复杂度校验，规则如下： 1、密码不为空；2、旧密码输入不正确；3、新密码与确认密码必须一致；4、密码必须是8-20位；5、密码必须包含字母和数字；
-     * 6、密码不能包含空格.
+     * 密码复杂度校验，规则如下：
+     * 1、密码不为空；2、旧密码输入不正确；3、新密码与确认密码必须一致；4、密码必须是8-20位；5、密码必须包含字母和数字； 6、密码不能包含空格.
      *
      * @return errorMessage 校验不通过的错误信息，如果校验通过则错误信息为空
      */
     private String isInputValid() throws ApplicationException {
         String errorMessage = "";
-        userInfoModel = new UserInfoModel();
         String regex = "^[A-Za-z0-9]+$";
         //密码不为空
         if (StringUtils.isBlank(oldPasswordField.getText())) {
@@ -87,9 +84,9 @@ public class ResetPasswordController {
             return errorMessage = "ResetPasswordController.reNewPasswordField.empty";
         }
         //旧密码输入不正确
-        String oldPassword = userInfoModel.getOldPassword();
+        String oldPassword = userInfoService.getOldPassword();
         String newOldPassword = HashUtil.toMD5(oldPasswordField.getText());
-        if(!StringUtils.equals(oldPassword, newOldPassword)){
+        if (!StringUtils.equals(oldPassword, newOldPassword)) {
             return errorMessage = "ResetPasswordController.passWordField.old";
         }
         //新密码与确认密码必须一致
@@ -112,5 +109,9 @@ public class ResetPasswordController {
             return errorMessage = "ResetPasswordController.passWordField.space";
         }
         return errorMessage;
+    }
+
+    public void setDialogStage(Stage dialogStage) {
+        this.dialogStage = dialogStage;
     }
 }
