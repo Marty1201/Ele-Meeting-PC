@@ -128,7 +128,9 @@ public class NoticeDetailController {
                     //下载会议通知附件
                     FileDownloader fileDownloader = new FileDownloader(fileUrl);
                     URL url = new URL(fileUrl);
-                    fileDownloader.downloadFile(url, new FileOutputStream(dest), 1024);
+                    if (dest != null && dest.exists()) {
+                        fileDownloader.downloadFile(url, new FileOutputStream(dest), 1024);
+                    }
                 } catch (Exception ex) {
                     DialogsUtils.errorAlert("system.malfunction");
                     logger.error(FxmlUtils.getResourceBundle().getString("error.NoticeDetailController.showNoticeDetail.setOnAction"), ex);
