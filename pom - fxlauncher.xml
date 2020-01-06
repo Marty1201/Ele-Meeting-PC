@@ -142,6 +142,8 @@
 
         <!-- Base URL where you will host the application artifacts -->
         <app.url>http://192.168.1.162:8080/</app.url>
+        <!-- production enviroment -->
+        <!-- <app.url>http://10.120.26.141:8080/</app.url> -->
 
         <!-- Optional scp target for application artifacts hosted at the above url -->
         <!-- <app.deploy.target>w48839@fxldemo.tornado.no:fxldemo</app.deploy.target> -->

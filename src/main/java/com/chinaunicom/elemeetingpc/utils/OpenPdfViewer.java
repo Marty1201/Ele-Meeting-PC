@@ -2,13 +2,10 @@ package com.chinaunicom.elemeetingpc.utils;
 
 import com.chinaunicom.elemeetingpc.constant.GlobalStaticConstant;
 import com.chinaunicom.elemeetingpc.controllers.FileDetailController;
-import com.j256.ormlite.logger.Logger;
-import com.j256.ormlite.logger.LoggerFactory;
 import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -39,6 +36,8 @@ import javafx.stage.FileChooser;
 import javafx.util.Callback;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.PDFRenderer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A custom PDF viewer control extends BorderPane.
@@ -133,9 +132,9 @@ public class OpenPdfViewer extends BorderPane implements Initializable {
         this.getStylesheets().add(getClass().getResource("/styles/Styles.css").toString());
         try {
             fxmlLoader.load();
-        } catch (IOException exception) {
-            logger.error(exception.getCause().getMessage());
-            throw new RuntimeException(exception);
+        } catch (Exception ex) {
+            DialogsUtils.errorAlert("system.malfunction");
+            logger.error(FxmlUtils.getResourceBundle().getString("error.OpenPdfViewer.load"), ex);
         }
     }
 
@@ -180,8 +179,8 @@ public class OpenPdfViewer extends BorderPane implements Initializable {
             //Configure platform's default file chooser dialog
             configureFileChooser();
         } catch (Exception ex) {
-            ex.printStackTrace();
-            logger.error(ex.getCause().getMessage());
+            DialogsUtils.errorAlert("system.malfunction");
+            logger.error(FxmlUtils.getResourceBundle().getString("error.OpenPdfViewer.initialize"), ex);
         }
     }
 
@@ -206,8 +205,8 @@ public class OpenPdfViewer extends BorderPane implements Initializable {
             //never set! but somehow this binding works, amazing!
             scroller.contentProperty().bind(currentImage);
         } catch (Exception ex) {
-            ex.printStackTrace();
-            logger.error(ex.getCause().getMessage());
+            DialogsUtils.errorAlert("system.malfunction");
+            logger.error(FxmlUtils.getResourceBundle().getString("error.OpenPdfViewer.initScroller"), ex);
         }
     }
 
@@ -219,31 +218,41 @@ public class OpenPdfViewer extends BorderPane implements Initializable {
      *
      */
     private void initPropertyChangeListener() {
-        try {
-            //add height property change listener, when the height of the AnchorPane changes, call the resize() method
-            mainPane.heightProperty().addListener(new ChangeListener<Number>() {
-                @Override
-                public void changed(ObservableValue<? extends Number> observableValue, Number number, Number t1) {
+        //add height property change listener, when the height of the AnchorPane changes, call the resize() method
+        mainPane.heightProperty().addListener(new ChangeListener<Number>() {
+            @Override
+            public void changed(ObservableValue<? extends Number> observableValue, Number number, Number t1) {
+                try {
                     resize();
+                } catch (Exception ex) {
+                    DialogsUtils.errorAlert("system.malfunction");
+                    logger.error(FxmlUtils.getResourceBundle().getString("error.OpenPdfViewer.initPropertyChangeListener.heightProperty.changed"), ex);
                 }
-            });
-            //add width property change listener, when the width of the AnchorPane changes, call the resize() method
-            mainPane.widthProperty().addListener(new ChangeListener<Number>() {
-                @Override
-                public void changed(ObservableValue<? extends Number> observableValue, Number number, Number t1) {
+            }
+        });
+        //add width property change listener, when the width of the AnchorPane changes, call the resize() method
+        mainPane.widthProperty().addListener(new ChangeListener<Number>() {
+            @Override
+            public void changed(ObservableValue<? extends Number> observableValue, Number number, Number t1) {
+                try {
                     resize();
+                } catch (Exception ex) {
+                    DialogsUtils.errorAlert("system.malfunction");
+                    logger.error(FxmlUtils.getResourceBundle().getString("error.OpenPdfViewer.initPropertyChangeListener.widthProperty.changed"), ex);
                 }
-            });
-            //add vvalue property change listener for scrollpane, provide vertical scrolling sync ability
-            //note: since the mouse scrolling event has no way to tell when user will stop scrolling(unlike guesture events
-            //such as setOnScrollFinish/setOnScrollStart), we simply can't get the last scrolling position, instead we send
-            //out every mouse scrolling position to consumers. eg, scroll from A to E will cause this Listener send all the
-            //letters from A to E inclusive. there is a known issue as if the network is unstable, there will be a huge delay
-            //for the consumer to receive the message and it will become very slow for each position to load on the page :(
-            //solution: make sure your network is stable and fast!
-            scroller.vvalueProperty().addListener(new ChangeListener<Number>() {
-                @Override
-                public void changed(ObservableValue<? extends Number> observableValue, Number number, Number t1) {
+            }
+        });
+        //add vvalue property change listener for scrollpane, provide vertical scrolling sync ability
+        //note: since the mouse scrolling event has no way to tell when user will stop scrolling(unlike guesture events
+        //such as setOnScrollFinish/setOnScrollStart), we simply can't get the last scrolling position, instead we send
+        //out every mouse scrolling position to consumers. eg, scroll from A to E will cause this Listener send all the
+        //letters from A to E inclusive. there is a known issue as if the network is unstable, there will be a huge delay
+        //for the consumer to receive the message and it will become very slow for each position to load on the page :(
+        //solution: make sure your network is stable and fast!
+        scroller.vvalueProperty().addListener(new ChangeListener<Number>() {
+            @Override
+            public void changed(ObservableValue<? extends Number> observableValue, Number number, Number t1) {
+                try {
                     if (GlobalStaticConstant.GLOBAL_ISSPEAKINGCLICKED == true) {
                         double vValue = scroller.getVvalue();
                         String fileId = ",\"bookid\":\"" + fileDetailController.getFileInfo().getFileId();
@@ -260,18 +269,23 @@ public class OpenPdfViewer extends BorderPane implements Initializable {
                         String message = "{\"vValue\":" + vValue + ",\"height\":" + height + ",\"width\":" + width + ",\"zoomFactor\":" + zoomFactor + ",\"page\":" + page + fileId + fileName + filePassword + type + organName + command + "\"}";
                         mQPlugin.publishMessage(message);
                     }
+                } catch (Exception ex) {
+                    DialogsUtils.errorAlert("system.malfunction");
+                    logger.error(FxmlUtils.getResourceBundle().getString("error.OpenPdfViewer.initPropertyChangeListener.vvalueProperty.changed"), ex);
                 }
-            });
-            //add hvalue property change listener for scrollpane, provide horizontal scrolling sync ability
-            //note: since the mouse scrolling event has no way to tell when user will stop scrolling(unlike guesture events
-            //such as setOnScrollFinish/setOnScrollStart), we simply can't get the last scrolling position, instead we send
-            //out every mouse scrolling position to consumers. eg, scroll from A to E will cause this Listener send all the
-            //letters from A to E inclusive. there is a known issue as if the network is unstable, there will be a huge delay
-            //for the consumer to receive the message and it will become very slow for each position to load on the page :(
-            //solution: make sure your network is stable and fast!
-            scroller.hvalueProperty().addListener(new ChangeListener<Number>() {
-                @Override
-                public void changed(ObservableValue<? extends Number> observableValue, Number number, Number t1) {
+            }
+        });
+        //add hvalue property change listener for scrollpane, provide horizontal scrolling sync ability
+        //note: since the mouse scrolling event has no way to tell when user will stop scrolling(unlike guesture events
+        //such as setOnScrollFinish/setOnScrollStart), we simply can't get the last scrolling position, instead we send
+        //out every mouse scrolling position to consumers. eg, scroll from A to E will cause this Listener send all the
+        //letters from A to E inclusive. there is a known issue as if the network is unstable, there will be a huge delay
+        //for the consumer to receive the message and it will become very slow for each position to load on the page :(
+        //solution: make sure your network is stable and fast!
+        scroller.hvalueProperty().addListener(new ChangeListener<Number>() {
+            @Override
+            public void changed(ObservableValue<? extends Number> observableValue, Number number, Number t1) {
+                try {
                     if (GlobalStaticConstant.GLOBAL_ISSPEAKINGCLICKED == true) {
                         double hValue = scroller.getHvalue();
                         String fileId = ",\"bookid\":\"" + fileDetailController.getFileInfo().getFileId();
@@ -288,12 +302,12 @@ public class OpenPdfViewer extends BorderPane implements Initializable {
                         String message = "{\"hValue\":" + hValue + ",\"height\":" + height + ",\"width\":" + width + ",\"zoomFactor\":" + zoomFactor + ",\"page\":" + page + fileId + fileName + filePassword + type + organName + command + "\"}";
                         mQPlugin.publishMessage(message);
                     }
+                } catch (Exception ex) {
+                    DialogsUtils.errorAlert("system.malfunction");
+                    logger.error(FxmlUtils.getResourceBundle().getString("error.OpenPdfViewer.initPropertyChangeListener.hvalueProperty.changed"), ex);
                 }
-            });
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            logger.error(ex.getCause().getMessage());
-        }
+            }
+        });
     }
 
     /**
@@ -301,29 +315,29 @@ public class OpenPdfViewer extends BorderPane implements Initializable {
      *
      */
     private void initEventHandler() {
-        try {
-            //create a scrollEventHandler to prevent vertical scrolling when sync
-            scrollEventHandler = new EventHandler<ScrollEvent>() {
-                @Override
-                public void handle(ScrollEvent event) {
-                    if (event.getDeltaY() > 0 || event.getDeltaY() < 0) {
-                        event.consume();
-                    }
+        //create a scrollEventHandler to prevent vertical scrolling when sync
+        scrollEventHandler = new EventHandler<ScrollEvent>() {
+            @Override
+            public void handle(ScrollEvent event) {
+                if (event.getDeltaY() > 0 || event.getDeltaY() < 0) {
+                    event.consume();
                 }
-            };
-            //create a keyEventHandler to prevent clicking left or right when sync
-            keyEventHandler = new EventHandler<KeyEvent>() {
-                @Override
-                public void handle(KeyEvent event) {
-                    if (event.getCode() == KeyCode.LEFT || event.getCode() == KeyCode.RIGHT) {
-                        event.consume();
-                    }
+            }
+        };
+        //create a keyEventHandler to prevent clicking left or right when sync
+        keyEventHandler = new EventHandler<KeyEvent>() {
+            @Override
+            public void handle(KeyEvent event) {
+                if (event.getCode() == KeyCode.LEFT || event.getCode() == KeyCode.RIGHT) {
+                    event.consume();
                 }
-            };
-            //tool bar button events
-            EventHandler<ActionEvent> eventEventHandler = new EventHandler<ActionEvent>() {
-                @Override
-                public void handle(ActionEvent actionEvent) {
+            }
+        };
+        //tool bar button events
+        EventHandler<ActionEvent> eventEventHandler = new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                try {
                     if (actionEvent.getSource() == loadButton) {//define load file event
                         //open up the platform's own file choosing window by FileChooser
                         final File file = fileChooser.showOpenDialog(pagination.getScene().getWindow());
@@ -385,18 +399,18 @@ public class OpenPdfViewer extends BorderPane implements Initializable {
                             }
                         }
                     }
+                } catch (Exception ex) {
+                    DialogsUtils.errorAlert("system.malfunction");
+                    logger.error(FxmlUtils.getResourceBundle().getString("error.OpenPdfViewer.initEventHandler.eventEventHandler.handle"), ex);
                 }
-            };
-            //add event handlers to the buttons
-            loadButton.setOnAction(eventEventHandler);
-            addZoomButton.setOnAction(eventEventHandler);
-            reduceZoomButton.setOnAction(eventEventHandler);
-            zoomHeightButton.setOnAction(eventEventHandler);
-            zoomWidthButton.setOnAction(eventEventHandler);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            logger.error(ex.getCause().getMessage());
-        }
+            }
+        };
+        //add event handlers to the buttons
+        loadButton.setOnAction(eventEventHandler);
+        addZoomButton.setOnAction(eventEventHandler);
+        reduceZoomButton.setOnAction(eventEventHandler);
+        zoomHeightButton.setOnAction(eventEventHandler);
+        zoomWidthButton.setOnAction(eventEventHandler);
     }
 
     /**
@@ -441,8 +455,8 @@ public class OpenPdfViewer extends BorderPane implements Initializable {
             }
 
         } catch (Exception ex) {
-            ex.printStackTrace();
-            logger.error(ex.getCause().getMessage());
+            DialogsUtils.errorAlert("system.malfunction");
+            logger.error(FxmlUtils.getResourceBundle().getString("error.OpenPdfViewer.updateToolbar"), ex);
         }
     }
 
@@ -458,8 +472,8 @@ public class OpenPdfViewer extends BorderPane implements Initializable {
             fileChooser.setInitialDirectory(Paths.get(initialDirectory).toFile());
             fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("PDF Files", "*.pdf", "*.PDF"));
         } catch (Exception ex) {
-            ex.printStackTrace();
-            logger.error(ex.getCause().getMessage());
+            DialogsUtils.errorAlert("system.malfunction");
+            logger.error(FxmlUtils.getResourceBundle().getString("error.OpenPdfViewer.configureFileChooser"), ex);
         }
     }
 
@@ -506,8 +520,8 @@ public class OpenPdfViewer extends BorderPane implements Initializable {
             stackPane.getChildren().add(imageView);
             currentImage.set(stackPane);
         } catch (Exception ex) {
-            ex.printStackTrace();
-            logger.error(ex.getCause().getMessage());
+            DialogsUtils.errorAlert("system.malfunction");
+            logger.error(FxmlUtils.getResourceBundle().getString("error.OpenPdfViewer.updateImage"), ex);
         }
     }
     
@@ -519,53 +533,58 @@ public class OpenPdfViewer extends BorderPane implements Initializable {
         imageView.setOnMouseClicked(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event) {
-                if (event.getClickCount() == 2) {
-                    VBox mainView = fileDetailController.getMainView();
-                    AnchorPane topMenu = fileDetailController.getTopMenu();
-                    //in the following sync state, the zoomOptions is locked and always set to false, only allow double click full screen effect
-                    if (GlobalStaticConstant.GLOBAL_ISFOLLOWINGCLICKED == true) {
-                        //show full screen
-                        if (topMenu.isVisible() == true) {
-                            mainView.getChildren().remove(topMenu);
-                            topMenu.setVisible(false);
-                            //get the navigation area and hide it
-                            ObservableList<Node> childList = pagination.getChildrenUnmodifiable();
-                            if (!childList.isEmpty()) {
-                                childList.get(2).setVisible(false);
+                try {
+                    if (event.getClickCount() == 2) {
+                        VBox mainView = fileDetailController.getMainView();
+                        AnchorPane topMenu = fileDetailController.getTopMenu();
+                        //in the following sync state, the zoomOptions is locked and always set to false, only allow double click full screen effect
+                        if (GlobalStaticConstant.GLOBAL_ISFOLLOWINGCLICKED == true) {
+                            //show full screen
+                            if (topMenu.isVisible() == true) {
+                                mainView.getChildren().remove(topMenu);
+                                topMenu.setVisible(false);
+                                //get the navigation area and hide it
+                                ObservableList<Node> childList = pagination.getChildrenUnmodifiable();
+                                if (!childList.isEmpty()) {
+                                    childList.get(2).setVisible(false);
+                                }
+                            } else if (topMenu.isVisible() == false) { //hide full screen
+                                mainView.getChildren().add(0, topMenu);
+                                topMenu.setVisible(true);
+                                //get the navigation area and show it
+                                ObservableList<Node> childList = pagination.getChildrenUnmodifiable();
+                                if (!childList.isEmpty()) {
+                                    childList.get(2).setVisible(true);
+                                }
                             }
-                        } else if (topMenu.isVisible() == false) { //hide full screen
-                            mainView.getChildren().add(0, topMenu);
-                            topMenu.setVisible(true);
-                            //get the navigation area and show it
-                            ObservableList<Node> childList = pagination.getChildrenUnmodifiable();
-                            if (!childList.isEmpty()) {
-                                childList.get(2).setVisible(true);
-                            }
-                        }
-                    } else if (GlobalStaticConstant.GLOBAL_ISFOLLOWINGCLICKED == false) {
-                        //show full screen
-                        if (zoomOptions == true && loadOptions == false) {
-                            zoomOptions = false;
-                            loadOptions = false;
-                            updateToolbar();
-                            mainView.getChildren().remove(topMenu);
-                            //get the navigation area and hide it
-                            ObservableList<Node> childList = pagination.getChildrenUnmodifiable();
-                            if (!childList.isEmpty()) {
-                                childList.get(2).setVisible(false);
-                            }
-                        } else if (zoomOptions == false && loadOptions == false) { //hide full screen
-                            zoomOptions = true;
-                            loadOptions = false;
-                            updateToolbar();
-                            mainView.getChildren().add(0, topMenu);
-                            //get the navigation area and show it
-                            ObservableList<Node> childList = pagination.getChildrenUnmodifiable();
-                            if (!childList.isEmpty()) {
-                                childList.get(2).setVisible(true);
+                        } else if (GlobalStaticConstant.GLOBAL_ISFOLLOWINGCLICKED == false) {
+                            //show full screen
+                            if (zoomOptions == true && loadOptions == false) {
+                                zoomOptions = false;
+                                loadOptions = false;
+                                updateToolbar();
+                                mainView.getChildren().remove(topMenu);
+                                //get the navigation area and hide it
+                                ObservableList<Node> childList = pagination.getChildrenUnmodifiable();
+                                if (!childList.isEmpty()) {
+                                    childList.get(2).setVisible(false);
+                                }
+                            } else if (zoomOptions == false && loadOptions == false) { //hide full screen
+                                zoomOptions = true;
+                                loadOptions = false;
+                                updateToolbar();
+                                mainView.getChildren().add(0, topMenu);
+                                //get the navigation area and show it
+                                ObservableList<Node> childList = pagination.getChildrenUnmodifiable();
+                                if (!childList.isEmpty()) {
+                                    childList.get(2).setVisible(true);
+                                }
                             }
                         }
                     }
+                } catch (Exception ex) {
+                    DialogsUtils.errorAlert("system.malfunction");
+                    logger.error(FxmlUtils.getResourceBundle().getString("error.OpenPdfViewer.addDoubleClickEffect.handle"), ex);
                 }
             }
         });
@@ -610,8 +629,8 @@ public class OpenPdfViewer extends BorderPane implements Initializable {
                 }
             }
         } catch (Exception ex) {
-            ex.printStackTrace();
-            logger.error(ex.getCause().getMessage());
+            DialogsUtils.errorAlert("system.malfunction");
+            logger.error(FxmlUtils.getResourceBundle().getString("error.OpenPdfViewer.updateZoomFactor"), ex);
         }
     }
 
@@ -665,9 +684,9 @@ public class OpenPdfViewer extends BorderPane implements Initializable {
             //set pagination
             pagination.setPageCount(pdf.numPages());
             pagination.setCurrentPageIndex(pageIndex);
-        } catch (IOException e) {
-            e.printStackTrace();
-            logger.error(e.getCause().getMessage());
+        } catch (Exception ex) {
+            DialogsUtils.errorAlert("system.malfunction");
+            logger.error(FxmlUtils.getResourceBundle().getString("error.OpenPdfViewer.loadPdf"), ex);
         }
     }
 
@@ -695,9 +714,9 @@ public class OpenPdfViewer extends BorderPane implements Initializable {
             //set pagination
             pagination.setPageCount(pdf.numPages());
             pagination.setCurrentPageIndex(pageIndex);
-        } catch (IOException e) {
-            e.printStackTrace();
-            logger.error(e.getCause().getMessage());
+        } catch (Exception ex) {
+            DialogsUtils.errorAlert("system.malfunction");
+            logger.error(FxmlUtils.getResourceBundle().getString("error.OpenPdfViewer.loadPdf.withPassword"), ex);
         }
     }
 
@@ -710,9 +729,9 @@ public class OpenPdfViewer extends BorderPane implements Initializable {
             if (pdf != null) {
                 pdf.getDocument().close();
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-            logger.error(e.getCause().getMessage());
+        } catch (Exception ex) {
+            DialogsUtils.errorAlert("system.malfunction");
+            logger.error(FxmlUtils.getResourceBundle().getString("error.OpenPdfViewer.closePdf"), ex);
         }
     }
 
@@ -848,9 +867,9 @@ public class OpenPdfViewer extends BorderPane implements Initializable {
     public void goToCurrentPage(int pageIndex) {
         try {
             pagination.setCurrentPageIndex(pageIndex);
-        } catch (Exception e) {
-            e.printStackTrace();
-            logger.error(e.getCause().getMessage());
+        } catch (Exception ex) {
+            DialogsUtils.errorAlert("system.malfunction");
+            logger.error(FxmlUtils.getResourceBundle().getString("error.OpenPdfViewer.goToCurrentPage"), ex);
         }
     }
 
@@ -884,8 +903,8 @@ public class OpenPdfViewer extends BorderPane implements Initializable {
                 pagination.removeEventFilter(KeyEvent.ANY, keyEventHandler);
             }
         } catch (Exception ex) {
-            ex.printStackTrace();
-            logger.error(ex.getCause().getMessage());
+            DialogsUtils.errorAlert("system.malfunction");
+            logger.error(FxmlUtils.getResourceBundle().getString("error.OpenPdfViewer.isLockPagination"), ex);
         }
     }
 
@@ -912,19 +931,14 @@ public class OpenPdfViewer extends BorderPane implements Initializable {
                 scroller.setPannable(true);
             }
         } catch (Exception ex) {
-            ex.printStackTrace();
-            logger.error(ex.getCause().getMessage());
+            DialogsUtils.errorAlert("system.malfunction");
+            logger.error(FxmlUtils.getResourceBundle().getString("error.OpenPdfViewer.isLockScroller"), ex);
         }
     }
 
     public void setMQPlugin(MQPlugin mQPlugin) {
-        try {
-            if (mQPlugin != null) {
-                this.mQPlugin = mQPlugin;
-            }
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            logger.error(ex.getCause().getMessage());
+        if (mQPlugin != null) {
+            this.mQPlugin = mQPlugin;
         }
     }
 }
@@ -950,9 +964,9 @@ class Pdf {
             document = PDDocument.load(path.toFile());//load a PDF file file
             renderer = new PDFRenderer(document);//pass the file for BufferedImage rendering
             //document.close();
-        } catch (IOException ex) {
-            ex.printStackTrace();
-            logger.error(ex.getCause().getMessage());
+        } catch (Exception ex) {
+            DialogsUtils.errorAlert("system.malfunction");
+            logger.error(FxmlUtils.getResourceBundle().getString("error.OpenPdfViewer.Pdf"), ex);
         }
     }
 
@@ -961,9 +975,9 @@ class Pdf {
         try {
             document = PDDocument.load(path.toFile(), password);//load a PDF file with password
             renderer = new PDFRenderer(document);//pass the file for BufferedImage rendering
-        } catch (IOException ex) {
-            ex.printStackTrace();
-            logger.error(ex.getCause().getMessage());
+        } catch (Exception ex) {
+            DialogsUtils.errorAlert("system.malfunction");
+            logger.error(FxmlUtils.getResourceBundle().getString("error.OpenPdfViewer.Pdf.withPassword"), ex);
         }
     }
 
@@ -991,10 +1005,9 @@ class Pdf {
             } else {
                 return null;
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-            logger.error(e.getCause().getMessage());
-            return null;
+        } catch (Exception ex) {
+            DialogsUtils.errorAlert("system.malfunction");
+            logger.error(FxmlUtils.getResourceBundle().getString("error.OpenPdfViewer.Pdf.getImage"), ex);
         }
         //the rendered page is a BufferedImage type, need to convert it to Image
         return SwingFXUtils.toFXImage(pageImage, null);
@@ -1009,7 +1022,7 @@ class Pdf {
      * @return the image of a page
      */
     public Image getImage(int pageNumber, float scaleFactor) {
-        BufferedImage pageImage;
+        BufferedImage pageImage = null;
         try {
             if (pageNumber <= document.getNumberOfPages()) {
                 if (scaleFactor >= 0.1) {
@@ -1020,10 +1033,9 @@ class Pdf {
             } else {
                 return null;
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-            logger.error(e.getCause().getMessage());
-            return null;
+        } catch (Exception ex) {
+            DialogsUtils.errorAlert("system.malfunction");
+            logger.error(FxmlUtils.getResourceBundle().getString("error.OpenPdfViewer.Pdf.getImage.withScaleFactor"), ex);
         }
         //the rendered page is a BufferedImage type, need to convert it to Image
         return SwingFXUtils.toFXImage(pageImage, null);

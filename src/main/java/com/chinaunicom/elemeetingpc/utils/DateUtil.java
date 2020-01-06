@@ -11,7 +11,8 @@ import java.util.logging.Logger;
 
 /**
  * 日期工具类.
- * @author chenxi
+ * 
+ * @author administrator
  * 创建时间：2019-6-20 18:06:06
  */
 public class DateUtil
